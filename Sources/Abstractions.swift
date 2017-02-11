@@ -1,5 +1,9 @@
 import Platform
 
+#if os(Linux)
+    public let SOCK_STREAM = Int32(Glibc.SOCK_STREAM.rawValue)
+#endif
+
 extension sockaddr_in {
     public init(_ addr: sockaddr) {
         self = unsafeBitCast(addr, to: sockaddr_in.self)
