@@ -59,16 +59,10 @@ open class Socket {
         var addr = sockaddr()
         var addrLen = sockaddr.length
         var client: Int32 = 0
-        while true {
-            try awaiter?.wait(for: descriptor, event: .read)
-            client = Platform.accept(descriptor, &addr, &addrLen)
-            guard client > 0 else {
-                if errno == EAGAIN || errno == EWOULDBLOCK || errno == EINTR {
-                    continue
-                }
-                throw SocketError()
-            }
-            break
+        try awaiter?.wait(for: descriptor, event: .read)
+        client = Platform.accept(descriptor, &addr, &addrLen)
+        guard client != -1 else {
+            throw SocketError()
         }
         return Socket(descriptor: client, awaiter: self.awaiter)
     }
