@@ -7,20 +7,59 @@ extension Socket {
             self.descriptor = descriptor
         }
 
-        public subscript(option: Int32) -> Bool? {
+        public var reuseAddr: Bool {
             get {
-                var value: Int32 = 0
-                var valueSize = socklen_t(MemoryLayout<Int32>.size)
-                guard getsockopt(descriptor, SOL_SOCKET, option, &value, &valueSize) != -1 else {
-                    return nil
-                }
-                return value == 0 ? false : true
+                return try! getValue(for: SO_REUSEADDR)
             }
             set {
-                var value: Int32 = newValue == true ? 1 : 0
-                let valueSize = socklen_t(MemoryLayout<Int32>.size)
-                _ = setsockopt(descriptor, SOL_SOCKET, option, &value, valueSize)
+                try! setValue(true, for: SO_REUSEADDR)
             }
+        }
+
+        public var reusePort: Bool {
+            get {
+                return try! getValue(for: SO_REUSEPORT)
+            }
+            set {
+                try! setValue(true, for: SO_REUSEPORT)
+            }
+        }
+
+    #if os(macOS)
+        public var noSignalPipe: Bool {
+            get {
+                return try! getValue(for: SO_NOSIGPIPE)
+            }
+            set {
+                try! setValue(true, for: SO_NOSIGPIPE)
+            }
+        }
+    #endif
+
+        fileprivate func setValue(_ value: Bool, for option: Int32) throws {
+            var value: Int32 = value ? 1 : 0
+            try setValue(&value, size: MemoryLayout<Int32>.size, for: option)
+        }
+
+        fileprivate func getValue(for option: Int32) throws -> Bool {
+            var value: Int32 = 0
+            var valueSize = MemoryLayout<Int32>.size
+            try getValue(&value, size: &valueSize, for: option)
+            return value == 0 ? false : true
+        }
+
+        fileprivate func setValue(_ pointer: UnsafeRawPointer, size: Int, for option: Int32) throws {
+            guard setsockopt(descriptor, SOL_SOCKET, option, pointer, socklen_t(size)) != -1 else {
+                throw SocketError()
+            }
+        }
+
+        fileprivate func getValue(_ pointer: UnsafeMutableRawPointer, size: inout Int, for option: Int32) throws {
+            var actualSize = socklen_t(size)
+            guard getsockopt(descriptor, SOL_SOCKET, option, pointer, &actualSize) != -1 else {
+                throw SocketError()
+            }
+            size = Int(actualSize)
         }
     }
 }

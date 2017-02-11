@@ -23,9 +23,9 @@ open class Socket {
         self.options = Options(for: descriptor)
         self.awaiter = awaiter
 
-        #if os(OSX)
-            self.options[SO_NOSIGPIPE] = true
-        #endif
+    #if os(OSX)
+        self.options.noSignalPipe = true
+    #endif
     }
 
     public convenience init(awaiter: IOAwaiter? = nil) throws {
@@ -41,10 +41,9 @@ open class Socket {
     }
 
     @discardableResult
-    public func listen(at host: String, port: UInt16, options: [Int32] = [SO_REUSEADDR, SO_REUSEPORT]) throws -> Socket {
-        for option in options {
-            self.options[option] = true
-        }
+    public func listen(at host: String, port: UInt16, reusePort: Bool = true) throws -> Socket {
+        self.options.reuseAddr = true
+        self.options.reusePort = reusePort
 
         var addr = sockaddr(sockaddr_in(host: host, port: port, family: AF_INET))
         guard bind(descriptor, &addr, sockaddr_in.length) == 0 else {

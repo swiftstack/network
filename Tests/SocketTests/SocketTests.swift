@@ -37,4 +37,26 @@ class SocketTests: XCTestCase {
             XCTFail(String(describing: error))
         }
     }
+
+    func testSocketOptions() {
+        do {
+            let socket = try Socket()
+            var options = socket.options
+
+            XCTAssertFalse(options.reuseAddr)
+            options.reuseAddr = true
+            XCTAssertTrue(options.reuseAddr)
+
+            XCTAssertFalse(options.reusePort)
+            options.reusePort = true
+            XCTAssertTrue(options.reusePort)
+
+        #if os(macOS)
+            XCTAssertTrue(options.noSignalPipe)
+        #endif
+
+        } catch {
+            XCTFail(String(describing: error))
+        }
+    }
 }
