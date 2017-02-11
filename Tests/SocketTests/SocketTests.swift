@@ -6,7 +6,7 @@ import Dispatch
 class SocketTests: XCTestCase {
     func testSocket() {
         let condition = AtomicCondition()
-        let message = [UInt8]("Hey there!".utf8)
+        let message = [UInt8]("ping".utf8)
 
         DispatchQueue.global().async {
             do {

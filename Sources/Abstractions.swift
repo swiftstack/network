@@ -8,14 +8,16 @@ extension sockaddr_in {
     public init(_ addr: sockaddr) {
         self = unsafeBitCast(addr, to: sockaddr_in.self)
     }
-    static let length = socklen_t(MemoryLayout<sockaddr_in>.size)
 }
 
 extension sockaddr {
     public init(_ addr: sockaddr_in) {
         self = unsafeBitCast(addr, to: sockaddr.self)
     }
-    static let length = socklen_t(MemoryLayout<sockaddr>.size)
+}
+
+extension sockaddr {
+    static let size = socklen_t(MemoryLayout<sockaddr>.size)
 }
 
 extension sockaddr_in {
