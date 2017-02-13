@@ -89,11 +89,13 @@ public final class Socket {
         return Socket(descriptor: client, family: family, type: type, awaiter: awaiter)
     }
 
-    public func connect(to address: Address) throws {
+    @discardableResult
+    public func connect(to address: Address) throws -> Socket {
         var copy = address
         guard Platform.connect(descriptor, rebounded(&copy), address.size) != -1 else {
             throw SocketError()
         }
+        return self
     }
 
     public func close(silent: Bool = false) throws {
@@ -143,22 +145,28 @@ public final class Socket {
 }
 
 extension Socket {
+    @discardableResult
     public func bind(to address: String, port: UInt16) throws -> Socket {
         try bind(to: try Address(address, port: port))
         return self
     }
 
+    @discardableResult
     public func bind(to address: String) throws -> Socket {
         try bind(to: try Address(unix: address))
         return self
     }
 
-    public func connect(to address: String, port: UInt16) throws {
+    @discardableResult
+    public func connect(to address: String, port: UInt16) throws -> Socket {
         try connect(to: try Address(address, port: port))
+        return self
     }
 
-    public func connect(to address: String) throws {
+    @discardableResult
+    public func connect(to address: String) throws -> Socket {
         try connect(to: try Address(address))
+        return self
     }
 }
 
