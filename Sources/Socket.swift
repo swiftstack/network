@@ -39,7 +39,11 @@ public final class Socket {
         }
     }
 
-    public init(descriptor: Int32, family: Family, type: SocketType, awaiter: IOAwaiter? = nil) {
+    public init(descriptor: Int32? = nil, family: Family = .inet, type: SocketType = .stream, awaiter: IOAwaiter? = nil) throws {
+        let descriptor = descriptor ?? socket(family.rawValue, type.rawValue, 0)
+        guard descriptor > 0 else {
+            throw SocketError()
+        }
         self.type = type
         self.family = family
         self.awaiter = awaiter
@@ -49,14 +53,6 @@ public final class Socket {
         self.options.noSignalPipe = true
     #endif
         self.options.reuseAddr = true
-    }
-
-    public convenience init(family: Family = .inet, type: SocketType = .stream, awaiter: IOAwaiter? = nil) throws {
-        let descriptor = socket(family.rawValue, type.rawValue, 0)
-        guard descriptor > 0 else {
-            throw SocketError()
-        }
-        self.init(descriptor: descriptor, family: family, type: type, awaiter: awaiter)
     }
 
     deinit {
@@ -86,7 +82,7 @@ public final class Socket {
         guard client != -1 else {
             throw SocketError()
         }
-        return Socket(descriptor: client, family: family, type: type, awaiter: awaiter)
+        return try Socket(descriptor: client, family: family, type: type, awaiter: awaiter)
     }
 
     @discardableResult
