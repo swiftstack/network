@@ -102,6 +102,7 @@ class AddressTests: XCTestCase {
                     .listen()
 
                 ready.signal()
+
                 _ = try socket.accept()
                 done.wait()
             } catch {
@@ -144,6 +145,7 @@ class AddressTests: XCTestCase {
                     .listen()
 
                 ready.signal()
+
                 _ = try socket.accept()
                 done.wait()
             } catch {
@@ -168,7 +170,6 @@ class AddressTests: XCTestCase {
         #endif
 
             XCTAssertEqual(socket.peerAddress, Socket.Address.ip4(sockaddr))
-
             done.signal()
         } catch {
             XCTFail(String(describing: error))
@@ -186,6 +187,7 @@ class AddressTests: XCTestCase {
                     .listen()
 
                 ready.signal()
+
                 _ = try socket.accept()
                 done.wait()
             } catch {
@@ -210,7 +212,6 @@ class AddressTests: XCTestCase {
         #endif
 
             XCTAssertEqual(socket.selfAddress, Socket.Address.ip6(sockaddr))
-
             done.signal()
         } catch {
             XCTFail(String(describing: error))
@@ -228,6 +229,7 @@ class AddressTests: XCTestCase {
                     .listen()
 
                 ready.signal()
+
                 _ = try socket.accept()
                 done.wait()
             } catch {
@@ -252,7 +254,6 @@ class AddressTests: XCTestCase {
         #endif
 
             XCTAssertEqual(socket.peerAddress, Socket.Address.ip6(sockaddr))
-
             done.signal()
         } catch {
             XCTFail(String(describing: error))

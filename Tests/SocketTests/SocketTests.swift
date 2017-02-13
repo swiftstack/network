@@ -29,8 +29,10 @@ class SocketTests: XCTestCase {
         do {
             let socket = try Socket()
                 .connect(to: "127.0.0.1", port: 3000)
+
             let written = try socket.send(bytes: message)
             XCTAssertEqual(written, message.count)
+
             var response = [UInt8](repeating: 0, count: message.count)
             let read = try socket.receive(to: &response)
             XCTAssertEqual(read, message.count)
@@ -66,8 +68,10 @@ class SocketTests: XCTestCase {
         do {
             let socket = try Socket(family: .inet, type: .stream)
                 .connect(to: "127.0.0.1", port: 3001)
+
             let written = try socket.send(bytes: message)
             XCTAssertEqual(written, message.count)
+
             var response = [UInt8](repeating: 0, count: message.count)
             let read = try socket.receive(to: &response)
             XCTAssertEqual(read, message.count)
@@ -76,7 +80,6 @@ class SocketTests: XCTestCase {
             XCTFail(String(describing: error))
         }
     }
-
 
     func testSocketInetDatagram() {
         let ready = AtomicCondition()
@@ -119,7 +122,6 @@ class SocketTests: XCTestCase {
         }
     }
 
-
     func testSocketInet6Stream() {
         let ready = AtomicCondition()
         let message = [UInt8]("ping".utf8)
@@ -146,8 +148,10 @@ class SocketTests: XCTestCase {
         do {
             let socket = try Socket(family: .inet6, type: .stream)
                 .connect(to: "::1", port: 3004)
+
             let written = try socket.send(bytes: message)
             XCTAssertEqual(written, message.count)
+
             var response = [UInt8](repeating: 0, count: message.count)
             let read = try socket.receive(to: &response)
             XCTAssertEqual(read, message.count)
@@ -225,8 +229,10 @@ class SocketTests: XCTestCase {
         do {
             let socket = try Socket(family: .unix, type: .stream)
                 .connect(to: "/tmp/teststream.sock")
+
             let written = try socket.send(bytes: message)
             XCTAssertEqual(written, message.count)
+
             var response = [UInt8](repeating: 0, count: message.count)
             let read = try socket.receive(to: &response)
             XCTAssertEqual(read, message.count)
@@ -307,8 +313,10 @@ class SocketTests: XCTestCase {
         do {
             let socket = try Socket(family: .unix, type: .sequenced)
                 .connect(to: "/tmp/testsequenced.sock")
+
             let written = try socket.send(bytes: message)
             XCTAssertEqual(written, message.count)
+
             var response = [UInt8](repeating: 0, count: message.count)
             let read = try socket.receive(to: &response)
             XCTAssertEqual(read, message.count)
