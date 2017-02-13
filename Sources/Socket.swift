@@ -119,9 +119,9 @@ public final class Socket {
     }
 
     public func send(buffer: UnsafeRawPointer, count: Int, to address: Address) throws -> Int {
-        var addr = address
+        var copy = address
         try awaiter?.wait(for: descriptor, event: .write)
-        let sended = Platform.sendto(descriptor, buffer, count, noSignal, rebounded(&addr), address.size)
+        let sended = Platform.sendto(descriptor, buffer, count, noSignal, rebounded(&copy), address.size)
         guard sended != -1 else {
             throw SocketError()
         }
@@ -129,10 +129,10 @@ public final class Socket {
     }
 
     public func receive(buffer: UnsafeMutableRawPointer, count: Int, from address: Address) throws -> Int {
-        var addr = address
+        var copy = address
         var size = address.size
         try awaiter?.wait(for: descriptor, event: .read)
-        let received = Platform.recvfrom(descriptor, buffer, count, 0, rebounded(&addr), &size)
+        let received = Platform.recvfrom(descriptor, buffer, count, 0, rebounded(&copy), &size)
         guard received != -1 else {
             throw SocketError()
         }
