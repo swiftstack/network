@@ -13,31 +13,18 @@ class SocketAwaiterTests: XCTestCase {
 
     let message = [UInt8]("ping".utf8)
 
-    override func setUp() {
-        let condition = AtomicCondition()
-        DispatchQueue.global().async {
-            do {
-                let socket = try Socket()
-                try socket.listen(at: "127.0.0.1", port: 4445)
-                condition.signal()
-                let client = try socket.accept()
-                _ = try client.write(bytes: self.message)
-            } catch {
-                XCTFail(String(describing: error))
-            }
-        }
-        condition.wait()
-    }
-
     func testSocketAwaiterAccept() {
-        let condition = AtomicCondition()
+        let ready = AtomicCondition()
 
         DispatchQueue.global().async {
             do {
                 let awaiter = TestAwaiter()
                 let socket = try Socket(awaiter: awaiter)
-                try socket.listen(at: "127.0.0.1", port: 4445)
-                condition.signal()
+                    .bind(to: "127.0.0.1", port: 4001)
+                    .listen()
+
+                ready.signal()
+
                 _ = try socket.accept()
                 XCTAssertEqual(awaiter.event, .read)
             } catch {
@@ -45,22 +32,41 @@ class SocketAwaiterTests: XCTestCase {
             }
         }
 
-        condition.wait()
+        ready.wait()
 
         do {
             let socket = try Socket()
-            _ = try socket.connect(to: "127.0.0.1", port: 4445)
+            _ = try socket.connect(to: "127.0.0.1", port: 4001)
         } catch {
             XCTFail(String(describing: error))
         }
     }
 
     func testSocketAwaiterWrite() {
+        let ready = AtomicCondition()
+        DispatchQueue.global().async {
+            do {
+                let socket = try Socket()
+                    .configure(reusePort: true)
+                    .bind(to: "127.0.0.1", port: 4002)
+                    .listen()
+
+                ready.signal()
+
+                let client = try socket.accept()
+                _ = try client.send(bytes: self.message)
+            } catch {
+                XCTFail(String(describing: error))
+            }
+        }
+
+        ready.wait()
+
         do {
             let awaiter = TestAwaiter()
             let socket = try Socket(awaiter: awaiter)
-            _ = try socket.connect(to: "127.0.0.1", port: 4445)
-            _ = try socket.write(bytes: message)
+            _ = try socket.connect(to: "127.0.0.1", port: 4002)
+            _ = try socket.send(bytes: message)
             XCTAssertEqual(awaiter.event, .write)
         } catch {
             XCTFail(String(describing: error))
@@ -68,13 +74,101 @@ class SocketAwaiterTests: XCTestCase {
     }
 
     func testSocketAwaiterRead() {
+        let ready = AtomicCondition()
+
+        DispatchQueue.global().async {
+            do {
+                let awaiter = TestAwaiter()
+                let socket = try Socket(awaiter: awaiter)
+                    .bind(to: "127.0.0.1", port: 4003)
+                    .listen()
+
+                ready.signal()
+
+                _ = try socket.accept()
+                XCTAssertEqual(awaiter.event, .read)
+            } catch {
+                XCTFail(String(describing: error))
+            }
+        }
+
+        ready.wait()
+
         var response = [UInt8](repeating: 0, count: message.count)
         do {
             let awaiter = TestAwaiter()
             let socket = try Socket(awaiter: awaiter)
-            _ = try socket.connect(to: "127.0.0.1", port: 4445)
-            _ = try socket.read(to: &response)
+            _ = try socket.connect(to: "127.0.0.1", port: 4003)
+            _ = try socket.receive(to: &response)
             XCTAssertEqual(awaiter.event, .read)
+        } catch {
+            XCTFail(String(describing: error))
+        }
+    }
+
+    func testSocketAwaiterWriteTo() {
+        let ready = AtomicCondition()
+        let done = AtomicCondition()
+
+        let server = try! Socket.Address("127.0.0.1", port: 4004)
+
+        DispatchQueue.global().async {
+            do {
+                let awaiter = TestAwaiter()
+                _ = try Socket(type: .datagram, awaiter: awaiter)
+                    .bind(to: server)
+                ready.signal()
+                done.wait()
+            } catch {
+                XCTFail(String(describing: error))
+            }
+        }
+
+        ready.wait()
+
+        do {
+            let awaiter = TestAwaiter()
+            let socket = try Socket(type: .datagram, awaiter: awaiter)
+
+            _ = try socket.send(bytes: message, to: server)
+            XCTAssertEqual(awaiter.event, .write)
+            done.signal()
+        } catch {
+            XCTFail(String(describing: error))
+        }
+    }
+
+    func testSocketAwaiterReadFrom() {
+        let ready = AtomicCondition()
+        let done = AtomicCondition()
+
+        let server = try! Socket.Address("127.0.0.1", port: 4005)
+        let client = try! Socket.Address("127.0.0.1", port: 4006)
+
+        DispatchQueue.global().async {
+            do {
+                let awaiter = TestAwaiter()
+                let socket = try Socket(type: .datagram, awaiter: awaiter)
+                    .bind(to: server)
+                ready.wait()
+                _ = try socket.send(bytes: self.message, to: client)
+                done.wait()
+            } catch {
+                XCTFail(String(describing: error))
+            }
+        }
+
+
+
+        var response = [UInt8](repeating: 0, count: message.count)
+        do {
+            let awaiter = TestAwaiter()
+            let socket = try Socket(type: .datagram, awaiter: awaiter)
+                .bind(to: client)
+            ready.signal()
+            _ = try socket.receive(to: &response, from: server)
+            XCTAssertEqual(awaiter.event, .read)
+            done.signal()
         } catch {
             XCTFail(String(describing: error))
         }

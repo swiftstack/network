@@ -2,38 +2,61 @@ import Platform
 
 @_exported import Async
 
-open class Socket {
+public final class Socket {
+    public enum Family {
+        case inet, inet6, unspecified, unix
+    }
+
+    public enum SocketType {
+        case stream, datagram, sequenced
+    }
+
     private var backlog: Int32 = 256
 
     public var descriptor: Descriptor
-
-    public private(set) var options: Options
+    public internal(set) var options: Options
+    public private(set) var family: Family
+    public private(set) var type: SocketType
 
     public var awaiter: IOAwaiter? {
         didSet {
             switch awaiter {
-            case .some: descriptor.status |= O_NONBLOCK
-            case .none: descriptor.status &= ~O_NONBLOCK
+            case .some: noDelay = true
+            case .none: noDelay = false
             }
         }
     }
 
-    public init(descriptor: Int32, awaiter: IOAwaiter? = nil) {
+    public var noDelay: Bool {
+        get {
+            return descriptor.status & O_NONBLOCK != 0
+        }
+        set {
+            switch newValue {
+            case true: descriptor.status |= O_NONBLOCK
+            case false: descriptor.status &= ~O_NONBLOCK
+            }
+        }
+    }
+
+    public init(descriptor: Int32, family: Family, type: SocketType, awaiter: IOAwaiter? = nil) {
+        self.type = type
+        self.family = family
+        self.awaiter = awaiter
         self.descriptor = descriptor
         self.options = Options(for: descriptor)
-        self.awaiter = awaiter
-
     #if os(OSX)
         self.options.noSignalPipe = true
     #endif
+        self.options.reuseAddr = true
     }
 
-    public convenience init(awaiter: IOAwaiter? = nil) throws {
-        let descriptor = socket(AF_INET, SOCK_STREAM, 0)
+    public convenience init(family: Family = .inet, type: SocketType = .stream, awaiter: IOAwaiter? = nil) throws {
+        let descriptor = socket(family.rawValue, type.rawValue, 0)
         guard descriptor > 0 else {
             throw SocketError()
         }
-        self.init(descriptor: descriptor, awaiter: awaiter)
+        self.init(descriptor: descriptor, family: family, type: type, awaiter: awaiter)
     }
 
     deinit {
@@ -41,86 +64,118 @@ open class Socket {
     }
 
     @discardableResult
-    public func listen(at host: String, port: UInt16, reusePort: Bool = true) throws -> Socket {
-        self.options.reuseAddr = true
-        self.options.reusePort = reusePort
-
-        var addr = sockaddr(sockaddr_in(host: host, port: port, family: AF_INET))
-        guard Platform.bind(descriptor, &addr, sockaddr.size) != -1 else {
+    public func bind(to address: Address) throws -> Socket {
+        var copy = address
+        guard Platform.bind(descriptor, rebounded(&copy), address.size) != -1 else {
             throw SocketError()
         }
+        return self
+    }
+
+    @discardableResult
+    public func listen() throws -> Socket {
         guard Platform.listen(descriptor, backlog) != -1 else {
             throw SocketError()
         }
         return self
     }
 
-    open func accept() throws -> Socket {
-        var addr = sockaddr()
-        var addrLen = sockaddr.size
-        var client: Int32 = 0
+    public func accept() throws -> Socket {
         try awaiter?.wait(for: descriptor, event: .read)
-        client = Platform.accept(descriptor, &addr, &addrLen)
+        let client = Platform.accept(descriptor, nil, nil)
         guard client != -1 else {
             throw SocketError()
         }
-        return Socket(descriptor: client, awaiter: self.awaiter)
+        return Socket(descriptor: client, family: family, type: type, awaiter: awaiter)
     }
 
-    @discardableResult
-    open func connect(to host: String, port: UInt16) throws -> Socket {
-        var addr = sockaddr(sockaddr_in(host: host, port: port, family: AF_INET))
-        guard Platform.connect(descriptor, &addr, sockaddr.size) != -1 else {
+    public func connect(to address: Address) throws {
+        var copy = address
+        guard Platform.connect(descriptor, rebounded(&copy), address.size) != -1 else {
             throw SocketError()
         }
-        return self
     }
 
-    open func close(silent: Bool = false) throws {
+    public func close(silent: Bool = false) throws {
         guard Platform.close(descriptor) != -1 || silent else {
             throw SocketError()
         }
     }
 
-    open func read(to pointer: UnsafeMutablePointer<UInt8>, count: Int) throws -> Int {
-        try awaiter?.wait(for: descriptor, event: .read)
-        let read = Platform.read(descriptor, pointer, count)
-        guard read != -1 else {
-            throw SocketError()
-        }
-        return read
-    }
-
-    open func write(bytes pointer: UnsafePointer<UInt8>, count: Int) throws -> Int {
+    public func send(buffer: UnsafeRawPointer, count: Int) throws -> Int {
         try awaiter?.wait(for: descriptor, event: .write)
-        let written = Platform.write(descriptor, pointer, count)
-        guard written != -1 else {
+        let sended = Platform.send(descriptor, buffer, count, noSignal)
+        guard sended != -1 else {
             throw SocketError()
         }
-        return written
+        return sended
+    }
+
+    public func receive(buffer: UnsafeMutableRawPointer, count: Int) throws -> Int {
+        try awaiter?.wait(for: descriptor, event: .read)
+        let received = Platform.recv(descriptor, buffer, count, 0)
+        guard received != -1 else {
+            throw SocketError()
+        }
+        return received
+    }
+
+    public func send(buffer: UnsafeRawPointer, count: Int, to address: Address) throws -> Int {
+        var addr = address
+        try awaiter?.wait(for: descriptor, event: .write)
+        let sended = Platform.sendto(descriptor, buffer, count, noSignal, rebounded(&addr), address.size)
+        guard sended != -1 else {
+            throw SocketError()
+        }
+        return sended
+    }
+
+    public func receive(buffer: UnsafeMutableRawPointer, count: Int, from address: Address) throws -> Int {
+        var addr = address
+        var size = address.size
+        try awaiter?.wait(for: descriptor, event: .read)
+        let received = Platform.recvfrom(descriptor, buffer, count, 0, rebounded(&addr), &size)
+        guard received != -1 else {
+            throw SocketError()
+        }
+        return received
     }
 }
 
 extension Socket {
-    @inline(__always)
-    public func read(to buffer: UnsafeMutableBufferPointer<UInt8>) throws -> Int {
-        return try read(to: buffer.baseAddress!, count: buffer.count)
+    public func bind(to address: String, port: UInt16) throws -> Socket {
+        try bind(to: try Address(address, port: port))
+        return self
     }
 
-    @inline(__always)
-    public func write(bytes buffer: UnsafeBufferPointer<UInt8>) throws -> Int {
-        return try write(bytes: buffer.baseAddress!, count: buffer.count)
+    public func bind(to address: String) throws -> Socket {
+        try bind(to: try Address(unix: address))
+        return self
+    }
+
+    public func connect(to address: String, port: UInt16) throws {
+        try connect(to: try Address(address, port: port))
+    }
+
+    public func connect(to address: String) throws {
+        try connect(to: try Address(address))
     }
 }
 
 extension Socket {
-    @inline(__always)
-    public func read(to bytes: inout [UInt8]) throws -> Int {
-        return try read(to: &bytes, count: bytes.count)
+    public func receive(to bytes: inout [UInt8]) throws -> Int {
+        return try receive(buffer: &bytes, count: bytes.count)
     }
 
-    @inline(__always)
-    public func write(bytes: [UInt8]) throws -> Int {
-        return try write(bytes: bytes, count: bytes.count)
+    public func send(bytes: [UInt8]) throws -> Int {
+        return try send(buffer: bytes, count: bytes.count)
+    }
+
+    public func receive(to bytes: inout [UInt8], from address: Address) throws -> Int {
+        return try receive(buffer: &bytes, count: bytes.count, from: address)
+    }
+
+    public func send(bytes: [UInt8], to address: Address) throws -> Int {
+        return try send(buffer: bytes, count: bytes.count, to: address)
     }
 }

@@ -1,6 +1,12 @@
 import Platform
 
 extension Socket {
+    @discardableResult
+    func configure(reusePort: Bool = false) -> Socket {
+        options.reusePort = reusePort
+        return self
+    }
+
     public struct Options {
         let descriptor: Descriptor
         public init(for descriptor: Descriptor) {
@@ -36,7 +42,7 @@ extension Socket {
         }
     #endif
 
-        fileprivate func setValue(_ value: Bool, for option: Int32) throws {
+        fileprivate mutating func setValue(_ value: Bool, for option: Int32) throws {
             var value: Int32 = value ? 1 : 0
             try setValue(&value, size: MemoryLayout<Int32>.size, for: option)
         }
@@ -48,7 +54,7 @@ extension Socket {
             return value == 0 ? false : true
         }
 
-        fileprivate func setValue(_ pointer: UnsafeRawPointer, size: Int, for option: Int32) throws {
+        fileprivate mutating func setValue(_ pointer: UnsafeRawPointer, size: Int, for option: Int32) throws {
             guard setsockopt(descriptor, SOL_SOCKET, option, pointer, socklen_t(size)) != -1 else {
                 throw SocketError()
             }
