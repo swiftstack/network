@@ -128,14 +128,15 @@ public final class Socket {
         return sended
     }
 
-    public func receive(buffer: UnsafeMutableRawPointer, count: Int, from address: Address) throws -> Int {
-        var copy = address
-        var size = address.size
+    public func receive(buffer: UnsafeMutableRawPointer, count: Int, from address: inout Address?) throws -> Int {
+        var storage = sockaddr_storage()
+        var size = sockaddr_storage.size
         try awaiter?.wait(for: descriptor, event: .read)
-        let received = Platform.recvfrom(descriptor, buffer, count, 0, rebounded(&copy), &size)
+        let received = Platform.recvfrom(descriptor, buffer, count, 0, rebounded(&storage), &size)
         guard received != -1 else {
             throw SocketError()
         }
+        address = Address(storage, size)
         return received
     }
 }
@@ -167,19 +168,19 @@ extension Socket {
 }
 
 extension Socket {
-    public func receive(to bytes: inout [UInt8]) throws -> Int {
-        return try receive(buffer: &bytes, count: bytes.count)
-    }
-
     public func send(bytes: [UInt8]) throws -> Int {
         return try send(buffer: bytes, count: bytes.count)
     }
 
-    public func receive(to bytes: inout [UInt8], from address: Address) throws -> Int {
-        return try receive(buffer: &bytes, count: bytes.count, from: address)
-    }
-
     public func send(bytes: [UInt8], to address: Address) throws -> Int {
         return try send(buffer: bytes, count: bytes.count, to: address)
+    }
+
+    public func receive(to bytes: inout [UInt8]) throws -> Int {
+        return try receive(buffer: &bytes, count: bytes.count)
+    }
+
+    public func receive(to bytes: inout [UInt8], from address: inout Address?) throws -> Int {
+        return try receive(buffer: &bytes, count: bytes.count, from: &address)
     }
 }

@@ -171,7 +171,8 @@ class SocketAwaiterTests: XCTestCase {
 
             ready.signal()
 
-            _ = try socket.receive(to: &response, from: server)
+            var sender: Socket.Address? = nil
+            _ = try socket.receive(to: &response, from: &sender)
             XCTAssertEqual(awaiter.event, .read)
             done.signal()
         } catch {

@@ -9,8 +9,12 @@ class AddressTests: XCTestCase {
 
             var sockaddr = sockaddr_in()
             inet_pton(AF_INET, "127.0.0.1", &sockaddr.sin_addr)
-            sockaddr.sin_port = UInt16(5000).byteSwapped
+        #if os(macOS)
+            sockaddr.sin_len = sa_family_t(sockaddr_in.size)
+        #endif
             sockaddr.sin_family = sa_family_t(AF_INET)
+            sockaddr.sin_port = UInt16(5000).byteSwapped
+
 
             XCTAssertEqual(address, Socket.Address.ip4(sockaddr))
             XCTAssertEqual(address.size, socklen_t(MemoryLayout<sockaddr_in>.size))
@@ -25,8 +29,12 @@ class AddressTests: XCTestCase {
 
             var sockaddr = sockaddr_in6()
             inet_pton(AF_INET6, "::1", &sockaddr.sin6_addr)
-            sockaddr.sin6_port = UInt16(5001).byteSwapped
+        #if os(macOS)
+            sockaddr.sin6_len = sa_family_t(sockaddr_in6.size)
+        #endif
             sockaddr.sin6_family = sa_family_t(AF_INET6)
+            sockaddr.sin6_port = UInt16(5001).byteSwapped
+
 
             XCTAssertEqual(address, Socket.Address.ip6(sockaddr))
             XCTAssertEqual(address.size, socklen_t(MemoryLayout<sockaddr_in6>.size))
@@ -47,6 +55,9 @@ class AddressTests: XCTestCase {
                 errno = EINVAL
                 throw SocketError()
             }
+        #if os(macOS)
+            sockaddr.sun_len = sa_family_t(sockaddr_un.size)
+        #endif
             sockaddr.family = AF_UNIX
             memcpy(&sockaddr.sun_path, &bytes, bytes.count)
 

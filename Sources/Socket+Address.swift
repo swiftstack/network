@@ -8,33 +8,38 @@ extension Socket {
 
         var size: socklen_t {
             switch self {
-            case .ip4: return socklen_t(MemoryLayout<sockaddr_in>.size)
-            case .ip6: return socklen_t(MemoryLayout<sockaddr_in6>.size)
-            case .unix: return socklen_t(MemoryLayout<sockaddr_un>.size)
+            case .ip4: return sockaddr_in.size
+            case .ip6: return sockaddr_in6.size
+            case .unix: return sockaddr_un.size
             }
         }
     }
 
-    public var selfAddress: Address {
+    public var selfAddress: Address? {
         var storage = sockaddr_storage()
-        var length = UInt32(MemoryLayout<sockaddr_storage>.size)
-        getsockname(descriptor, rebounded(&storage), &length)
-        return transform(storage)
+        var size = UInt32(sockaddr_storage.size)
+        getsockname(descriptor, rebounded(&storage), &size)
+        return Address(storage, size)
     }
 
-    public var peerAddress: Address {
+    public var peerAddress: Address? {
         var storage = sockaddr_storage()
-        var length = UInt32(MemoryLayout<sockaddr_storage>.size)
-        getpeername(descriptor, rebounded(&storage), &length)
-        return transform(storage)
+        var size = UInt32(sockaddr_storage.size)
+        getpeername(descriptor, rebounded(&storage), &size)
+        return Address(storage, size)
     }
+}
 
-    fileprivate func transform(_ storage: sockaddr_storage) -> Address {
-        switch storage.ss_family {
-        case sa_family_t(AF_INET): return .ip4(sockaddr_in(storage))
-        case sa_family_t(AF_INET6): return .ip6(sockaddr_in6(storage))
-        case sa_family_t(AF_UNIX): return .unix(sockaddr_un(storage))
-        default: preconditionFailure("unexpected family")
+extension Socket.Address {
+    init?(_ storage: sockaddr_storage, _ size: socklen_t) {
+        switch (storage.ss_family, size) {
+        case (sa_family_t(AF_INET), sockaddr_in.size):
+            self = .ip4(sockaddr_in(storage))
+        case (sa_family_t(AF_INET6), sockaddr_in6.size):
+            self = .ip6(sockaddr_in6(storage))
+        case (sa_family_t(AF_UNIX), _):
+            self = .unix(sockaddr_un(storage))
+        default: return nil
         }
     }
 }
