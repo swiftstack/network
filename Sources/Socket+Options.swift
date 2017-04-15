@@ -2,7 +2,7 @@ import Platform
 
 extension Socket {
     @discardableResult
-    func configure(reusePort: Bool = false) -> Socket {
+    public func configure(reusePort: Bool = false) -> Socket {
         options.reusePort = reusePort
         return self
     }
