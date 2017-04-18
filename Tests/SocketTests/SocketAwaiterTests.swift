@@ -1,9 +1,8 @@
-import XCTest
 import Platform
 import Dispatch
 @testable import Socket
 
-class SocketAwaiterTests: XCTestCase {
+class SocketAwaiterTests: TestCase {
     class TestAwaiter: IOAwaiter {
         var event: IOEvent? = nil
         func wait(for descriptor: Descriptor, event: IOEvent) throws {
@@ -26,9 +25,9 @@ class SocketAwaiterTests: XCTestCase {
                 ready.signal()
 
                 _ = try socket.accept()
-                XCTAssertEqual(awaiter.event, .read)
+                assertEqual(awaiter.event, .read)
             } catch {
-                XCTFail(String(describing: error))
+                fail(String(describing: error))
             }
         }
 
@@ -37,7 +36,7 @@ class SocketAwaiterTests: XCTestCase {
         do {
             _ = try Socket().connect(to: "127.0.0.1", port: 4001)
         } catch {
-            XCTFail(String(describing: error))
+            fail(String(describing: error))
         }
     }
 
@@ -55,7 +54,7 @@ class SocketAwaiterTests: XCTestCase {
                 let client = try socket.accept()
                 _ = try client.send(bytes: self.message)
             } catch {
-                XCTFail(String(describing: error))
+                fail(String(describing: error))
             }
         }
 
@@ -67,9 +66,9 @@ class SocketAwaiterTests: XCTestCase {
                 .connect(to: "127.0.0.1", port: 4002)
 
             _ = try socket.send(bytes: message)
-            XCTAssertEqual(awaiter.event, .write)
+            assertEqual(awaiter.event, .write)
         } catch {
-            XCTFail(String(describing: error))
+            fail(String(describing: error))
         }
     }
 
@@ -86,9 +85,9 @@ class SocketAwaiterTests: XCTestCase {
                 ready.signal()
 
                 _ = try socket.accept()
-                XCTAssertEqual(awaiter.event, .read)
+                assertEqual(awaiter.event, .read)
             } catch {
-                XCTFail(String(describing: error))
+                fail(String(describing: error))
             }
         }
 
@@ -101,9 +100,9 @@ class SocketAwaiterTests: XCTestCase {
                 .connect(to: "127.0.0.1", port: 4003)
 
             _ = try socket.receive(to: &response)
-            XCTAssertEqual(awaiter.event, .read)
+            assertEqual(awaiter.event, .read)
         } catch {
-            XCTFail(String(describing: error))
+            fail(String(describing: error))
         }
     }
 
@@ -123,7 +122,7 @@ class SocketAwaiterTests: XCTestCase {
 
                 done.wait()
             } catch {
-                XCTFail(String(describing: error))
+                fail(String(describing: error))
             }
         }
 
@@ -134,10 +133,10 @@ class SocketAwaiterTests: XCTestCase {
             let socket = try Socket(type: .datagram, awaiter: awaiter)
 
             _ = try socket.send(bytes: message, to: server)
-            XCTAssertEqual(awaiter.event, .write)
+            assertEqual(awaiter.event, .write)
             done.signal()
         } catch {
-            XCTFail(String(describing: error))
+            fail(String(describing: error))
         }
     }
 
@@ -159,7 +158,7 @@ class SocketAwaiterTests: XCTestCase {
                 _ = try socket.send(bytes: self.message, to: client)
                 done.wait()
             } catch {
-                XCTFail(String(describing: error))
+                fail(String(describing: error))
             }
         }
 
@@ -173,10 +172,10 @@ class SocketAwaiterTests: XCTestCase {
 
             var sender: Socket.Address? = nil
             _ = try socket.receive(to: &response, from: &sender)
-            XCTAssertEqual(awaiter.event, .read)
+            assertEqual(awaiter.event, .read)
             done.signal()
         } catch {
-            XCTFail(String(describing: error))
+            fail(String(describing: error))
         }
     }
 }

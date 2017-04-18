@@ -1,8 +1,7 @@
-import XCTest
 import Dispatch
 @testable import Socket
 
-class SocketTests: XCTestCase {
+class SocketTests: TestCase {
     func testSocket() {
         let ready = AtomicCondition()
         let message = [UInt8]("ping".utf8)
@@ -20,7 +19,7 @@ class SocketTests: XCTestCase {
                 _ = try client.receive(to: &buffer)
                 _ = try client.send(bytes: buffer)
             } catch {
-                XCTFail(String(describing: error))
+                fail(String(describing: error))
             }
         }
 
@@ -31,14 +30,14 @@ class SocketTests: XCTestCase {
                 .connect(to: "127.0.0.1", port: 3000)
 
             let written = try socket.send(bytes: message)
-            XCTAssertEqual(written, message.count)
+            assertEqual(written, message.count)
 
             var response = [UInt8](repeating: 0, count: message.count)
             let read = try socket.receive(to: &response)
-            XCTAssertEqual(read, message.count)
-            XCTAssertEqual(response, message)
+            assertEqual(read, message.count)
+            assertEqual(response, message)
         } catch {
-            XCTFail(String(describing: error))
+            fail(String(describing: error))
         }
     }
 
@@ -59,7 +58,7 @@ class SocketTests: XCTestCase {
                 _ = try client.receive(to: &buffer)
                 _ = try client.send(bytes: buffer)
             } catch {
-                XCTFail(String(describing: error))
+                fail(String(describing: error))
             }
         }
 
@@ -70,14 +69,14 @@ class SocketTests: XCTestCase {
                 .connect(to: "127.0.0.1", port: 3001)
 
             let written = try socket.send(bytes: message)
-            XCTAssertEqual(written, message.count)
+            assertEqual(written, message.count)
 
             var response = [UInt8](repeating: 0, count: message.count)
             let read = try socket.receive(to: &response)
-            XCTAssertEqual(read, message.count)
-            XCTAssertEqual(response, message)
+            assertEqual(read, message.count)
+            assertEqual(response, message)
         } catch {
-            XCTFail(String(describing: error))
+            fail(String(describing: error))
         }
     }
 
@@ -99,7 +98,7 @@ class SocketTests: XCTestCase {
                 _ = try socket.receive(to: &buffer, from: &client)
                 _ = try socket.send(bytes: message, to: client!)
             } catch {
-                XCTFail(String(describing: error))
+                fail(String(describing: error))
             }
         }
 
@@ -109,16 +108,16 @@ class SocketTests: XCTestCase {
             let socket = try Socket(family: .inet, type: .datagram)
 
             let written = try socket.send(bytes: message, to: server)
-            XCTAssertEqual(written, message.count)
+            assertEqual(written, message.count)
 
             var sender: Socket.Address? = nil
             var buffer = [UInt8](repeating: 0, count: message.count)
             let read = try socket.receive(to: &buffer, from: &sender)
-            XCTAssertEqual(sender, server)
-            XCTAssertEqual(read, message.count)
-            XCTAssertEqual(buffer, message)
+            assertEqual(sender, server)
+            assertEqual(read, message.count)
+            assertEqual(buffer, message)
         } catch {
-            XCTFail(String(describing: error))
+            fail(String(describing: error))
         }
     }
 
@@ -139,7 +138,7 @@ class SocketTests: XCTestCase {
                 _ = try client.receive(to: &buffer)
                 _ = try client.send(bytes: buffer)
             } catch {
-                XCTFail(String(describing: error))
+                fail(String(describing: error))
             }
         }
 
@@ -150,14 +149,14 @@ class SocketTests: XCTestCase {
                 .connect(to: "::1", port: 3003)
 
             let written = try socket.send(bytes: message)
-            XCTAssertEqual(written, message.count)
+            assertEqual(written, message.count)
 
             var response = [UInt8](repeating: 0, count: message.count)
             let read = try socket.receive(to: &response)
-            XCTAssertEqual(read, message.count)
-            XCTAssertEqual(response, message)
+            assertEqual(read, message.count)
+            assertEqual(response, message)
         } catch {
-            XCTFail(String(describing: error))
+            fail(String(describing: error))
         }
     }
 
@@ -178,7 +177,7 @@ class SocketTests: XCTestCase {
                 _ = try socket.receive(to: &buffer, from: &client)
                 _ = try socket.send(bytes: message, to: client!)
             } catch {
-                XCTFail(String(describing: error))
+                fail(String(describing: error))
             }
         }
 
@@ -188,16 +187,16 @@ class SocketTests: XCTestCase {
             let socket = try Socket(family: .inet6, type: .datagram)
 
             let written = try socket.send(bytes: message, to: server)
-            XCTAssertEqual(written, message.count)
+            assertEqual(written, message.count)
 
             var sender: Socket.Address? = nil
             var buffer = [UInt8](repeating: 0, count: message.count)
             let read = try socket.receive(to: &buffer, from: &sender)
-            XCTAssertEqual(sender, server)
-            XCTAssertEqual(read, message.count)
-            XCTAssertEqual(buffer, message)
+            assertEqual(sender, server)
+            assertEqual(read, message.count)
+            assertEqual(buffer, message)
         } catch {
-            XCTFail(String(describing: error))
+            fail(String(describing: error))
         }
     }
 
@@ -219,7 +218,7 @@ class SocketTests: XCTestCase {
                 _ = try client.receive(to: &buffer)
                 _ = try client.send(bytes: buffer)
             } catch {
-                XCTFail(String(describing: error))
+                fail(String(describing: error))
             }
         }
 
@@ -230,14 +229,14 @@ class SocketTests: XCTestCase {
                 .connect(to: "/tmp/teststream.sock")
 
             let written = try socket.send(bytes: message)
-            XCTAssertEqual(written, message.count)
+            assertEqual(written, message.count)
 
             var response = [UInt8](repeating: 0, count: message.count)
             let read = try socket.receive(to: &response)
-            XCTAssertEqual(read, message.count)
-            XCTAssertEqual(response, message)
+            assertEqual(read, message.count)
+            assertEqual(response, message)
         } catch {
-            XCTFail(String(describing: error))
+            fail(String(describing: error))
         }
     }
 
@@ -262,7 +261,7 @@ class SocketTests: XCTestCase {
                 _ = try socket.receive(to: &buffer, from: &client)
                 _ = try socket.send(bytes: message, to: client!)
             } catch {
-                XCTFail(String(describing: error))
+                fail(String(describing: error))
             }
         }
 
@@ -273,16 +272,16 @@ class SocketTests: XCTestCase {
                 .bind(to: client)
 
             let written = try socket.send(bytes: message, to: server)
-            XCTAssertEqual(written, message.count)
+            assertEqual(written, message.count)
 
             var sender: Socket.Address? = nil
             var buffer = [UInt8](repeating: 0, count: message.count)
             let read = try socket.receive(to: &buffer, from: &sender)
-            XCTAssertEqual(sender, server)
-            XCTAssertEqual(read, message.count)
-            XCTAssertEqual(buffer, message)
+            assertEqual(sender, server)
+            assertEqual(read, message.count)
+            assertEqual(buffer, message)
         } catch {
-            XCTFail(String(describing: error))
+            fail(String(describing: error))
         }
     }
 
@@ -305,7 +304,7 @@ class SocketTests: XCTestCase {
                 _ = try client.receive(to: &buffer)
                 _ = try client.send(bytes: buffer)
             } catch {
-                XCTFail(String(describing: error))
+                fail(String(describing: error))
             }
         }
 
@@ -316,14 +315,14 @@ class SocketTests: XCTestCase {
                 .connect(to: "/tmp/testsequenced.sock")
 
             let written = try socket.send(bytes: message)
-            XCTAssertEqual(written, message.count)
+            assertEqual(written, message.count)
 
             var response = [UInt8](repeating: 0, count: message.count)
             let read = try socket.receive(to: &response)
-            XCTAssertEqual(read, message.count)
-            XCTAssertEqual(response, message)
+            assertEqual(read, message.count)
+            assertEqual(response, message)
         } catch {
-            XCTFail(String(describing: error))
+            fail(String(describing: error))
         }
     #endif
     }
