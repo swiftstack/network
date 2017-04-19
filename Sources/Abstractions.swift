@@ -4,6 +4,7 @@ import Platform
     let SOCK_STREAM = Int32(Glibc.SOCK_STREAM.rawValue)
     let SOCK_DGRAM = Int32(Glibc.SOCK_DGRAM.rawValue)
     let SOCK_SEQPACKET = Int32(Glibc.SOCK_SEQPACKET.rawValue)
+    let SOCK_RAW = Int32(Glibc.SOCK_RAW.rawValue)
     let noSignal = Int32(MSG_NOSIGNAL)
 #else
     let noSignal = Int32(0)
@@ -14,11 +15,7 @@ extension Socket.Family {
         switch self {
         case .local: return PF_LOCAL
         case .inet: return PF_INET
-        case .route: return PF_ROUTE
-        case .key: return PF_KEY
         case .inet6: return PF_INET6
-        case .system: return PF_SYSTEM
-        case .raw: return PF_NDRV
         }
     }
 }

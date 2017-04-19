@@ -1,11 +1,12 @@
 import Platform
 import Dispatch
 @testable import Socket
+import struct Foundation.Date
 
 class SocketAwaiterTests: TestCase {
     class TestAwaiter: IOAwaiter {
         var event: IOEvent? = nil
-        func wait(for descriptor: Descriptor, event: IOEvent) throws {
+        func wait(for descriptor: Descriptor, event: IOEvent, deadline: Date = Date.distantFuture) throws {
             self.event = event
         }
     }

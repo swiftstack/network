@@ -1,3 +1,4 @@
+import Platform
 import Dispatch
 @testable import Socket
 

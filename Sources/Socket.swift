@@ -5,7 +5,7 @@ import struct Foundation.Date
 
 public final class Socket {
     public enum Family {
-        case local, inet, route, key, inet6, system, raw
+        case local, inet, inet6
     }
 
     public enum SocketType {
