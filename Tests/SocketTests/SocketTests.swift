@@ -207,7 +207,7 @@ class SocketTests: TestCase {
         unlink("/tmp/teststream.sock")
         DispatchQueue.global().async {
             do {
-                let socket = try Socket(family: .unix, type: .stream)
+                let socket = try Socket(family: .local, type: .stream)
                     .bind(to: "/tmp/teststream.sock")
                     .listen()
 
@@ -225,7 +225,7 @@ class SocketTests: TestCase {
         ready.wait()
 
         do {
-            let socket = try Socket(family: .unix, type: .stream)
+            let socket = try Socket(family: .local, type: .stream)
                 .connect(to: "/tmp/teststream.sock")
 
             let written = try socket.send(bytes: message)
@@ -251,7 +251,7 @@ class SocketTests: TestCase {
 
         DispatchQueue.global().async {
             do {
-                let socket = try Socket(family: .unix, type: .datagram)
+                let socket = try Socket(family: .local, type: .datagram)
                     .bind(to: server)
 
                 ready.signal()
@@ -268,7 +268,7 @@ class SocketTests: TestCase {
         ready.wait()
 
         do {
-            let socket = try Socket(family: .unix, type: .datagram)
+            let socket = try Socket(family: .local, type: .datagram)
                 .bind(to: client)
 
             let written = try socket.send(bytes: message, to: server)

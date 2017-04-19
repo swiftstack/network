@@ -4,16 +4,16 @@ import Platform
 
 public final class Socket {
     public enum Family {
-        case inet, inet6, unspecified, unix
+        case local, inet, route, key, inet6, system, raw
     }
 
     public enum SocketType {
-        case stream, datagram, sequenced
+        case stream, datagram, sequenced, raw
     }
 
     private var backlog: Int32 = 256
 
-    public var descriptor: Descriptor
+    public private(set) var descriptor: Descriptor
     public internal(set) var options: Options
     public private(set) var family: Family
     public private(set) var type: SocketType

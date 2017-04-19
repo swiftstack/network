@@ -12,10 +12,13 @@ import Platform
 extension Socket.Family {
     var rawValue: Int32 {
         switch self {
-        case .inet: return AF_INET
-        case .inet6: return AF_INET6
-        case .unix: return AF_UNIX
-        case .unspecified: return AF_UNSPEC
+        case .local: return PF_LOCAL
+        case .inet: return PF_INET
+        case .route: return PF_ROUTE
+        case .key: return PF_KEY
+        case .inet6: return PF_INET6
+        case .system: return PF_SYSTEM
+        case .raw: return PF_NDRV
         }
     }
 }
@@ -26,6 +29,7 @@ extension Socket.SocketType {
         case .stream: return SOCK_STREAM
         case .datagram: return SOCK_DGRAM
         case .sequenced: return SOCK_SEQPACKET
+        case .raw: return SOCK_RAW
         }
     }
 }
