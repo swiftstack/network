@@ -211,6 +211,26 @@ extension sockaddr_un {
     }
 }
 
+extension in6_addr {
+    init(_ addr16:
+        (UInt16, UInt16, UInt16, UInt16, UInt16, UInt16, UInt16, UInt16))
+    {
+        #if os(Linux)
+            self = in6_addr(
+                __in6_u: in6_addr.__Unnamed_union___in6_u(
+                    __u6_addr16: (addr16)
+                )
+            )
+        #else
+            self = in6_addr(
+                __u6_addr: in6_addr.__Unnamed_union___u6_addr(
+                    __u6_addr16: (addr16)
+                )
+            )
+        #endif
+    }
+}
+
 protocol NativeStructEquatable: Equatable {}
 extension sockaddr_in: NativeStructEquatable {}
 extension sockaddr_in6: NativeStructEquatable {}

@@ -35,18 +35,16 @@ struct IPv6 {
         _ fragment7: UInt16,
         _ fragment8: UInt16
         ) {
-
         self.address = in6_addr(
-            __u6_addr: in6_addr.__Unnamed_union___u6_addr(
-                __u6_addr16: (
-                    fragment1,
-                    fragment2,
-                    fragment3,
-                    fragment4,
-                    fragment5,
-                    fragment6,
-                    fragment7,
-                    fragment8)
+            (
+                fragment1,
+                fragment2,
+                fragment3,
+                fragment4,
+                fragment5,
+                fragment6,
+                fragment7,
+                fragment8
             )
         )
     }
