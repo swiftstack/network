@@ -47,13 +47,17 @@ public final class Socket {
         }
         self.type = type
         self.family = family
-        self.awaiter = awaiter
         self.descriptor = descriptor
         self.options = Options(for: descriptor)
     #if os(OSX)
         self.options.noSignalPipe = true
     #endif
         self.options.reuseAddr = true
+
+        if awaiter != nil {
+            self.awaiter = awaiter
+            self.noDelay = true
+        }
     }
 
     deinit {
@@ -90,6 +94,10 @@ public final class Socket {
     public func connect(to address: Address, deadline: Date = Date.distantFuture) throws -> Socket {
         var copy = address
         guard Platform.connect(descriptor, rebounded(&copy), address.size) != -1 else {
+            if let awaiter = awaiter, errno == EINPROGRESS {
+                try awaiter.wait(for: descriptor, event: .write, deadline: deadline)
+                return self
+            }
             throw SocketError()
         }
         return self

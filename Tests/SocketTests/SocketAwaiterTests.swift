@@ -7,6 +7,8 @@ class SocketAwaiterTests: TestCase {
     class TestAwaiter: IOAwaiter {
         var event: IOEvent? = nil
         func wait(for descriptor: Descriptor, event: IOEvent, deadline: Date = Date.distantFuture) throws {
+            var time = timespec(tv_sec: 0, tv_nsec: 100_000_000)
+            nanosleep(&time, &time)
             self.event = event
         }
     }
