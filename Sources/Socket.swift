@@ -65,7 +65,7 @@ public final class Socket {
     }
 
     @discardableResult
-    public func bind(to address: Address) throws -> Socket {
+    public func bind(to address: Address) throws -> Self {
         var copy = address
         guard Platform.bind(descriptor, rebounded(&copy), address.size) != -1 else {
             throw SocketError()
@@ -74,7 +74,7 @@ public final class Socket {
     }
 
     @discardableResult
-    public func listen() throws -> Socket {
+    public func listen() throws -> Self {
         guard Platform.listen(descriptor, backlog) != -1 else {
             throw SocketError()
         }
@@ -82,92 +82,101 @@ public final class Socket {
     }
 
     public func accept(deadline: Date = Date.distantFuture) throws -> Socket {
-        try awaiter?.wait(for: descriptor, event: .read, deadline: deadline)
-        let client = Platform.accept(descriptor, nil, nil)
-        guard client != -1 else {
-            throw SocketError()
+        let client = try repeatWhileInterrupted {
+            try awaiter?.wait(for: descriptor, event: .read, deadline: deadline)
+            return Int(Platform.accept(descriptor, nil, nil))
         }
-        return try Socket(descriptor: client, family: family, type: type, awaiter: awaiter)
+        return try Socket(descriptor: Int32(client), family: family, type: type, awaiter: awaiter)
     }
 
     @discardableResult
-    public func connect(to address: Address, deadline: Date = Date.distantFuture) throws -> Socket {
+    public func connect(to address: Address, deadline: Date = Date.distantFuture) throws -> Self {
         var copy = address
-        guard Platform.connect(descriptor, rebounded(&copy), address.size) != -1 else {
-            if let awaiter = awaiter, errno == EINPROGRESS {
-                try awaiter.wait(for: descriptor, event: .write, deadline: deadline)
-                return self
+        do {
+            _ = try repeatWhileInterrupted {
+                return Int(Platform.connect(descriptor, rebounded(&copy), address.size))
             }
-            throw SocketError()
+        } catch let error as SocketError where error.number == EINPROGRESS {
+            try awaiter?.wait(for: descriptor, event: .write, deadline: deadline)
         }
         return self
     }
 
     public func close(silent: Bool = false) throws {
-        guard Platform.close(descriptor) != -1 || silent else {
-            throw SocketError()
+        _ = try repeatWhileInterrupted {
+            return Int(Platform.close(descriptor))
         }
     }
 
     public func send(buffer: UnsafeRawPointer, count: Int, deadline: Date = Date.distantFuture) throws -> Int {
-        try awaiter?.wait(for: descriptor, event: .write, deadline: deadline)
-        let sended = Platform.send(descriptor, buffer, count, noSignal)
-        guard sended != -1 else {
-            throw SocketError()
+        return try repeatWhileInterrupted {
+            try awaiter?.wait(for: descriptor, event: .write, deadline: deadline)
+            return Platform.send(descriptor, buffer, count, noSignal)
         }
-        return sended
     }
 
     public func receive(buffer: UnsafeMutableRawPointer, count: Int, deadline: Date = Date.distantFuture) throws -> Int {
-        try awaiter?.wait(for: descriptor, event: .read, deadline: deadline)
-        let received = Platform.recv(descriptor, buffer, count, 0)
-        guard received != -1 else {
-            throw SocketError()
+        return try repeatWhileInterrupted {
+            try awaiter?.wait(for: descriptor, event: .read, deadline: deadline)
+            return Platform.recv(descriptor, buffer, count, 0)
         }
-        return received
     }
 
     public func send(buffer: UnsafeRawPointer, count: Int, to address: Address, deadline: Date = Date.distantFuture) throws -> Int {
         var copy = address
-        try awaiter?.wait(for: descriptor, event: .write, deadline: deadline)
-        let sended = Platform.sendto(descriptor, buffer, count, noSignal, rebounded(&copy), address.size)
-        guard sended != -1 else {
-            throw SocketError()
+        return try repeatWhileInterrupted {
+            try awaiter?.wait(for: descriptor, event: .write, deadline: deadline)
+            return Platform.sendto(descriptor, buffer, count, noSignal, rebounded(&copy), address.size)
         }
-        return sended
     }
 
     public func receive(buffer: UnsafeMutableRawPointer, count: Int, from address: inout Address?, deadline: Date = Date.distantFuture) throws -> Int {
         var storage = sockaddr_storage()
         var size = sockaddr_storage.size
-        try awaiter?.wait(for: descriptor, event: .read, deadline: deadline)
-        let received = Platform.recvfrom(descriptor, buffer, count, 0, rebounded(&storage), &size)
-        guard received != -1 else {
-            throw SocketError()
+        let received = try repeatWhileInterrupted {
+            try awaiter?.wait(for: descriptor, event: .read, deadline: deadline)
+            return Platform.recvfrom(descriptor, buffer, count, 0, rebounded(&storage), &size)
         }
         address = Address(storage, size)
         return received
+    }
+
+    @inline(__always)
+    func repeatWhileInterrupted(_ task: (Void) throws -> Int) throws -> Int {
+        var result = 0
+        while true {
+            result = try task()
+            if result == -1 &&
+                (errno == EAGAIN || errno == EWOULDBLOCK || errno == EINTR) {
+                continue
+            }
+            break
+        }
+        guard result != -1 else {
+            throw SocketError()
+        }
+        return result
     }
 }
 
 extension Socket {
     @discardableResult
-    public func bind(to address: String, port: UInt16) throws -> Socket {
+    public func bind(to address: String, port: UInt16) throws -> Self {
         return try bind(to: try Address(address, port: port))
     }
 
     @discardableResult
-    public func bind(to address: String) throws -> Socket {
+    public func bind(to address: String) throws -> Self {
         return try bind(to: try Address(unix: address))
     }
 
     @discardableResult
-    public func connect(to address: String, port: UInt16, deadline: Date = Date.distantFuture) throws -> Socket {
+    public func connect(to address: String, port: UInt16, deadline: Date = Date.distantFuture) throws -> Self {
         return try connect(to: try Address(address, port: port), deadline: deadline)
     }
 
     @discardableResult
-    public func connect(to address: String, deadline: Date = Date.distantFuture) throws -> Socket {
+    public func connect(to address: String, deadline: Date = Date.distantFuture) throws -> Self {
         return try connect(to: try Address(address), deadline: deadline)
     }
 }
