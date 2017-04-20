@@ -14,10 +14,10 @@ struct IPv4 {
         _ fragment4: UInt8
     ) {
         self.init(
-            UInt32(fragment1) << 24 |
-            UInt32(fragment1) << 16 |
-            UInt32(fragment1) << 8 |
             UInt32(fragment1)
+            | UInt32(fragment2) << 8
+            | UInt32(fragment3) << 16
+            | UInt32(fragment4) << 24
         )
     }
 }
@@ -37,16 +37,28 @@ struct IPv6 {
         ) {
         self.address = in6_addr(
             (
-                fragment1,
-                fragment2,
-                fragment3,
-                fragment4,
-                fragment5,
-                fragment6,
-                fragment7,
-                fragment8
+                fragment1.byteSwapped,
+                fragment2.byteSwapped,
+                fragment3.byteSwapped,
+                fragment4.byteSwapped,
+                fragment5.byteSwapped,
+                fragment6.byteSwapped,
+                fragment7.byteSwapped,
+                fragment8.byteSwapped
             )
         )
+    }
+}
+
+extension IPv4: CustomStringConvertible {
+    var description: String {
+        return address.description
+    }
+}
+
+extension IPv6: CustomStringConvertible {
+    var description: String {
+        return address.description
     }
 }
 

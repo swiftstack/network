@@ -1,5 +1,7 @@
 import Platform
 
+// MARK: raw values
+
 #if os(Linux)
     let SOCK_STREAM = Int32(Glibc.SOCK_STREAM.rawValue)
     let SOCK_DGRAM = Int32(Glibc.SOCK_DGRAM.rawValue)
@@ -31,6 +33,8 @@ extension Socket.SocketType {
     }
 }
 
+// MARK: convert
+
 func rebounded<T>(_ pointer: UnsafePointer<T>) -> UnsafePointer<sockaddr> {
     return UnsafeRawPointer(pointer).assumingMemoryBound(to: sockaddr.self)
 }
@@ -59,6 +63,8 @@ fileprivate func presentationToNetwork(ip6 address: String) throws -> in6_addr? 
     }
 }
 
+// MARK: convenience initializers
+
 extension sockaddr_in {
     init(_ storage: sockaddr_storage) {
         var storage = storage
@@ -86,6 +92,8 @@ extension sockaddr_un {
     }
 }
 
+// MARK: convenience properties
+
 extension sockaddr_storage {
     static var size: socklen_t {
         return socklen_t(MemoryLayout<sockaddr_storage>.size)
@@ -93,12 +101,9 @@ extension sockaddr_storage {
 }
 
 extension sockaddr_in {
-    var address: String? {
+    var address: String {
         get {
-            var bytes = [Int8](repeating: 0, count: Int(INET_ADDRSTRLEN) + 1)
-            var addr = self.sin_addr
-            inet_ntop(AF_INET, &addr, &bytes, socklen_t(INET_ADDRSTRLEN))
-            return String(cString: bytes)
+            return self.sin_addr.description
         }
     }
 
@@ -133,14 +138,9 @@ extension sockaddr_in {
 }
 
 extension sockaddr_in6 {
-    var address: String? {
+    var address: String {
         get {
-            var bytes = [Int8](repeating: 0, count: Int(INET6_ADDRSTRLEN) + 1)
-            var addr = self.sin6_addr
-            guard inet_ntop(AF_INET6, &addr, &bytes, socklen_t(INET6_ADDRSTRLEN)) != nil else {
-                return nil
-            }
-            return String(cString: bytes)
+            return self.sin6_addr.description
         }
     }
 
@@ -208,6 +208,50 @@ extension sockaddr_un {
         sockaddr.family = AF_UNIX
         memcpy(&sockaddr.sun_path, &bytes, bytes.count)
         self = sockaddr
+    }
+}
+
+// MARK: CustomStringConvertible
+
+extension sockaddr_in: CustomStringConvertible {
+    public var description: String {
+        get {
+            return "\(address):\(port)"
+        }
+    }
+}
+
+extension sockaddr_in6: CustomStringConvertible {
+    public var description: String {
+        get {
+            return "\(address):\(port)"
+        }
+    }
+}
+
+extension in_addr: CustomStringConvertible {
+    public var description: String {
+        get {
+            var bytes = [Int8](repeating: 0, count: Int(INET_ADDRSTRLEN) + 1)
+            var addr = self
+            guard inet_ntop(AF_INET, &addr, &bytes, socklen_t(INET_ADDRSTRLEN)) != nil else {
+                return ""
+            }
+            return String(cString: bytes)
+        }
+    }
+}
+
+extension in6_addr: CustomStringConvertible {
+    public var description: String {
+        get {
+            var bytes = [Int8](repeating: 0, count: Int(INET6_ADDRSTRLEN) + 1)
+            var addr = self
+            guard inet_ntop(AF_INET6, &addr, &bytes, socklen_t(INET6_ADDRSTRLEN)) != nil else {
+                return ""
+            }
+            return String(cString: bytes)
+        }
     }
 }
 
