@@ -211,12 +211,14 @@ extension sockaddr_un {
     }
 }
 
-protocol SockaddrProtocol: Equatable {}
-extension sockaddr_in: SockaddrProtocol {}
-extension sockaddr_in6: SockaddrProtocol {}
-extension sockaddr_un: SockaddrProtocol {}
+protocol NativeStructEquatable: Equatable {}
+extension sockaddr_in: NativeStructEquatable {}
+extension sockaddr_in6: NativeStructEquatable {}
+extension sockaddr_un: NativeStructEquatable {}
+extension in_addr: NativeStructEquatable {}
+extension in6_addr: NativeStructEquatable {}
 
-extension SockaddrProtocol {
+extension NativeStructEquatable {
     public static func ==(lhs: Self, rhs: Self) -> Bool {
         var lhs = lhs
         var rhs = rhs

@@ -5,12 +5,37 @@ extension Socket {
         case ip4(sockaddr_in)
         case ip6(sockaddr_in6)
         case unix(sockaddr_un)
+        case unspecified
+
+        public enum Family {
+            case inet, inet6, unspecified, unix
+
+            // FIXME: extension Socket.Address.Family doesn't compile
+            var rawValue: Int32 {
+                switch self {
+                case .inet: return AF_INET
+                case .inet6: return AF_INET6
+                case .unix: return AF_UNIX
+                case .unspecified: return AF_UNSPEC
+                }
+            }
+        }
+
+        var family: Family {
+            switch self {
+            case .ip4: return .inet
+            case .ip6: return .inet6
+            case .unix: return .unix
+            case .unspecified: return .unspecified
+            }
+        }
 
         var size: socklen_t {
             switch self {
             case .ip4: return sockaddr_in.size
             case .ip6: return sockaddr_in6.size
             case .unix: return sockaddr_un.size
+            case .unspecified: return 0
             }
         }
     }
@@ -32,14 +57,15 @@ extension Socket {
 
 extension Socket.Address {
     init?(_ storage: sockaddr_storage, _ size: socklen_t) {
-        switch (storage.ss_family, size) {
-        case (sa_family_t(AF_INET), sockaddr_in.size):
+        switch Int32(storage.ss_family) {
+        case Socket.Address.Family.inet.rawValue:
             self = .ip4(sockaddr_in(storage))
-        case (sa_family_t(AF_INET6), sockaddr_in6.size):
+        case Socket.Address.Family.inet6.rawValue:
             self = .ip6(sockaddr_in6(storage))
-        case (sa_family_t(AF_UNIX), _):
+        case Socket.Address.Family.unix.rawValue:
             self = .unix(sockaddr_un(storage))
-        default: return nil
+        default:
+            self = .unspecified
         }
     }
 }
