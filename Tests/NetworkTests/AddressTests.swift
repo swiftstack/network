@@ -1,6 +1,6 @@
 import Platform
 import Dispatch
-@testable import Socket
+@testable import Network
 
 class AddressTests: TestCase {
     func testIPv4() {

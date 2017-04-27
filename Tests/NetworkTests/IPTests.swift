@@ -1,4 +1,4 @@
-@testable import Socket
+@testable import Network
 
 class IPTests: TestCase {
     func testIPv4() {
