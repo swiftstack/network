@@ -1,5 +1,10 @@
 import Platform
 
+enum IPAddress {
+    case v4(IPv4)
+    case v6(IPv6)
+}
+
 struct IPv4 {
     let address: in_addr
 
@@ -73,3 +78,14 @@ extension IPv6: Equatable {
         return lhs.address == rhs.address
     }
 }
+
+extension IPAddress: Equatable {
+    static func ==(lhs: IPAddress, rhs: IPAddress) -> Bool {
+        switch (lhs, rhs) {
+        case let (.v4(lhs), v4(rhs)): return lhs == rhs
+        case let (.v6(lhs), v6(rhs)): return lhs == rhs
+        default: return false
+        }
+    }
+}
+
