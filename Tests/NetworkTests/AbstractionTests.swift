@@ -1,3 +1,4 @@
+import Test
 import Platform
 @testable import Network
 

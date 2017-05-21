@@ -1,5 +1,7 @@
+import Test
 import Dispatch
 @testable import Network
+
 import struct Foundation.Date
 
 class DNSTests: TestCase {

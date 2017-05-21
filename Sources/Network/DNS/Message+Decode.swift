@@ -107,13 +107,16 @@ extension Message {
             questions.append(Question(name: name, type: type))
         }
 
-        func decodeTTL(from bytes: [UInt8], offset: inout Int) throws -> Int {
-            let ttl = UInt32(bytes[offset]) << 24
-                | UInt32(bytes[offset+1]) << 16
-                | UInt32(bytes[offset+2]) << 8
-                | UInt32(bytes[offset+3])
+        func decodeTTL(
+            from bytes: [UInt8], offset: inout Int
+        ) throws -> Int {
+            // FIXME: expression was to complex
+            let byte1 = Int(bytes[offset]) << 24
+            let byte2 = Int(bytes[offset+1]) << 16
+            let byte3 = Int(bytes[offset+2]) << 8
+            let byte4 = Int(bytes[offset+3])
             offset += 4
-            return Int(ttl)
+            return byte1 | byte2 | byte3 | byte4
         }
 
         func decodeResourceRecord(

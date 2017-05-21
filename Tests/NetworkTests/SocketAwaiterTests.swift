@@ -1,6 +1,8 @@
+import Test
 import Platform
 import Dispatch
 @testable import Network
+
 import struct Foundation.Date
 
 class SocketAwaiterTests: TestCase {
@@ -8,7 +10,7 @@ class SocketAwaiterTests: TestCase {
         var event: IOEvent? = nil
         func wait(for descriptor: Descriptor, event: IOEvent, deadline: Date = Date.distantFuture) throws {
             var time = timespec(tv_sec: 0, tv_nsec: 100_000_000)
-            nanosleep(&time, &time)
+            nanosleep(&time, nil)
             self.event = event
         }
     }

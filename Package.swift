@@ -1,17 +1,27 @@
+// swift-tools-version:4.0
 import PackageDescription
 
 let package = Package(
     name: "Network",
+    products: [
+        .library(name: "Network", targets: ["Network"])
+    ],
     dependencies: [
-        .Package(
+        .package(
             url: "https://github.com/swift-stack/platform.git",
-            majorVersion: 0,
-            minor: 3
+            from: "0.4.0"
         ),
-        .Package(
+        .package(
             url: "https://github.com/swift-stack/async.git",
-            majorVersion: 0,
-            minor: 3
+            from: "0.4.0"
+        ),
+        .package(
+            url: "https://github.com/swift-stack/test.git",
+            from: "0.4.0"
         )
+    ],
+    targets: [
+        .target(name: "Network", dependencies: ["Async"]),
+        .testTarget(name: "NetworkTests", dependencies: ["Network", "Test"])
     ]
 )

@@ -1,3 +1,4 @@
+import Test
 import Platform
 import Dispatch
 @testable import Network

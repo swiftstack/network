@@ -6,9 +6,9 @@ extension Message {
     }
 
     func encode(to buffer: inout [UInt8]) {
-        let id = UInt16(truncatingBitPattern: self.id)
-        buffer.append(UInt8(truncatingBitPattern: id >> 8))
-        buffer.append(UInt8(truncatingBitPattern: id))
+        let id = UInt16(extendingOrTruncating: self.id)
+        buffer.append(UInt8(extendingOrTruncating: id >> 8))
+        buffer.append(UInt8(extendingOrTruncating: id))
 
         var mask: UInt16 = 0
 
@@ -19,12 +19,12 @@ extension Message {
         mask |= ((isRecursionDesired ? 1 : 0) as UInt16) << 8
         mask |= ((isRecursionAvailable ? 1 : 0) as UInt16) << 7
 
-        buffer.append(UInt8(truncatingBitPattern: mask >> 8))
-        buffer.append(UInt8(truncatingBitPattern: mask))
+        buffer.append(UInt8(extendingOrTruncating: mask >> 8))
+        buffer.append(UInt8(extendingOrTruncating: mask))
 
-        let count = UInt16(truncatingBitPattern: question.count)
-        buffer.append(UInt8(truncatingBitPattern: count >> 8))
-        buffer.append(UInt8(truncatingBitPattern: count))
+        let count = UInt16(extendingOrTruncating: question.count)
+        buffer.append(UInt8(extendingOrTruncating: count >> 8))
+        buffer.append(UInt8(extendingOrTruncating: count))
 
         buffer.append(0)
         buffer.append(0)
@@ -37,18 +37,18 @@ extension Message {
 
         for questionRecord in question {
             for part in questionRecord.name.components(separatedBy: ".") {
-                buffer.append(UInt8(truncatingBitPattern: part.utf8.count))
+                buffer.append(UInt8(extendingOrTruncating: part.utf8.count))
                 buffer.append(contentsOf: [UInt8](part.utf8))
             }
             buffer.append(0)
 
             let type = questionRecord.type.rawValue
-            buffer.append(UInt8(truncatingBitPattern: type >> 8))
-            buffer.append(UInt8(truncatingBitPattern: type))
+            buffer.append(UInt8(extendingOrTruncating: type >> 8))
+            buffer.append(UInt8(extendingOrTruncating: type))
 
             let klass = ResourceClass.in.rawValue
-            buffer.append(UInt8(truncatingBitPattern: klass >> 8))
-            buffer.append(UInt8(truncatingBitPattern: klass))
+            buffer.append(UInt8(extendingOrTruncating: klass >> 8))
+            buffer.append(UInt8(extendingOrTruncating: klass))
         }
     }
 }

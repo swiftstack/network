@@ -1,3 +1,4 @@
+import Test
 @testable import Network
 
 class IPTests: TestCase {
