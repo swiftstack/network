@@ -46,20 +46,6 @@ extension Socket {
 }
 
 extension Socket.Address {
-    init?(_ storage: sockaddr_storage) {
-        guard let family = Family(storage.ss_family) else {
-            return nil
-        }
-        switch family {
-        case .inet: self = .ip4(sockaddr_in(storage))
-        case .inet6: self = .ip6(sockaddr_in6(storage))
-        case .unix: self = .unix(sockaddr_un(storage))
-        case .unspecified: self = .unspecified
-        }
-    }
-}
-
-extension Socket.Address {
     public init(_ address: String, port: UInt16? = nil) throws {
         if let port = port {
             if let ip4 = try? Socket.Address(ip4: address, port: port) {
@@ -94,6 +80,20 @@ extension Socket.Address {
 
     public init(unix address: String) throws {
         self = .unix(try sockaddr_un(address))
+    }
+}
+
+extension Socket.Address {
+    init?(_ storage: sockaddr_storage) {
+        guard let family = Family(storage.ss_family) else {
+            return nil
+        }
+        switch family {
+        case .inet: self = .ip4(sockaddr_in(storage))
+        case .inet6: self = .ip6(sockaddr_in6(storage))
+        case .unix: self = .unix(sockaddr_un(storage))
+        case .unspecified: self = .unspecified
+        }
     }
 }
 

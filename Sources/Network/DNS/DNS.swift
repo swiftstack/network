@@ -50,10 +50,10 @@ struct DNS {
 
         return response.answer.reduce([IPAddress]()) { result, next in
             var result = result
-            if case let .a(ip4) = next.data {
-                result.append(.v4(ip4))
-            } else if case let .aaaa(ip6) = next.data {
-                result.append(.v6(ip6))
+            if case let .a(address) = next.data {
+                result.append(.v4(address))
+            } else if case let .aaaa(address) = next.data {
+                result.append(.v6(address))
             }
             return result
         }
