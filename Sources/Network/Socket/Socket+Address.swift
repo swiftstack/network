@@ -9,16 +9,6 @@ extension Socket {
 
         public enum Family {
             case inet, inet6, unspecified, unix
-
-            // FIXME: extension Socket.Address.Family doesn't compile
-            var rawValue: Int32 {
-                switch self {
-                case .inet: return AF_INET
-                case .inet6: return AF_INET6
-                case .unix: return AF_UNIX
-                case .unspecified: return AF_UNSPEC
-                }
-            }
         }
 
         var family: Family {
@@ -44,28 +34,27 @@ extension Socket {
         var storage = sockaddr_storage()
         var size = UInt32(sockaddr_storage.size)
         getsockname(descriptor, rebounded(&storage), &size)
-        return Address(storage, size)
+        return Address(storage)
     }
 
     public var peerAddress: Address? {
         var storage = sockaddr_storage()
         var size = UInt32(sockaddr_storage.size)
         getpeername(descriptor, rebounded(&storage), &size)
-        return Address(storage, size)
+        return Address(storage)
     }
 }
 
 extension Socket.Address {
-    init?(_ storage: sockaddr_storage, _ size: socklen_t) {
-        switch Int32(storage.ss_family) {
-        case Socket.Address.Family.inet.rawValue:
-            self = .ip4(sockaddr_in(storage))
-        case Socket.Address.Family.inet6.rawValue:
-            self = .ip6(sockaddr_in6(storage))
-        case Socket.Address.Family.unix.rawValue:
-            self = .unix(sockaddr_un(storage))
-        default:
-            self = .unspecified
+    init?(_ storage: sockaddr_storage) {
+        guard let family = Family(storage.ss_family) else {
+            return nil
+        }
+        switch family {
+        case .inet: self = .ip4(sockaddr_in(storage))
+        case .inet6: self = .ip6(sockaddr_in6(storage))
+        case .unix: self = .unix(sockaddr_un(storage))
+        case .unspecified: self = .unspecified
         }
     }
 }
@@ -105,6 +94,31 @@ extension Socket.Address {
 
     public init(unix address: String) throws {
         self = .unix(try sockaddr_un(address))
+    }
+}
+
+extension Socket.Address.Family {
+    init?(_ family: sa_family_t) {
+        self.init(rawValue: Int32(family))
+    }
+
+    init?(rawValue: Int32) {
+        switch rawValue {
+        case AF_INET: self = .inet
+        case AF_INET6: self = .inet6
+        case AF_UNIX: self = .unix
+        case AF_UNSPEC: self = .unspecified
+        default: return nil
+        }
+    }
+
+    var rawValue: Int32 {
+        switch self {
+        case .inet: return AF_INET
+        case .inet6: return AF_INET6
+        case .unix: return AF_UNIX
+        case .unspecified: return AF_UNSPEC
+        }
     }
 }
 

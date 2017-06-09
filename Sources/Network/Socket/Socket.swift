@@ -137,7 +137,7 @@ public final class Socket {
             try awaiter?.wait(for: descriptor, event: .read, deadline: deadline)
             return Platform.recvfrom(descriptor, buffer, count, 0, rebounded(&storage), &size)
         }
-        address = Address(storage, size)
+        address = Address(storage)
         return received
     }
 
