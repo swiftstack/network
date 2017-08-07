@@ -18,12 +18,12 @@ struct IPv4 {
         _ fragment3: UInt8,
         _ fragment4: UInt8
     ) {
-        self.init(
-            UInt32(fragment1)
-            | UInt32(fragment2) << 8
-            | UInt32(fragment3) << 16
-            | UInt32(fragment4) << 24
-        )
+        // FIXME: expression was to complex to be solved in reasonable time.
+        let fragment1 = UInt32(fragment1)
+        let fragment2 = UInt32(fragment2) << 8
+        let fragment3 = UInt32(fragment3) << 16
+        let fragment4 = UInt32(fragment4) << 24
+        self.init(fragment1 | fragment2 | fragment3 | fragment4)
     }
 }
 
