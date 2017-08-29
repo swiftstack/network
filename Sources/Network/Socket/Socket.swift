@@ -126,7 +126,7 @@ public final class Socket {
     }
 
     public func send(
-        buffer: UnsafeRawPointer,
+        bytes: UnsafeRawPointer,
         count: Int,
         deadline: Date = Date.distantFuture
     ) throws -> Int {
@@ -135,12 +135,12 @@ public final class Socket {
                 for: descriptor,
                 event: .write,
                 deadline: deadline)
-            return Platform.send(descriptor, buffer, count, noSignal)
+            return Platform.send(descriptor, bytes, count, noSignal)
         }
     }
 
     public func receive(
-        buffer: UnsafeMutableRawPointer,
+        to buffer: UnsafeMutableRawPointer,
         count: Int,
         deadline: Date = Date.distantFuture
     ) throws -> Int {
@@ -151,7 +151,7 @@ public final class Socket {
     }
 
     public func send(
-        buffer: UnsafeRawPointer,
+        bytes: UnsafeRawPointer,
         count: Int,
         to address: Address,
         deadline: Date = Date.distantFuture
@@ -164,7 +164,7 @@ public final class Socket {
                 deadline: deadline)
             return Platform.sendto(
                 descriptor,
-                buffer,
+                bytes,
                 count,
                 noSignal,
                 rebounded(&copy),
@@ -173,7 +173,7 @@ public final class Socket {
     }
 
     public func receive(
-        buffer: UnsafeMutableRawPointer,
+        to buffer: UnsafeMutableRawPointer,
         count: Int,
         from address: inout Address?,
         deadline: Date = Date.distantFuture

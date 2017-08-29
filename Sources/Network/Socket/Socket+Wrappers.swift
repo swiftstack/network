@@ -35,11 +35,33 @@ extension Socket {
 
 extension Socket {
     public func send(
+        bytes: UnsafeRawBufferPointer,
+        deadline: Date = Date.distantFuture
+    ) throws -> Int {
+        return try send(
+            bytes: bytes.baseAddress!,
+            count: bytes.count,
+            deadline: deadline)
+    }
+
+    public func send(
+        bytes: UnsafeRawBufferPointer,
+        to address: Address,
+        deadline: Date = Date.distantFuture
+    ) throws -> Int {
+        return try send(
+            bytes: bytes.baseAddress!,
+            count: bytes.count,
+            to: address,
+            deadline: deadline)
+    }
+
+    public func send(
         bytes: [UInt8],
         deadline: Date = Date.distantFuture
     ) throws -> Int {
         return try send(
-            buffer: bytes,
+            bytes: bytes,
             count: bytes.count,
             deadline: deadline)
     }
@@ -50,30 +72,52 @@ extension Socket {
         deadline: Date = Date.distantFuture
     ) throws -> Int {
         return try send(
-            buffer: bytes,
+            bytes: bytes,
             count: bytes.count,
             to: address,
             deadline: deadline)
     }
 
     public func receive(
-        to bytes: inout [UInt8],
+        to buffer: inout [UInt8],
         deadline: Date = Date.distantFuture
     ) throws -> Int {
         return try receive(
-            buffer: &bytes,
-            count: bytes.count,
+            to: &buffer,
+            count: buffer.count,
             deadline: deadline)
     }
 
     public func receive(
-        to bytes: inout [UInt8],
+        to buffer: inout [UInt8],
         from address: inout Address?,
         deadline: Date = Date.distantFuture
     ) throws -> Int {
         return try receive(
-            buffer: &bytes,
-            count: bytes.count,
+            to: &buffer,
+            count: buffer.count,
+            from: &address,
+            deadline: deadline)
+    }
+
+    public func receive(
+        to buffer: UnsafeMutableRawBufferPointer,
+        deadline: Date = Date.distantFuture
+    ) throws -> Int {
+        return try receive(
+            to: buffer.baseAddress!,
+            count: buffer.count,
+            deadline: deadline)
+    }
+
+    public func receive(
+        to buffer: UnsafeMutableRawBufferPointer,
+        from address: inout Address?,
+        deadline: Date = Date.distantFuture
+    ) throws -> Int {
+        return try receive(
+            to: buffer.baseAddress!,
+            count: buffer.count,
             from: &address,
             deadline: deadline)
     }
