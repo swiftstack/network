@@ -25,3 +25,17 @@ let package = Package(
         .testTarget(name: "NetworkTests", dependencies: ["Network", "Test"])
     ]
 )
+
+import class Foundation.ProcessInfo
+if ProcessInfo.processInfo.environment["Development"] == "true" {
+    package.dependencies.append(
+        .package(
+            url: "https://github.com/swift-stack/stream.git",
+            from: "0.4.0")
+    )
+
+    package.targets
+        .first(where: { $0.name == "Network" })?
+        .dependencies
+        .append("Stream")
+}
