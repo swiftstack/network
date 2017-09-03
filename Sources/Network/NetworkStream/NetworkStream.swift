@@ -1,4 +1,3 @@
-#if canImport(Stream)
 import Stream
 
 public class NetworkStream: Stream {
@@ -16,4 +15,3 @@ public class NetworkStream: Stream {
         return try socket.send(bytes: bytes.baseAddress!, count: bytes.count)
     }
 }
-#endif
