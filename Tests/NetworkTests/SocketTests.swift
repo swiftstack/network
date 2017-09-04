@@ -4,8 +4,14 @@ import Dispatch
 @testable import Network
 
 class SocketTests: TestCase {
+    override func setUp() {
+        if async == nil {
+            TestAsync().registerGlobal()
+        }
+    }
+
     func testSocket() {
-        let ready = AtomicCondition()
+        let ready = DispatchSemaphore(value: 0)
         let message = [UInt8]("ping".utf8)
 
         DispatchQueue.global().async {
@@ -44,7 +50,7 @@ class SocketTests: TestCase {
     }
 
     func testSocketInetStream() {
-        let ready = AtomicCondition()
+        let ready = DispatchSemaphore(value: 0)
         let message = [UInt8]("ping".utf8)
 
         DispatchQueue.global().async {
@@ -83,7 +89,7 @@ class SocketTests: TestCase {
     }
 
     func testSocketInetDatagram() {
-        let ready = AtomicCondition()
+        let ready = DispatchSemaphore(value: 0)
         let message = [UInt8]("ping".utf8)
 
         let server = try! Socket.Address("127.0.0.1", port: 3002)
@@ -124,7 +130,7 @@ class SocketTests: TestCase {
     }
 
     func testSocketInet6Stream() {
-        let ready = AtomicCondition()
+        let ready = DispatchSemaphore(value: 0)
         let message = [UInt8]("ping".utf8)
 
         DispatchQueue.global().async {
@@ -163,7 +169,7 @@ class SocketTests: TestCase {
     }
 
     func testSocketInet6Datagram() {
-        let ready = AtomicCondition()
+        let ready = DispatchSemaphore(value: 0)
         let message = [UInt8]("ping".utf8)
 
         let server = try! Socket.Address("::1", port: 3004)
@@ -203,7 +209,7 @@ class SocketTests: TestCase {
     }
 
     func testSocketUnixStream() {
-        let ready = AtomicCondition()
+        let ready = DispatchSemaphore(value: 0)
         let message = [UInt8]("ping".utf8)
 
         unlink("/tmp/teststream.sock")
@@ -243,7 +249,7 @@ class SocketTests: TestCase {
     }
 
     func testSocketUnixDatagram() {
-        let ready = AtomicCondition()
+        let ready = DispatchSemaphore(value: 0)
         let message = [UInt8]("ping".utf8)
 
         unlink("/tmp/testdatagramserver.sock")
@@ -289,7 +295,7 @@ class SocketTests: TestCase {
 
     func testSocketUnixSequenced() {
     #if os(Linux)
-        let ready = AtomicCondition()
+        let ready = DispatchSemaphore(value: 0)
         let message = [UInt8]("ping".utf8)
 
         unlink("/tmp/testsequenced.sock")

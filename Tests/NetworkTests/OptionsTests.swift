@@ -3,6 +3,12 @@ import Platform
 @testable import Network
 
 class OptionsTests: TestCase {
+    override func setUp() {
+        if async == nil {
+            TestAsync().registerGlobal()
+        }
+    }
+
     func testReuseAddr() {
         do {
             let socket = try Socket()

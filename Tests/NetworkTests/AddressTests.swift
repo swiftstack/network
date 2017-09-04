@@ -4,6 +4,12 @@ import Dispatch
 @testable import Network
 
 class AddressTests: TestCase {
+    override func setUp() {
+        if async == nil {
+            TestAsync().registerGlobal()
+        }
+    }
+
     func testIPv4() {
         do {
             let address = try Socket.Address(ip4: "127.0.0.1", port: 5000)
@@ -104,8 +110,8 @@ class AddressTests: TestCase {
     }
 
     func testLocalAddress() {
-        let ready = AtomicCondition()
-        let done = AtomicCondition()
+        let ready = DispatchSemaphore(value: 0)
+        let done = DispatchSemaphore(value: 0)
 
         DispatchQueue.global().async {
             do {
@@ -147,8 +153,8 @@ class AddressTests: TestCase {
     }
 
     func testRemoteAddress() {
-        let ready = AtomicCondition()
-        let done = AtomicCondition()
+        let ready = DispatchSemaphore(value: 0)
+        let done = DispatchSemaphore(value: 0)
 
         DispatchQueue.global().async {
             do {
@@ -189,8 +195,8 @@ class AddressTests: TestCase {
     }
 
     func testLocal6Address() {
-        let ready = AtomicCondition()
-        let done = AtomicCondition()
+        let ready = DispatchSemaphore(value: 0)
+        let done = DispatchSemaphore(value: 0)
 
         DispatchQueue.global().async {
             do {
@@ -231,8 +237,8 @@ class AddressTests: TestCase {
     }
 
     func testRemote6Address() {
-        let ready = AtomicCondition()
-        let done = AtomicCondition()
+        let ready = DispatchSemaphore(value: 0)
+        let done = DispatchSemaphore(value: 0)
 
         DispatchQueue.global().async {
             do {
