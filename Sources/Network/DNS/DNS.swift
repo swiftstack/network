@@ -2,6 +2,8 @@ import Platform
 import Foundation
 
 struct DNS {
+    static var cache = [String : [IPAddress]]()
+
     static var nameserver: String = {
         // FIXME: implement async reader
         let fileManager = FileManager.default
@@ -44,11 +46,16 @@ struct DNS {
         type: ResourceType = .a,
         deadline: Date = Date.distantFuture
     ) throws -> [IPAddress] {
+        // TODO: separate by resource type
+        guard cache[domain] == nil else {
+            return cache[domain]!
+        }
+
         let response = try makeRequest(
             query: Message(domain: domain, type: type),
             deadline: deadline)
 
-        return response.answer.reduce([IPAddress]()) { result, next in
+        let result = response.answer.reduce([IPAddress]()) { result, next in
             var result = result
             if case let .a(address) = next.data {
                 result.append(.v4(address))
@@ -57,5 +64,8 @@ struct DNS {
             }
             return result
         }
+
+        cache[domain] = result
+        return result
     }
 }
