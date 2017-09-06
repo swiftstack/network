@@ -43,23 +43,27 @@ func rebounded<T>(_ pointer: UnsafeMutablePointer<T>) -> UnsafeMutablePointer<so
     return UnsafeMutableRawPointer(pointer).assumingMemoryBound(to: sockaddr.self)
 }
 
-fileprivate func presentationToNetwork(ip4 address: String) throws -> in_addr? {
-    var addr = in_addr()
-    switch inet_pton(AF_INET, address, &addr) {
-    case 1: return addr
-    case 0: return nil
-    case -1: throw SocketError()
-    default: preconditionFailure("inet_pton: unexpected return code")
+extension in_addr {
+    init?(_ address: String) throws {
+        var addr = in_addr()
+        switch inet_pton(AF_INET, address, &addr) {
+        case 1: self = addr
+        case 0: return nil
+        case -1: throw SocketError()
+        default: preconditionFailure("inet_pton: unexpected return code")
+        }
     }
 }
 
-fileprivate func presentationToNetwork(ip6 address: String) throws -> in6_addr? {
-    var addr6 = in6_addr()
-    switch inet_pton(AF_INET6, address, &addr6) {
-    case 1: return addr6
-    case 0: return nil
-    case -1: throw SocketError()
-    default: preconditionFailure("inet_pton: unexpected return code")
+extension in6_addr {
+    init?(_ address: String) throws {
+        var addr6 = in6_addr()
+        switch inet_pton(AF_INET6, address, &addr6) {
+        case 1: self = addr6
+        case 0: return nil
+        case -1: throw SocketError()
+        default: preconditionFailure("inet_pton: unexpected return code")
+        }
     }
 }
 
@@ -121,19 +125,23 @@ extension sockaddr_in {
         return socklen_t(MemoryLayout<sockaddr_in>.size)
     }
 
-    public init(_ address: String, _ port: UInt16) throws {
-        guard let addr = try presentationToNetwork(ip4: address) else {
-            errno = EINVAL
-            throw SocketError()
-        }
+    public init(_ address: in_addr, _ port: UInt16) throws {
         var sockaddr = sockaddr_in()
     #if os(macOS)
         sockaddr.sin_len = UInt8(MemoryLayout<sockaddr_in>.size)
     #endif
         sockaddr.family = AF_INET
-        sockaddr.sin_addr = addr
+        sockaddr.sin_addr = address
         sockaddr.port = port
         self = sockaddr
+    }
+
+    public init(_ address: String, _ port: UInt16) throws {
+        guard let address = try in_addr(address) else {
+            errno = EINVAL
+            throw SocketError()
+        }
+        try self.init(address, port)
     }
 }
 
@@ -158,19 +166,23 @@ extension sockaddr_in6 {
         return socklen_t(MemoryLayout<sockaddr_in6>.size)
     }
 
-    public init(_ address: String, _ port: UInt16) throws {
-        guard let addr = try presentationToNetwork(ip6: address) else {
-            errno = EINVAL
-            throw SocketError()
-        }
+    public init(_ address: in6_addr, _ port: UInt16) throws {
         var sockaddr = sockaddr_in6()
     #if os(macOS)
         sockaddr.sin6_len = UInt8(MemoryLayout<sockaddr_in6>.size)
     #endif
         sockaddr.family = AF_INET6
-        sockaddr.sin6_addr = addr
+        sockaddr.sin6_addr = address
         sockaddr.port = port
         self = sockaddr
+    }
+
+    public init(_ address: String, _ port: UInt16) throws {
+        guard let address = try in6_addr(address) else {
+            errno = EINVAL
+            throw SocketError()
+        }
+        try self.init(address, port)
     }
 }
 
