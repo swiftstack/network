@@ -111,6 +111,30 @@ class AddressTests: TestCase {
         }
     }
 
+    func testIP4DNSResolve() {
+        do {
+            let address = try Socket.Address("duckduckgo.com", port: 80)
+
+            guard case .ip4(let sockaddr) = address else {
+                fail("invalid address")
+                return
+            }
+
+            let knownAddresses = [
+                "176.34.155.20",
+                "46.51.197.89",
+                "176.34.135.167",
+                "54.229.105.92",
+                "176.34.131.233",
+                "54.229.105.203"
+            ]
+
+            assertTrue(knownAddresses.contains(sockaddr.address))
+        } catch {
+            fail(String(describing: error))
+        }
+    }
+
     func testLocalAddress() {
         let ready = DispatchSemaphore(value: 0)
         let done = DispatchSemaphore(value: 0)
