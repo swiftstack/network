@@ -45,7 +45,7 @@ struct DNS {
         deadline: Date = Date.distantFuture
     ) throws -> [IPAddress] {
         let response = try makeRequest(
-            query: Message(resolve: domain, type: type),
+            query: Message(domain: domain, type: type),
             deadline: deadline)
 
         return response.answer.reduce([IPAddress]()) { result, next in

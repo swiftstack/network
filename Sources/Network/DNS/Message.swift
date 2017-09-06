@@ -15,7 +15,7 @@ struct Message {
     let authority: [ResourceRecord]
     let additional: [ResourceRecord]
 
-    public init(resolve host: String, type: ResourceType) {
+    public init(domain: String, type: ResourceType) {
         self.id = Int(Int16(truncatingIfNeeded: arc4random()))
         self.type = .query
         self.kind = .query
@@ -26,7 +26,7 @@ struct Message {
         self.responseCode = .noError
 
         self.question = [
-            Question(name: host, type: type)
+            Question(name: domain, type: type)
         ]
         self.answer = []
         self.authority = []
