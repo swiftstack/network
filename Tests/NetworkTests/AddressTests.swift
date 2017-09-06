@@ -70,6 +70,8 @@ class AddressTests: TestCase {
 
             assertEqual(address, Socket.Address.unix(sockaddr))
             assertEqual(address.size, socklen_t(MemoryLayout<sockaddr_un>.size))
+
+            assertThrowsError(try Socket.Address(unix: "testunix.com"))
         } catch {
             fail(String(describing: error))
         }

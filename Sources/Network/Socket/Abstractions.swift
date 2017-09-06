@@ -195,6 +195,10 @@ extension sockaddr_un {
     }
 
     public init(_ address: String) throws {
+        guard address.starts(with: "/") else {
+            errno = EINVAL
+            throw SocketError()
+        }
         var bytes = [UInt8](address.utf8)
         var sockaddr = sockaddr_un()
         let size = MemoryLayout.size(ofValue: sockaddr.sun_path)
