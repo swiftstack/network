@@ -2,7 +2,7 @@ import Platform
 import Foundation
 
 struct DNS {
-    static var dns: String = {
+    static var nameserver: String = {
         // FIXME: implement async reader
         let fileManager = FileManager.default
         guard fileManager.isReadableFile(atPath: "/etc/resolv.conf") else {
@@ -28,7 +28,7 @@ struct DNS {
         query: Message,
         deadline: Date = Date.distantFuture
     ) throws -> Message {
-        let server = try! Socket.Address(dns, port: 53)
+        let server = try! Socket.Address(nameserver, port: 53)
         let socket = try Socket(type: .datagram)
 
         _ = try socket.send(bytes: query.bytes, to: server)
