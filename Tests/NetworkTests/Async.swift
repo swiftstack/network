@@ -30,7 +30,7 @@ class TestAsync: Async {
         deadline: Date
     ) throws {
         let event = event == .read ? Int16(POLLIN) : Int16(POLLOUT)
-        var fd = pollfd(fd: descriptor, events: event, revents: 0)
+        var fd = pollfd(fd: descriptor.rawValue, events: event, revents: 0)
         guard poll(&fd, 1, -1) > 0 else {
             throw SystemError()
         }

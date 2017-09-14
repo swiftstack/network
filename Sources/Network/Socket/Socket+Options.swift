@@ -55,14 +55,14 @@ extension Socket {
         }
 
         fileprivate mutating func setValue(_ pointer: UnsafeRawPointer, size: Int, for option: Int32) throws {
-            guard setsockopt(descriptor, SOL_SOCKET, option, pointer, socklen_t(size)) != -1 else {
+            guard setsockopt(descriptor.rawValue, SOL_SOCKET, option, pointer, socklen_t(size)) != -1 else {
                 throw SocketError()
             }
         }
 
         fileprivate func getValue(_ pointer: UnsafeMutableRawPointer, size: inout Int, for option: Int32) throws {
             var actualSize = socklen_t(size)
-            guard getsockopt(descriptor, SOL_SOCKET, option, pointer, &actualSize) != -1 else {
+            guard getsockopt(descriptor.rawValue, SOL_SOCKET, option, pointer, &actualSize) != -1 else {
                 throw SocketError()
             }
             size = Int(actualSize)

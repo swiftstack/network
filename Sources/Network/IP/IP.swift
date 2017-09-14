@@ -39,7 +39,7 @@ struct IPv6 {
         _ fragment6: UInt16,
         _ fragment7: UInt16,
         _ fragment8: UInt16
-        ) {
+    ) {
         self.address = in6_addr(
             (
                 fragment1.byteSwapped,

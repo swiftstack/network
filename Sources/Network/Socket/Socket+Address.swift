@@ -34,14 +34,14 @@ extension Socket {
     public var selfAddress: Address? {
         var storage = sockaddr_storage()
         var size = UInt32(sockaddr_storage.size)
-        getsockname(descriptor, rebounded(&storage), &size)
+        getsockname(descriptor.rawValue, rebounded(&storage), &size)
         return Address(storage)
     }
 
     public var peerAddress: Address? {
         var storage = sockaddr_storage()
         var size = UInt32(sockaddr_storage.size)
-        getpeername(descriptor, rebounded(&storage), &size)
+        getpeername(descriptor.rawValue, rebounded(&storage), &size)
         return Address(storage)
     }
 }
