@@ -22,6 +22,8 @@ let package = Package(
     ],
     targets: [
         .target(name: "Network", dependencies: ["Async", "Stream"]),
-        .testTarget(name: "NetworkTests", dependencies: ["Network", "Test"])
+        .testTarget(
+            name: "NetworkTests",
+            dependencies: ["Network", "AsyncDispatch", "Test"])
     ]
 )
