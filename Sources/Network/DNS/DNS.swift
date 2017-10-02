@@ -4,27 +4,15 @@ import Foundation
 struct DNS {
     static var cache = [String : [IPAddress]]()
 
-    static var nameserver: String = {
-        // FIXME: implement async reader
-        let fileManager = FileManager.default
-        guard fileManager.isReadableFile(atPath: "/etc/resolv.conf") else {
-            fatalError("/etc/resolv.conf not found")
-        }
+    static var nameservers: [String] = [
+        "208.67.220.220",
+        "208.67.222.222"
+    ]
 
-        guard let nameserver = String(
-                data: fileManager.contents(atPath: "/etc/resolv.conf")!,
-                encoding: .utf8)!
-            .components(separatedBy: .newlines)
-            .first(where: { $0.hasPrefix("nameserver") }) else {
-                fatalError("nameserver not found")
-        }
-
-        guard let address = nameserver.components(separatedBy: .whitespaces)
-            .last else {
-                fatalError("invalid nameserver record")
-        }
-        return address
-    }()
+    // TODO: round-robin? till failure?
+    static var nameserver: String {
+        return nameservers.first!
+    }
 
     static func makeRequest(
         query: Message,
