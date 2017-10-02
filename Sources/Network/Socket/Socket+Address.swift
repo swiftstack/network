@@ -141,3 +141,14 @@ extension Socket.Address: Equatable {
         }
     }
 }
+
+extension Socket.Address: CustomStringConvertible {
+    public var description: String {
+        switch self {
+        case .ip4(let address): return address.description
+        case .ip6(let address): return address.description
+        case .unix(let address): return address.address
+        case .unspecified: return "unspecified"
+        }
+    }
+}

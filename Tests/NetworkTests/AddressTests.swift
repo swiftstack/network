@@ -24,6 +24,7 @@ class AddressTests: TestCase {
 
             assertEqual(address, Socket.Address.ip4(sockaddr))
             assertEqual(address.size, socklen_t(MemoryLayout<sockaddr_in>.size))
+            assertEqual(address.description, "127.0.0.1:5000")
         } catch {
             fail(String(describing: error))
         }
@@ -44,6 +45,7 @@ class AddressTests: TestCase {
 
             assertEqual(address, Socket.Address.ip6(sockaddr))
             assertEqual(address.size, socklen_t(MemoryLayout<sockaddr_in6>.size))
+            assertEqual(address.description, "::1:5001")
         } catch {
             fail(String(describing: error))
         }
@@ -69,6 +71,7 @@ class AddressTests: TestCase {
 
             assertEqual(address, Socket.Address.unix(sockaddr))
             assertEqual(address.size, socklen_t(MemoryLayout<sockaddr_un>.size))
+            assertEqual(address.description, "/tmp/testunix")
 
             assertThrowsError(try Socket.Address(unix: "testunix.com"))
         } catch {
