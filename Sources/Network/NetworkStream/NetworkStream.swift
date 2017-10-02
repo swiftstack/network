@@ -1,6 +1,10 @@
 import Stream
 
 public class NetworkStream: Stream {
+    public enum Error: Swift.Error {
+        case closed
+    }
+
     let socket: Socket
 
     public init(socket: Socket) {
@@ -8,10 +12,20 @@ public class NetworkStream: Stream {
     }
 
     public func read(to buffer: UnsafeMutableRawBufferPointer) throws -> Int {
-        return try socket.receive(to: buffer)
+        let read = try socket.receive(to: buffer)
+        guard read > 0 else {
+            throw Error.closed
+        }
+        return read
     }
 
     public func write(_ bytes: UnsafeRawBufferPointer) throws -> Int {
-        return try socket.send(bytes: bytes.baseAddress!, count: bytes.count)
+        let written = try socket.send(
+            bytes: bytes.baseAddress!,
+            count: bytes.count)
+        guard written > 0 else {
+            throw Error.closed
+        }
+        return written
     }
 }
