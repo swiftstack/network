@@ -67,6 +67,18 @@ extension Socket {
     }
 
     public func send(
+        bytes: ArraySlice<UInt8>,
+        deadline: Date = Date.distantFuture
+    ) throws -> Int {
+        return try bytes.withUnsafeBufferPointer { buffer in
+            return try send(
+                bytes: buffer.baseAddress!,
+                count: buffer.count,
+                deadline: deadline)
+        }
+    }
+
+    public func send(
         bytes: [UInt8],
         to address: Address,
         deadline: Date = Date.distantFuture
@@ -78,6 +90,20 @@ extension Socket {
             deadline: deadline)
     }
 
+    public func send(
+        bytes: ArraySlice<UInt8>,
+        to address: Address,
+        deadline: Date = Date.distantFuture
+    ) throws -> Int {
+        return try bytes.withUnsafeBufferPointer { buffer in
+            return try send(
+                bytes: buffer.baseAddress!,
+                count: buffer.count,
+                to: address,
+                deadline: deadline)
+        }
+    }
+
     public func receive(
         to buffer: inout [UInt8],
         deadline: Date = Date.distantFuture
@@ -86,6 +112,18 @@ extension Socket {
             to: &buffer,
             count: buffer.count,
             deadline: deadline)
+    }
+
+    public func receive(
+        to buffer: inout ArraySlice<UInt8>,
+        deadline: Date = Date.distantFuture
+    ) throws -> Int {
+        return try buffer.withUnsafeMutableBufferPointer { buffer in
+            return try receive(
+                to: buffer.baseAddress!,
+                count: buffer.count,
+                deadline: deadline)
+        }
     }
 
     public func receive(
@@ -98,6 +136,20 @@ extension Socket {
             count: buffer.count,
             from: &address,
             deadline: deadline)
+    }
+
+    public func receive(
+        to buffer: inout ArraySlice<UInt8>,
+        from address: inout Address?,
+        deadline: Date = Date.distantFuture
+    ) throws -> Int {
+        return try buffer.withUnsafeMutableBufferPointer { buffer in
+            return try receive(
+                to: buffer.baseAddress!,
+                count: buffer.count,
+                from: &address,
+                deadline: deadline)
+        }
     }
 
     public func receive(
