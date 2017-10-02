@@ -61,7 +61,7 @@ class OptionsTests: TestCase {
 
     func testConfigureReusePort() {
         do {
-            let socket = try Socket().configure(reusePort: true)
+            let socket = try Socket().configure { $0.reusePort = true }
 
             assertTrue(socket.options.reuseAddr)
             assertTrue(socket.options.reusePort)
