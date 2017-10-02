@@ -42,6 +42,15 @@ extension Socket {
         }
     #endif
 
+        public var broadcast: Bool {
+            get {
+                return try! getValue(for: SO_BROADCAST)
+            }
+            set {
+                try! setValue(true, for: SO_BROADCAST)
+            }
+        }
+
         fileprivate mutating func setValue(_ value: Bool, for option: Int32) throws {
             var value: Int32 = value ? 1 : 0
             try setValue(&value, size: MemoryLayout<Int32>.size, for: option)

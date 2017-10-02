@@ -69,4 +69,14 @@ class OptionsTests: TestCase {
             fail(String(describing: error))
         }
     }
+
+    func testConfigureBroadcast() {
+        do {
+            let socket = try Socket().configure { $0.broadcast = true }
+
+            assertTrue(socket.options.broadcast)
+        } catch {
+            fail(String(describing: error))
+        }
+    }
 }
