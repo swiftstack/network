@@ -20,9 +20,7 @@ public class NetworkStream: Stream {
     }
 
     public func write(_ bytes: UnsafeRawBufferPointer) throws -> Int {
-        let written = try socket.send(
-            bytes: bytes.baseAddress!,
-            count: bytes.count)
+        let written = try socket.send(bytes: bytes)
         guard written > 0 else {
             throw Error.closed
         }
