@@ -33,6 +33,25 @@ extension Socket.SocketType {
     }
 }
 
+extension Socket.Option {
+    var rawValue: Int32 {
+        #if os(macOS)
+            switch self {
+            case .reuseAddr: return SO_REUSEADDR
+            case .reusePort: return SO_REUSEPORT
+            case .noSignalPipe: return SO_NOSIGPIPE
+            case .broadcast: return SO_BROADCAST
+            }
+        #else
+            switch self {
+            case .reuseAddr: return SO_REUSEADDR
+            case .reusePort: return SO_REUSEPORT
+            case .broadcast: return SO_BROADCAST
+            }
+        #endif
+    }
+}
+
 // MARK: convert
 
 func rebounded<T>(_ pointer: UnsafePointer<T>) -> UnsafePointer<sockaddr> {

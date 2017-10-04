@@ -12,6 +12,13 @@ public final class Socket {
         case stream, datagram, sequenced, raw
     }
 
+    public enum Option {
+        case reuseAddr, reusePort, broadcast
+        #if os(macOS)
+        case noSignalPipe
+        #endif
+    }
+
     private var backlog: Int32 = 256
 
     public private(set) var descriptor: Descriptor
@@ -52,9 +59,9 @@ public final class Socket {
         self.descriptor = descriptor
         self.options = Options(for: descriptor)
     #if os(macOS)
-        self.options.noSignalPipe = true
+        try options.set(.noSignalPipe, true)
     #endif
-        self.options.reuseAddr = true
+        try options.set(.reuseAddr, true)
         self.nonBlock = true
     }
 
