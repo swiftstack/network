@@ -10,9 +10,12 @@ class AbstractionTests: TestCase {
     }
 
     func testSocketType() {
-        assertEqual(Socket.SocketType.stream.rawValue, SOCK_STREAM)
-        assertEqual(Socket.SocketType.datagram.rawValue, SOCK_DGRAM)
-        assertEqual(Socket.SocketType.sequenced.rawValue, SOCK_SEQPACKET)
-        assertEqual(Socket.SocketType.raw.rawValue, SOCK_RAW)
+        func rawValue(of type: Socket.`Type`) -> Int32 {
+            return type.rawValue
+        }
+        assertEqual(rawValue(of: .stream), SOCK_STREAM)
+        assertEqual(rawValue(of: .datagram), SOCK_DGRAM)
+        assertEqual(rawValue(of: .sequenced), SOCK_SEQPACKET)
+        assertEqual(rawValue(of: .raw), SOCK_RAW)
     }
 }

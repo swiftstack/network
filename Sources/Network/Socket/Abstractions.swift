@@ -22,7 +22,7 @@ extension Socket.Family {
     }
 }
 
-extension Socket.SocketType {
+extension Socket.`Type` {
     var rawValue: Int32 {
         switch self {
         case .stream: return SOCK_STREAM
