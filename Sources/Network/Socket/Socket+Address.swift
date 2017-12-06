@@ -47,8 +47,16 @@ extension Socket {
 }
 
 extension Socket.Address {
-    public init(_ address: String, port: UInt16? = nil) throws {
+    enum Error: String, Swift.Error {
+        case invalidPort = "port should be less than UIn16.max"
+    }
+
+    public init(_ address: String, port: Int? = nil) throws {
         if let port = port {
+            guard port <= UInt16.max else {
+                throw Error.invalidPort
+            }
+
             if let ip4 = try? Socket.Address(ip4: address, port: port) {
                 self = ip4
                 return
@@ -65,7 +73,7 @@ extension Socket.Address {
                 deadline: Date.distantFuture)
 
             if let address = entries.first, case .v4(let ip) = address {
-                self = .ip4(try sockaddr_in(ip.address, port))
+                self = .ip4(try sockaddr_in(ip.address, UInt16(port)))
                 return
             }
         }
@@ -79,11 +87,11 @@ extension Socket.Address {
         throw SocketError()
     }
 
-    public init(ip4 address: String, port: UInt16) throws {
+    public init(ip4 address: String, port: Int) throws {
         self = .ip4(try sockaddr_in(address, port))
     }
 
-    public init(ip6 address: String, port: UInt16) throws {
+    public init(ip6 address: String, port: Int) throws {
         self = .ip6(try sockaddr_in6(address, port))
     }
 

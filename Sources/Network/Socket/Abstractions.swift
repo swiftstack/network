@@ -155,10 +155,11 @@ extension sockaddr_in {
         self = sockaddr
     }
 
-    public init(_ address: String, _ port: UInt16) throws {
-        guard let address = try in_addr(address) else {
-            errno = EINVAL
-            throw SocketError()
+    public init(_ address: String, _ port: Int) throws {
+        guard let address = try in_addr(address),
+            let port = UInt16(exactly: port) else {
+                errno = EINVAL
+                throw SocketError()
         }
         try self.init(address, port)
     }
@@ -196,10 +197,11 @@ extension sockaddr_in6 {
         self = sockaddr
     }
 
-    public init(_ address: String, _ port: UInt16) throws {
-        guard let address = try in6_addr(address) else {
-            errno = EINVAL
-            throw SocketError()
+    public init(_ address: String, _ port: Int) throws {
+        guard let address = try in6_addr(address),
+            let port = UInt16(exactly: port) else {
+                errno = EINVAL
+                throw SocketError()
         }
         try self.init(address, port)
     }

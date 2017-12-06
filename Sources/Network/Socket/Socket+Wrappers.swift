@@ -2,7 +2,7 @@ import Foundation
 
 extension Socket {
     @discardableResult
-    public func bind(to address: String, port: UInt16) throws -> Self {
+    public func bind(to address: String, port: Int) throws -> Self {
         return try bind(to: try Address(address, port: port))
     }
 
@@ -14,7 +14,7 @@ extension Socket {
     @discardableResult
     public func connect(
         to address: String,
-        port: UInt16,
+        port: Int,
         deadline: Date = Date.distantFuture
     ) throws -> Self {
         return try connect(
