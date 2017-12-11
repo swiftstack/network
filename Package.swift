@@ -9,16 +9,16 @@ let package = Package(
     dependencies: [
         .package(
             url: "https://github.com/swift-stack/platform.git",
-            from: "0.4.0"),
+            .branch("master")),
         .package(
             url: "https://github.com/swift-stack/async.git",
-            from: "0.4.0"),
+            .branch("master")),
         .package(
             url: "https://github.com/swift-stack/stream.git",
-            from: "0.4.0"),
+            .branch("master")),
         .package(
             url: "https://github.com/swift-stack/test.git",
-            from: "0.4.0")
+            .branch("master"))
     ],
     targets: [
         .target(name: "Network", dependencies: ["Platform", "Async", "Stream"]),
