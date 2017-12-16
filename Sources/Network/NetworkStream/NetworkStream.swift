@@ -11,16 +11,20 @@ public class NetworkStream: Stream {
         self.socket = socket
     }
 
-    public func read(to buffer: UnsafeMutableRawBufferPointer) throws -> Int {
-        let read = try socket.receive(to: buffer)
+    public func read(
+        to buffer: UnsafeMutableRawPointer, byteCount: Int
+    ) throws -> Int {
+        let read = try socket.receive(to: buffer, count: byteCount)
         guard read > 0 else {
             throw Error.closed
         }
         return read
     }
 
-    public func write(_ bytes: UnsafeRawBufferPointer) throws -> Int {
-        let written = try socket.send(bytes: bytes)
+    public func write(
+        _ bytes: UnsafeRawPointer, byteCount: Int
+    ) throws -> Int {
+        let written = try socket.send(bytes: bytes, count: byteCount)
         guard written > 0 else {
             throw Error.closed
         }
