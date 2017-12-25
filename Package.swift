@@ -11,6 +11,9 @@ let package = Package(
             url: "https://github.com/swift-stack/platform.git",
             .branch("master")),
         .package(
+            url: "https://github.com/swift-stack/log.git",
+            .branch("master")),
+        .package(
             url: "https://github.com/swift-stack/async.git",
             .branch("master")),
         .package(
@@ -21,7 +24,9 @@ let package = Package(
             .branch("master"))
     ],
     targets: [
-        .target(name: "Network", dependencies: ["Platform", "Async", "Stream"]),
+        .target(
+            name: "Network",
+            dependencies: ["Platform", "Async", "Stream", "Log"]),
         .testTarget(
             name: "NetworkTests",
             dependencies: ["Network", "AsyncDispatch", "Test"])
