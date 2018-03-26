@@ -1,28 +1,29 @@
 import Test
 import Dispatch
+import AsyncDispatch
+
+@testable import Async
 @testable import Network
 
 import struct Foundation.Date
 
 class DNSTests: TestCase {
+    override func setUp() {
+        async.setUp(Dispatch.self)
+    }
+
     func testMakeRequest() {
         do {
             let query = Message(domain: "duckduckgo.com", type: .a)
             let response = try DNS.makeRequest(query: query)
 
-            let addresses: [ResourceData] = [
-                .a(IPv4(176,34,155,20)),
-                .a(IPv4(46,51,197,89)),
-                .a(IPv4(176,34,135,167)),
-                .a(IPv4(54,229,105,92)),
-                .a(IPv4(176,34,131,233)),
-                .a(IPv4(54,229,105,203))
-            ]
-
             for answer in response.answer {
                 assertEqual(answer.name, "duckduckgo.com")
                 assertTrue(answer.ttl > 0)
-                assertTrue(addresses.contains(answer.data))
+                switch answer.data {
+                case .a(_): break
+                default: fail()
+                }
             }
 
             let nsServers: [ResourceData] = [
@@ -46,18 +47,11 @@ class DNSTests: TestCase {
     func testResolve() {
         do {
             let response = try DNS.resolve(domain: "duckduckgo.com")
-
-            let addresses: [IPAddress] = [
-                .v4(IPv4(176,34,155,20)),
-                .v4(IPv4(46,51,197,89)),
-                .v4(IPv4(176,34,135,167)),
-                .v4(IPv4(54,229,105,92)),
-                .v4(IPv4(176,34,131,233)),
-                .v4(IPv4(54,229,105,203))
-            ]
-
             for address in response {
-                assertTrue(addresses.contains(address))
+                switch address {
+                case .v4(_): break
+                default: fail()
+                }
             }
         } catch {
             fail(String(describing: error))

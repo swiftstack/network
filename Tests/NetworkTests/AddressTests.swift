@@ -2,11 +2,13 @@ import Test
 import Platform
 import Dispatch
 import AsyncDispatch
+
+@testable import Async
 @testable import Network
 
 class AddressTests: TestCase {
     override func setUp() {
-        AsyncDispatch().registerGlobal()
+        async.setUp(Dispatch.self)
     }
 
     func testIPv4() {
@@ -122,16 +124,8 @@ class AddressTests: TestCase {
                 return
             }
 
-            let knownAddresses = [
-                "176.34.155.20",
-                "46.51.197.89",
-                "176.34.135.167",
-                "54.229.105.92",
-                "176.34.131.233",
-                "54.229.105.203"
-            ]
-
-            assertTrue(knownAddresses.contains(sockaddr.address))
+            let ip = sockaddr.address.description
+            assertEqual(ip.split(separator: ".").count, 4)
         } catch {
             fail(String(describing: error))
         }

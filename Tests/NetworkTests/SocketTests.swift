@@ -2,11 +2,13 @@ import Test
 import Platform
 import Dispatch
 import AsyncDispatch
+
+@testable import Async
 @testable import Network
 
 class SocketTests: TestCase {
     override func setUp() {
-        AsyncDispatch().registerGlobal()
+        async.setUp(Dispatch.self)
     }
 
     func testSocket() {

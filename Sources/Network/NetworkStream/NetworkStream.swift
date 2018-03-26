@@ -22,9 +22,10 @@ public class NetworkStream: Stream {
     }
 
     public func write(
-        _ bytes: UnsafeRawPointer, byteCount: Int
+        from buffer: UnsafeRawPointer,
+        byteCount: Int
     ) throws -> Int {
-        let written = try socket.send(bytes: bytes, count: byteCount)
+        let written = try socket.send(bytes: buffer, count: byteCount)
         guard written > 0 else {
             throw Error.closed
         }

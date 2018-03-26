@@ -2,11 +2,13 @@ import Test
 import Platform
 import Dispatch
 import AsyncDispatch
+
+@testable import Async
 @testable import Network
 
 class NetworkStreamTests: TestCase {
     override func setUp() {
-        AsyncDispatch().registerGlobal()
+        async.setUp(Dispatch.self)
     }
 
     func withSocketPair(_ body: (Socket, Socket) throws -> Void) throws {
@@ -40,12 +42,12 @@ class NetworkStreamTests: TestCase {
                 let serverStream = NetworkStream(socket: server)
                 let clientStream = NetworkStream(socket: client)
 
-                assertEqual(try clientStream.write([0,1,2,3,4]), 5)
+                assertEqual(try clientStream.write(from: [0,1,2,3,4]), 5)
                 var buffer = [UInt8](repeating: 0, count: 5)
                 assertEqual(try serverStream.read(to: &buffer), 5)
                 assertEqual(buffer, [0,1,2,3,4])
 
-                assertEqual(try serverStream.write([0,1,2,3,4]), 5)
+                assertEqual(try serverStream.write(from: [0,1,2,3,4]), 5)
                 buffer = [UInt8](repeating: 0, count: 5)
                 assertEqual(try clientStream.read(to: &buffer), 5)
             }
@@ -61,7 +63,7 @@ class NetworkStreamTests: TestCase {
                 try client.close()
                 var buffer = [UInt8]()
                 assertThrowsError(try networkStream.read(to: &buffer))
-                assertThrowsError(try networkStream.write(buffer))
+                assertThrowsError(try networkStream.write(from: buffer))
             }
         } catch {
             fail(String(describing: error))
