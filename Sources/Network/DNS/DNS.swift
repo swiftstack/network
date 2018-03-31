@@ -1,3 +1,4 @@
+import Time
 import Platform
 import Foundation
 
@@ -16,7 +17,7 @@ struct DNS {
 
     static func makeRequest(
         query: Message,
-        deadline: Date = Date.distantFuture
+        deadline: Time = .distantFuture
     ) throws -> Message {
         let server = try! Socket.Address(nameserver, port: 53)
         let socket = try Socket(type: .datagram)
@@ -32,7 +33,7 @@ struct DNS {
     public static func resolve(
         domain: String,
         type: ResourceType = .a,
-        deadline: Date = Date.distantFuture
+        deadline: Time = .distantFuture
     ) throws -> [IPAddress] {
         // TODO: separate by resource type
         guard cache[domain] == nil else {

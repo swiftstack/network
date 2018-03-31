@@ -1,5 +1,5 @@
+import Time
 import Platform
-import struct Foundation.Date
 
 @_exported import Async
 
@@ -87,7 +87,7 @@ public final class Socket {
         return self
     }
 
-    public func accept(deadline: Date = Date.distantFuture) throws -> Socket {
+    public func accept(deadline: Time = .distantFuture) throws -> Socket {
         let client = try repeatWhileInterrupted {
             try async.wait(for: descriptor, event: .read, deadline: deadline)
             return Int(Platform.accept(descriptor.rawValue, nil, nil))
@@ -101,7 +101,7 @@ public final class Socket {
     @discardableResult
     public func connect(
         to address: Address,
-        deadline: Date = Date.distantFuture
+        deadline: Time = .distantFuture
     ) throws -> Self {
         var copy = address
         do {
@@ -124,7 +124,7 @@ public final class Socket {
     public func send(
         bytes: UnsafeRawPointer,
         count: Int,
-        deadline: Date = Date.distantFuture
+        deadline: Time = .distantFuture
     ) throws -> Int {
         return try repeatWhileInterrupted {
             try async.wait(for: descriptor, event: .write, deadline: deadline)
@@ -135,7 +135,7 @@ public final class Socket {
     public func receive(
         to buffer: UnsafeMutableRawPointer,
         count: Int,
-        deadline: Date = Date.distantFuture
+        deadline: Time = .distantFuture
     ) throws -> Int {
         return try repeatWhileInterrupted {
             try async.wait(for: descriptor, event: .read, deadline: deadline)
@@ -147,7 +147,7 @@ public final class Socket {
         bytes: UnsafeRawPointer,
         count: Int,
         to address: Address,
-        deadline: Date = Date.distantFuture
+        deadline: Time = .distantFuture
     ) throws -> Int {
         var copy = address
         return try repeatWhileInterrupted {
@@ -166,7 +166,7 @@ public final class Socket {
         to buffer: UnsafeMutableRawPointer,
         count: Int,
         from address: inout Address?,
-        deadline: Date = Date.distantFuture
+        deadline: Time = .distantFuture
     ) throws -> Int {
         var storage = sockaddr_storage()
         var size = sockaddr_storage.size

@@ -1,5 +1,4 @@
 import Platform
-import struct Foundation.Date
 
 extension Socket {
     public enum Address {
@@ -70,7 +69,7 @@ extension Socket.Address {
             let entries = try DNS.resolve(
                 domain: address,
                 type: .a,
-                deadline: Date.distantFuture)
+                deadline: .distantFuture)
 
             if let address = entries.first, case .v4(let ip) = address {
                 self = .ip4(try sockaddr_in(ip.address, UInt16(port)))

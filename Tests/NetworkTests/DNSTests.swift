@@ -5,8 +5,6 @@ import AsyncDispatch
 @testable import Async
 @testable import Network
 
-import struct Foundation.Date
-
 class DNSTests: TestCase {
     override func setUp() {
         async.setUp(Dispatch.self)
