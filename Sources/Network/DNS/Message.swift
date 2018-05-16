@@ -16,7 +16,7 @@ struct Message {
     let additional: [ResourceRecord]
 
     public init(domain: String, type: ResourceType) {
-        self.id = Int(Int16(truncatingIfNeeded: arc4random()))
+        self.id = Int(Int16.random(in: 0...Int16.max))
         self.type = .query
         self.kind = .query
         self.isAuthoritative = false
