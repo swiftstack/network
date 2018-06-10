@@ -131,8 +131,8 @@ extension sockaddr_in {
     }
 
     var port: UInt16 {
-        get { return self.sin_port.byteSwapped }
-        set { self.sin_port = in_port_t(newValue).byteSwapped }
+        get { return self.sin_port.bigEndian }
+        set { self.sin_port = in_port_t(newValue).bigEndian }
     }
 
     var family: Int32 {
@@ -173,8 +173,8 @@ extension sockaddr_in6 {
     }
 
     var port: UInt16 {
-        get { return self.sin6_port.byteSwapped }
-        set { self.sin6_port = in_port_t(newValue).byteSwapped }
+        get { return self.sin6_port.bigEndian }
+        set { self.sin6_port = in_port_t(newValue).bigEndian }
     }
 
     var family: Int32 {

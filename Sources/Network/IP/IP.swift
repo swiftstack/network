@@ -42,14 +42,14 @@ struct IPv6 {
     ) {
         self.address = in6_addr(
             (
-                fragment1.byteSwapped,
-                fragment2.byteSwapped,
-                fragment3.byteSwapped,
-                fragment4.byteSwapped,
-                fragment5.byteSwapped,
-                fragment6.byteSwapped,
-                fragment7.byteSwapped,
-                fragment8.byteSwapped
+                fragment1.bigEndian,
+                fragment2.bigEndian,
+                fragment3.bigEndian,
+                fragment4.bigEndian,
+                fragment5.bigEndian,
+                fragment6.bigEndian,
+                fragment7.bigEndian,
+                fragment8.bigEndian
             )
         )
     }
