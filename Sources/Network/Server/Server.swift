@@ -53,8 +53,6 @@ public class Server {
             /* connection reset by peer */
             /* do nothing, it's fine. */
         case let error as SocketError where error.number == ECONNRESET: break
-            /* connection closed */
-        case let error as NetworkStream.Error where error == .closed: break
             /* log other errors */
         default: log(event: .error, message: String(describing: error))
         }
