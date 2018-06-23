@@ -1,6 +1,10 @@
+import Stream
+
 public class Client {
     public let host: String
     public let port: Int
+
+    public var bufferSize = 4096
 
     public private(set) var socket: Socket?
 
@@ -13,20 +17,25 @@ public class Client {
         self.port = port
     }
 
-    public func connect() throws -> Socket {
-        if let socket = self.socket {
-            return socket
+    public enum Error: Swift.Error {
+        case alreadyConnected
+    }
+
+    public func connect() throws -> BufferedStream<NetworkStream> {
+        guard !isConnected else {
+            throw Error.alreadyConnected
         }
+
         let socket = try Socket()
         try socket.connect(to: host, port: port)
         self.socket = socket
-        return socket
+        return BufferedStream(baseStream: NetworkStream(socket: socket))
     }
 
     public func disconnect() throws {
         if let socket = self.socket {
-            self.socket = nil
             try socket.close()
+            self.socket = nil
         }
     }
 }
