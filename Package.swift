@@ -24,7 +24,10 @@ let package = Package(
             .branch("master")),
         .package(
             url: "https://github.com/swift-stack/test.git",
-            .branch("master"))
+            .branch("master")),
+        .package(
+            url: "https://github.com/swift-stack/file.git",
+            .branch("master")),
     ],
     targets: [
         .target(
@@ -32,6 +35,6 @@ let package = Package(
             dependencies: ["Platform", "Time", "Async", "Stream", "Log"]),
         .testTarget(
             name: "NetworkTests",
-            dependencies: ["Network", "AsyncDispatch", "Test"])
+            dependencies: ["Network", "Test", "Fiber", "File"])
     ]
 )
