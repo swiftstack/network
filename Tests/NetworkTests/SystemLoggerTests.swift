@@ -8,7 +8,7 @@ import Platform
 @testable import Network
 
 class SystemLoggerTests: TestCase {
-    var temp = Path(string: "/tmp/SystemLoggerTests")
+    var temp = Path("/tmp/SystemLoggerTests")
 
     var isEnabled: Bool! = nil
     var level: Log.Message.Level! = nil
