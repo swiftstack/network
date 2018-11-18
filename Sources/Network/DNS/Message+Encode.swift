@@ -36,7 +36,7 @@ extension Message {
         buffer.append(0)
 
         for questionRecord in question {
-            for part in questionRecord.name.components(separatedBy: ".") {
+            for part in questionRecord.name.split(separator: ".") {
                 buffer.append(UInt8(truncatingIfNeeded: part.utf8.count))
                 buffer.append(contentsOf: [UInt8](part.utf8))
             }

@@ -1,6 +1,5 @@
 import Time
 import Platform
-import Foundation
 
 struct DNS {
     static var cache = [String : [IPAddress]]()
