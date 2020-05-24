@@ -45,7 +45,7 @@ public class Server {
 
     func handleClient (_ socket: Socket) {
         try? socket.close()
-        log(level: .warning, message: "unhandled client")
+        Log.warning("unhandled client")
     }
 
     func handleError (_ error: Error) {
@@ -54,7 +54,7 @@ public class Server {
             /* do nothing, it's fine. */
         case let error as SocketError where error.number == ECONNRESET: break
             /* log other errors */
-        default: log(level: .error, message: String(describing: error))
+        default: Log.error(String(describing: error))
         }
     }
 }
