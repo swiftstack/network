@@ -4,30 +4,19 @@ import PackageDescription
 let package = Package(
     name: "Network",
     products: [
-        .library(name: "Network", targets: ["Network"])
+        .library(
+            name: "Network",
+            targets: ["Network"]),
     ],
     dependencies: [
-        .package(
-            url: "https://github.com/swift-stack/platform.git",
-            .branch("master")),
-        .package(
-            url: "https://github.com/swift-stack/time.git",
-            .branch("master")),
-        .package(
-            url: "https://github.com/swift-stack/log.git",
-            .branch("master")),
-        .package(
-            url: "https://github.com/swift-stack/async.git",
-            .branch("master")),
-        .package(
-            url: "https://github.com/swift-stack/stream.git",
-            .branch("master")),
-        .package(
-            url: "https://github.com/swift-stack/test.git",
-            .branch("master")),
-        .package(
-            url: "https://github.com/swift-stack/file.git",
-            .branch("master")),
+        .package(name: "Platform"),
+        .package(name: "Time"),
+        .package(name: "Log"),
+        .package(name: "Async"),
+        .package(name: "Stream"),
+        .package(name: "Test"),
+        .package(name: "File"),
+        .package(name: "Fiber"),
     ],
     targets: [
         .target(
@@ -35,6 +24,52 @@ let package = Package(
             dependencies: ["Platform", "Time", "Async", "Stream", "Log"]),
         .testTarget(
             name: "NetworkTests",
-            dependencies: ["Network", "Test", "Fiber", "File"])
+            dependencies: ["Test", "Network", "File", "Fiber"])
     ]
 )
+
+// MARK: - custom package source
+
+#if canImport(ObjectiveC)
+import Darwin.C
+#else
+import Glibc
+#endif
+
+extension Package.Dependency {
+    enum Source: String {
+        case local, remote, github
+
+        static var `default`: Self { .local }
+
+        var baseUrl: String {
+            switch self {
+            case .local: return "../"
+            case .remote: return "https://swiftstack.io/"
+            case .github: return "https://github.com/swift-stack/"
+            }
+        }
+
+        func url(for name: String) -> String {
+            return self == .local
+                ? baseUrl + name.lowercased()
+                : baseUrl + name.lowercased() + ".git"
+        }
+    }
+
+    static func package(name: String) -> Package.Dependency {
+        guard let pointer = getenv("SWIFTSTACK") else {
+            return .package(name: name, source: .default)
+        }
+        guard let source = Source(rawValue: String(cString: pointer)) else {
+            fatalError("Invalid source. Use local, remote or github")
+        }
+        return .package(name: name, source: source)
+    }
+
+    static func package(name: String, source: Source) -> Package.Dependency {
+        return source == .local
+            ? .package(name: name, path: source.url(for: name))
+            : .package(name: name, url: source.url(for: name), .branch("dev"))
+    }
+}
