@@ -32,12 +32,12 @@ class SocketTests: TestCase {
                     .connect(to: "127.0.0.1", port: 3000)
 
                 let written = try socket.send(bytes: message)
-                assertEqual(written, message.count)
+                expect(written == message.count)
 
                 var response = [UInt8](repeating: 0, count: message.count)
                 let read = try socket.receive(to: &response)
-                assertEqual(read, message.count)
-                assertEqual(response, message)
+                expect(read == message.count)
+                expect(response == message)
             }
         }
 
@@ -67,12 +67,12 @@ class SocketTests: TestCase {
                     .connect(to: "127.0.0.1", port: 3001)
 
                 let written = try socket.send(bytes: message)
-                assertEqual(written, message.count)
+                expect(written == message.count)
 
                 var response = [UInt8](repeating: 0, count: message.count)
                 let read = try socket.receive(to: &response)
-                assertEqual(read, message.count)
-                assertEqual(response, message)
+                expect(read == message.count)
+                expect(response == message)
             }
         }
 
@@ -101,14 +101,14 @@ class SocketTests: TestCase {
                 let socket = try Socket(family: .inet, type: .datagram)
 
                 let written = try socket.send(bytes: message, to: server)
-                assertEqual(written, message.count)
+                expect(written == message.count)
 
                 var sender: Socket.Address? = nil
                 var buffer = [UInt8](repeating: 0, count: message.count)
                 let read = try socket.receive(to: &buffer, from: &sender)
-                assertEqual(sender, server)
-                assertEqual(read, message.count)
-                assertEqual(buffer, message)
+                expect(sender == server)
+                expect(read == message.count)
+                expect(buffer == message)
             }
         }
 
@@ -137,12 +137,12 @@ class SocketTests: TestCase {
                     .connect(to: "::1", port: 3003)
 
                 let written = try socket.send(bytes: message)
-                assertEqual(written, message.count)
+                expect(written == message.count)
 
                 var response = [UInt8](repeating: 0, count: message.count)
                 let read = try socket.receive(to: &response)
-                assertEqual(read, message.count)
-                assertEqual(response, message)
+                expect(read == message.count)
+                expect(response == message)
             }
         }
 
@@ -171,14 +171,14 @@ class SocketTests: TestCase {
                 let socket = try Socket(family: .inet6, type: .datagram)
 
                 let written = try socket.send(bytes: message, to: server)
-                assertEqual(written, message.count)
+                expect(written == message.count)
 
                 var sender: Socket.Address? = nil
                 var buffer = [UInt8](repeating: 0, count: message.count)
                 let read = try socket.receive(to: &buffer, from: &sender)
-                assertEqual(sender, server)
-                assertEqual(read, message.count)
-                assertEqual(buffer, message)
+                expect(sender == server)
+                expect(read == message.count)
+                expect(buffer == message)
             }
         }
 
@@ -208,12 +208,12 @@ class SocketTests: TestCase {
                     .connect(to: "/tmp/teststream.sock")
 
                 let written = try socket.send(bytes: message)
-                assertEqual(written, message.count)
+                expect(written == message.count)
 
                 var response = [UInt8](repeating: 0, count: message.count)
                 let read = try socket.receive(to: &response)
-                assertEqual(read, message.count)
-                assertEqual(response, message)
+                expect(read == message.count)
+                expect(response == message)
             }
         }
 
@@ -246,14 +246,14 @@ class SocketTests: TestCase {
                     .bind(to: client)
 
                 let written = try socket.send(bytes: message, to: server)
-                assertEqual(written, message.count)
+                expect(written == message.count)
 
                 var sender: Socket.Address? = nil
                 var buffer = [UInt8](repeating: 0, count: message.count)
                 let read = try socket.receive(to: &buffer, from: &sender)
-                assertEqual(sender, server)
-                assertEqual(read, message.count)
-                assertEqual(buffer, message)
+                expect(sender == server)
+                expect(read == message.count)
+                expect(buffer == message)
             }
         }
 
@@ -284,12 +284,12 @@ class SocketTests: TestCase {
                     .connect(to: "/tmp/testsequenced.sock")
 
                 let written = try socket.send(bytes: message)
-                assertEqual(written, message.count)
+                expect(written == message.count)
 
                 var response = [UInt8](repeating: 0, count: message.count)
                 let read = try socket.receive(to: &response)
-                assertEqual(read, message.count)
-                assertEqual(response, message)
+                expect(read == message.count)
+                expect(response == message)
             }
         }
 

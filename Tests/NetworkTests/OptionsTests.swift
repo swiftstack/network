@@ -10,57 +10,47 @@ class OptionsTests: TestCase {
         async.setUp(Fiber.self)
     }
 
-    func testReuseAddr() {
-        scope {
-            let socket = try Socket()
-            assertTrue(try socket.options.get(.reuseAddr))
-        }
+    func testReuseAddr() throws {
+        let socket = try Socket()
+        expect(try socket.options.get(.reuseAddr) == true)
     }
 
-    func testReuseAddrUnix() {
+    func testReuseAddrUnix() throws {
         unlink("/tmp/unix1")
-        scope {
-            assertNoThrow(try Socket(family: .local).bind(to: "/tmp/unix1"))
-            assertThrowsError(try Socket(family: .local).bind(to: "/tmp/unix1"))
+        try Socket(family: .local).bind(to: "/tmp/unix1")
+        do {
+            try Socket(family: .local).bind(to: "/tmp/unix1")
+        } catch {
+            print(error)
         }
     }
 
-    func testReusePort() {
-        scope {
-            let socket = try Socket()
-            assertFalse(try socket.options.get(.reusePort))
-            assertNoThrow(try socket.options.set(.reusePort, true))
-            assertTrue(try socket.options.get(.reusePort))
-        }
+    func testReusePort() throws {
+        let socket = try Socket()
+        expect(try socket.options.get(.reusePort) == false)
+        try socket.options.set(.reusePort, true)
+        expect(try socket.options.get(.reusePort) == true)
     }
 
-    func testNoSignalPipe() {
-        scope{
-            let socket = try Socket()
-            #if os(macOS)
-            assertTrue(try socket.options.get(.noSignalPipe))
-            #endif
-        }
+    func testNoSignalPipe() throws {
+        let socket = try Socket()
+        #if os(macOS)
+        expect(try socket.options.get(.noSignalPipe) == true)
+        #endif
     }
 
-    func testConfigureReusePort() {
-        scope {
-            let socket = try Socket().configure { options in
-                try options.set(.reusePort, true)
-            }
-
-            assertTrue(try socket.options.get(.reuseAddr))
-            assertTrue(try socket.options.get(.reusePort))
+    func testConfigureReusePort() throws {
+        let socket = try Socket().configure { options in
+            try options.set(.reusePort, true)
         }
+        expect(try socket.options.get(.reuseAddr) == true)
+        expect(try socket.options.get(.reusePort) == true)
     }
 
-    func testConfigureBroadcast() {
-        scope {
-            let socket = try Socket().configure { options in
-                try options.set(.broadcast, true)
-            }
-
-            assertTrue(try socket.options.get(.broadcast))
+    func testConfigureBroadcast() throws {
+        let socket = try Socket().configure { options in
+            try options.set(.broadcast, true)
         }
+        expect(try socket.options.get(.broadcast) == true)
     }
 }

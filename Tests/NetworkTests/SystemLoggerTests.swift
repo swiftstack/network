@@ -42,7 +42,7 @@ class SystemLoggerTests: TestCase {
                 let socket = try Socket(family: .local, type: .datagram)
                 try socket.bind(to: unixPath)
                 let result = try socket.read(max: 100, as: String.self)
-                assertEqual(result, "[info] \(message)")
+                expect(result == "[info] \(message)")
 
                 // FIXME: Fiber itself uses Log outside of a fiber
                 Log.use(Log.Terminal.shared)

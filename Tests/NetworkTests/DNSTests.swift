@@ -16,8 +16,8 @@ class DNSTests: TestCase {
                 let response = try DNS.makeRequest(query: query)
 
                 for answer in response.answer {
-                    assertEqual(answer.name, "duckduckgo.com")
-                    assertTrue(answer.ttl > 0)
+                    expect(answer.name == "duckduckgo.com")
+                    expect(answer.ttl > 0)
                     switch answer.data {
                     case .a(_): break
                     default: fail()
@@ -33,9 +33,9 @@ class DNSTests: TestCase {
                 ]
 
                 for answer in response.authority {
-                    assertEqual(answer.name, "duckduckgo.com")
-                    assertTrue(answer.ttl > 0)
-                    assertTrue(nsServers.contains(answer.data))
+                    expect(answer.name == "duckduckgo.com")
+                    expect(answer.ttl > 0)
+                    expect(nsServers.contains(answer.data))
                 }
             }
         }
