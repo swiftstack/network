@@ -15,7 +15,7 @@ let package = Package(
         .package(name: "Async"),
         .package(name: "Stream"),
         .package(name: "Test"),
-        .package(name: "File"),
+        .package(name: "FileSystem"),
         .package(name: "Fiber"),
     ],
     targets: [
@@ -24,7 +24,7 @@ let package = Package(
             dependencies: ["Platform", "Time", "Async", "Stream", "Log"]),
         .testTarget(
             name: "NetworkTests",
-            dependencies: ["Test", "Network", "File", "Fiber"])
+            dependencies: ["Test", "Network", "FileSystem", "Fiber"])
     ]
 )
 

@@ -1,5 +1,5 @@
 import Test
-import File
+import FileSystem
 import Stream
 import Fiber
 import Platform
