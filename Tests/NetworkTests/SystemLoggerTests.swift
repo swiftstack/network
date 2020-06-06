@@ -1,14 +1,14 @@
 import Test
-import FileSystem
-import Stream
 import Fiber
+import Stream
 import Platform
+import FileSystem
 @testable import Log
 @testable import Async
 @testable import Network
 
 class SystemLoggerTests: TestCase {
-    var temp = Path("/tmp/SystemLoggerTests")
+    var temp: Path = try! .init("/tmp/SystemLoggerTests")
 
     var isEnabled: Bool! = nil
     var level: Log.Message.Level! = nil
@@ -31,8 +31,8 @@ class SystemLoggerTests: TestCase {
         Log.delegate = delegate
     }
 
-    func testSystemLogger() {
-        let unixPath = self.temp.appending(#function).string
+    func testSystemLogger() throws {
+        let unixPath = try temp.appending(#function).string
         let message = "message"
 
         unlink(unixPath)
