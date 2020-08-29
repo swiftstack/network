@@ -5,6 +5,9 @@ let package = Package(
     name: "Network",
     products: [
         .library(
+            name: "Async",
+            targets: ["Async"]),
+        .library(
             name: "Network",
             targets: ["Network"]),
     ],
@@ -12,13 +15,15 @@ let package = Package(
         .package(name: "Platform"),
         .package(name: "Time"),
         .package(name: "Log"),
-        .package(name: "Async"),
         .package(name: "Stream"),
         .package(name: "Test"),
         .package(name: "FileSystem"),
         .package(name: "Fiber"),
     ],
     targets: [
+        .target(
+            name: "Async",
+            dependencies: ["Platform", "Fiber", "Time"]),
         .target(
             name: "Network",
             dependencies: ["Platform", "Time", "Async", "Stream", "Log"]),

@@ -1,16 +1,11 @@
 import Test
-import Fiber
+import Async
 
-@testable import Async
 @testable import Network
 
 class DNSTests: TestCase {
-    override func setUp() {
-        async.setUp(Fiber.self)
-    }
-
     func testMakeRequest() {
-        async.task {
+        async {
             scope {
                 let query = Message(domain: "duckduckgo.com", type: .a)
                 let response = try DNS.makeRequest(query: query)
@@ -39,11 +34,11 @@ class DNSTests: TestCase {
                 }
             }
         }
-        async.loop.run()
+        loop.run()
     }
 
     func testResolve() {
-        async.task {
+        async {
             scope {
                 let response = try DNS.resolve(domain: "duckduckgo.com")
                 for address in response {
@@ -54,17 +49,17 @@ class DNSTests: TestCase {
                 }
             }
         }
-        async.loop.run()
+        loop.run()
     }
 
     func testPerformance() {
         let query = Message(domain: "duckduckgo.com", type: .a)
 
-        async.task {
+        async {
             self.measure {
                 _ = try? DNS.makeRequest(query: query)
             }
         }
-        async.loop.run()
+        loop.run()
     }
 }

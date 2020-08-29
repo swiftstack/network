@@ -23,16 +23,15 @@ let socket = try Socket()
 
 ### Async
 ```swift
-import Fiber
+import Async
+import Network
 
-async.use(Fiber.self)
-
-async.main {
+async {
     let socket = try Socket()
     // use non-blocking api
 }
 
-async.loop.run()
+loop.run()
 ```
 
 ```swift
@@ -42,7 +41,7 @@ let empty = [UInt8](repeating: 0, count: hello.count + 1)
 
 ### TCP
 ```swift
-async.main {
+async {
     let socket = try Socket()
         .bind(to: "127.0.0.1", port: 1111)
         .listen()
@@ -51,7 +50,7 @@ async.main {
     _ = try client.send(bytes: hello)
 }
 
-async.main {
+async {
     let socket = try Socket()
         .connect(to: "127.0.0.1", port: 1111)
 
@@ -64,7 +63,7 @@ async.main {
 ```swift
 let udpServerAddress = try Socket.Address("127.0.0.1", port: 2222)
 
-async.main {
+async {
     let socket = try Socket(type: .datagram)
         .bind(to: udpServerAddress)
 
@@ -74,7 +73,7 @@ async.main {
     _ = try socket.send(bytes: hello, to: client!)
 }
 
-async.main {
+async {
     let socket = try Socket(type: .datagram)
 
     var buffer = empty
@@ -85,7 +84,7 @@ async.main {
 
 ### TCP IPv6
 ```swift
-async.main {
+async {
     let socket = try Socket(family: .inet6)
         .bind(to: "::1", port: 3333)
         .listen()
@@ -94,7 +93,7 @@ async.main {
     _ = try client.send(bytes: hello)
 }
 
-async.main {
+async {
     let socket = try Socket(family: .inet6)
         .connect(to: "::1", port: 3333)
 
@@ -113,7 +112,7 @@ let type: Socket.SocketType = .stream
 
 unlink("/tmp/socketexample.sock")
 
-async.main {
+async {
     let socket = try Socket(family: .unix, type: type)
         .bind(to: "/tmp/socketexample.sock")
         .listen()
@@ -122,7 +121,7 @@ async.main {
     _ = try client.send(bytes: hello)
 }
 
-async.main {
+async {
     let socket = try Socket(family: .unix, type: type)
         .connect(to: "/tmp/socketexample.sock")
 

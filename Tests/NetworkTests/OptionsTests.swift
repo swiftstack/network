@@ -1,15 +1,9 @@
 import Test
-import Fiber
 import Platform
 
-@testable import Async
 @testable import Network
 
 class OptionsTests: TestCase {
-    override func setUp() {
-        async.setUp(Fiber.self)
-    }
-
     func testReuseAddr() throws {
         let socket = try Socket()
         expect(try socket.options.get(.reuseAddr) == true)

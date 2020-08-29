@@ -89,7 +89,7 @@ public final class Socket {
 
     public func accept(deadline: Time = .distantFuture) throws -> Socket {
         let client = try repeatWhileInterrupted {
-            try async.wait(for: descriptor, event: .read, deadline: deadline)
+            try await(for: descriptor, event: .read, deadline: deadline)
             return Int(Platform.accept(descriptor.rawValue, nil, nil))
         }
         guard let descriptor = Descriptor(rawValue: Int32(client)) else {
@@ -110,7 +110,7 @@ public final class Socket {
                     descriptor.rawValue, rebounded(&copy), address.size))
             }
         } catch let error as SocketError where error.number == EINPROGRESS {
-            try async.wait(for: descriptor, event: .write, deadline: deadline)
+            try await(for: descriptor, event: .write, deadline: deadline)
         }
         return self
     }
@@ -127,7 +127,7 @@ public final class Socket {
         deadline: Time = .distantFuture
     ) throws -> Int {
         return try repeatWhileInterrupted {
-            try async.wait(for: descriptor, event: .write, deadline: deadline)
+            try await(for: descriptor, event: .write, deadline: deadline)
             return Platform.send(descriptor.rawValue, bytes, count, noSignal)
         }
     }
@@ -138,7 +138,7 @@ public final class Socket {
         deadline: Time = .distantFuture
     ) throws -> Int {
         return try repeatWhileInterrupted {
-            try async.wait(for: descriptor, event: .read, deadline: deadline)
+            try await(for: descriptor, event: .read, deadline: deadline)
             return Platform.recv(descriptor.rawValue, buffer, count, 0)
         }
     }
@@ -151,7 +151,7 @@ public final class Socket {
     ) throws -> Int {
         var copy = address
         return try repeatWhileInterrupted {
-            try async.wait(for: descriptor, event: .write, deadline: deadline)
+            try await(for: descriptor, event: .write, deadline: deadline)
             return Platform.sendto(
                 descriptor.rawValue,
                 bytes,
@@ -171,7 +171,7 @@ public final class Socket {
         var storage = sockaddr_storage()
         var size = sockaddr_storage.size
         let received = try repeatWhileInterrupted {
-            try async.wait(for: descriptor, event: .read, deadline: deadline)
+            try await(for: descriptor, event: .read, deadline: deadline)
             return Platform.recvfrom(
                 descriptor.rawValue,
                 buffer,

@@ -1,10 +1,9 @@
 import Test
-import Fiber
+import Async
 import Stream
 import Platform
 import FileSystem
 @testable import Log
-@testable import Async
 @testable import Network
 
 class SystemLoggerTests: TestCase {
@@ -15,7 +14,6 @@ class SystemLoggerTests: TestCase {
     var delegate: LogProtocol! = nil
 
     override func setUp() {
-        async.setUp(Fiber.self)
         try? Directory.create(at: temp)
 
         isEnabled = Log.isEnabled
@@ -37,7 +35,7 @@ class SystemLoggerTests: TestCase {
 
         unlink(unixPath)
 
-        async.task {
+        async {
             scope {
                 let socket = try Socket(family: .local, type: .datagram)
                 try socket.bind(to: unixPath)
@@ -46,18 +44,18 @@ class SystemLoggerTests: TestCase {
 
                 // FIXME: Fiber itself uses Log outside of a fiber
                 Log.use(Log.Terminal.shared)
-                async.loop.terminate()
+                loop.terminate()
             }
         }
 
-        async.task {
+        async {
             scope {
                 Log.use(try SystemLogger(unixPath: unixPath))
                 Log.info(message)
             }
         }
 
-        async.loop.run()
+        loop.run()
     }
 }
 

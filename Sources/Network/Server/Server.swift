@@ -34,7 +34,7 @@ public class Server {
         while true {
             do {
                 let client = try self.socket.accept()
-                async.task { [unowned self] in
+                async { [unowned self] in
                     self.onClient(client)
                 }
             } catch {

@@ -1,18 +1,13 @@
 import Test
 import Time
-import Fiber
+import Async
 import Platform
 
-@testable import Async
 @testable import Network
 
 class NetworkStreamTests: TestCase {
-    override func setUp() {
-        async.setUp(Fiber.self)
-    }
-
     func testNetworkStream() {
-        async.task {
+        async {
             scope {
                 let listener = try Socket()
                     .bind(to: "127.0.0.1", port: 7000)
@@ -29,7 +24,7 @@ class NetworkStreamTests: TestCase {
                 expect(try serverStream.write(from: [0,1,2,3,4]) == 5)
             }
         }
-        async.task {
+        async {
             scope {
                 let client = try Socket().connect(to: "127.0.0.1", port: 7000)
                 let clientStream = NetworkStream(socket: client)
@@ -39,12 +34,12 @@ class NetworkStreamTests: TestCase {
                 expect(try clientStream.read(to: &buffer) == 5)
             }
         }
-        async.loop.run()
+        loop.run()
     }
 
     func testNetworkStreamError() {
         #if os(macOS)
-        async.task {
+        async {
             scope {
                 let listener = try Socket()
                     .bind(to: "127.0.0.1", port: 7001)
@@ -54,7 +49,7 @@ class NetworkStreamTests: TestCase {
             }
         }
 
-        async.task {
+        async {
             scope {
                 let client = try Socket().connect(to: "127.0.0.1", port: 7001)
                 let clientStream = NetworkStream(socket: client)
@@ -71,7 +66,7 @@ class NetworkStreamTests: TestCase {
             }
         }
 
-        async.loop.run()
+        loop.run()
         #endif
     }
 }

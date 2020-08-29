@@ -1,16 +1,11 @@
 import Test
-import Fiber
+import Async
 import Platform
 import Dispatch
 
-@testable import Async
 @testable import Network
 
 class AddressTests: TestCase {
-    override func setUp() {
-        async.setUp(Fiber.self)
-    }
-
     func testIPv4() throws {
         let address = try Socket.Address(ip4: "127.0.0.1", port: 5000)
 
@@ -89,7 +84,7 @@ class AddressTests: TestCase {
     }
 
      func testIP4DNSResolve() {
-         async.task {
+         async {
              scope {
                  let address = try Socket.Address("duckduckgo.com", port: 80)
 
@@ -101,13 +96,13 @@ class AddressTests: TestCase {
                  let ip = sockaddr.address.description
                  expect(ip.split(separator: ".").count == 4)
              }
-             async.loop.terminate()
+             loop.terminate()
          }
-         async.loop.run()
+         loop.run()
      }
 
     func testLocalAddress() {
-        async.task {
+        async {
             scope {
                 let socket = try Socket()
                     .bind(to: "127.0.0.1", port: 5004)
@@ -117,7 +112,7 @@ class AddressTests: TestCase {
             }
         }
 
-        async.task {
+        async {
             scope {
                 let socket = try Socket()
                 _ = try socket
@@ -134,14 +129,14 @@ class AddressTests: TestCase {
 
                 expect(socket.selfAddress == Socket.Address.ip4(sockaddr))
             }
-            async.loop.terminate()
+            loop.terminate()
         }
 
-        async.loop.run()
+        loop.run()
     }
 
     func testRemoteAddress() {
-        async.task {
+        async {
             scope {
                 let socket = try Socket()
                     .bind(to: "127.0.0.1", port: 5006)
@@ -151,7 +146,7 @@ class AddressTests: TestCase {
             }
         }
 
-        async.task {
+        async {
             scope {
                 let socket = try Socket()
                 _ = try socket
@@ -168,14 +163,14 @@ class AddressTests: TestCase {
 
                 expect(socket.peerAddress == Socket.Address.ip4(sockaddr))
             }
-            async.loop.terminate()
+            loop.terminate()
         }
 
-        async.loop.run()
+        loop.run()
     }
 
     func testLocal6Address() {
-        async.task {
+        async {
             scope {
                 let socket = try Socket(family: .inet6)
                     .bind(to: "::1", port: 5008)
@@ -185,7 +180,7 @@ class AddressTests: TestCase {
             }
         }
 
-        async.task {
+        async {
             scope {
                 let socket = try Socket(family: .inet6)
                 _ = try socket
@@ -202,14 +197,14 @@ class AddressTests: TestCase {
 
                 expect(socket.selfAddress == Socket.Address.ip6(sockaddr))
             }
-            async.loop.terminate()
+            loop.terminate()
         }
 
-        async.loop.run()
+        loop.run()
     }
 
     func testRemote6Address() {
-        async.task {
+        async {
             scope {
                 let socket = try Socket(family: .inet6)
                     .bind(to: "::1", port: 5010)
@@ -219,7 +214,7 @@ class AddressTests: TestCase {
             }
         }
 
-        async.task {
+        async {
             scope {
                 let socket = try Socket(family: .inet6)
                 _ = try socket
@@ -236,9 +231,9 @@ class AddressTests: TestCase {
 
                 expect(socket.peerAddress == Socket.Address.ip6(sockaddr))
             }
-            async.loop.terminate()
+            loop.terminate()
         }
 
-        async.loop.run()
+        loop.run()
     }
 }

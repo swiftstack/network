@@ -1,19 +1,14 @@
 import Test
-import Fiber
+import Async
 import Platform
 
-@testable import Async
 @testable import Network
 
 class SocketTests: TestCase {
-    override func setUp() {
-        async.setUp(Fiber.self)
-    }
-
     func testSocket() {
         let message = [UInt8]("ping".utf8)
 
-        async.task {
+        async {
             scope {
                 let socket = try Socket()
                     .bind(to: "127.0.0.1", port: 3000)
@@ -26,7 +21,7 @@ class SocketTests: TestCase {
             }
         }
 
-        async.task {
+        async {
             scope {
                 let socket = try Socket()
                     .connect(to: "127.0.0.1", port: 3000)
@@ -41,13 +36,13 @@ class SocketTests: TestCase {
             }
         }
 
-        async.loop.run()
+        loop.run()
     }
 
     func testSocketInetStream() {
         let message = [UInt8]("ping".utf8)
 
-        async.task {
+        async {
             scope {
                 let socket = try Socket(family: .inet, type: .stream)
                     .bind(to: "127.0.0.1", port: 3001)
@@ -61,7 +56,7 @@ class SocketTests: TestCase {
         }
 
 
-        async.task {
+        async {
             scope {
                 let socket = try Socket(family: .inet, type: .stream)
                     .connect(to: "127.0.0.1", port: 3001)
@@ -76,7 +71,7 @@ class SocketTests: TestCase {
             }
         }
 
-        async.loop.run()
+        loop.run()
     }
 
     func testSocketInetDatagram() {
@@ -84,7 +79,7 @@ class SocketTests: TestCase {
 
         let server = try! Socket.Address("127.0.0.1", port: 3002)
 
-        async.task {
+        async {
             scope {
                 let socket = try Socket(family: .inet, type: .datagram)
                     .bind(to: server)
@@ -96,7 +91,7 @@ class SocketTests: TestCase {
             }
         }
 
-        async.task {
+        async {
             scope {
                 let socket = try Socket(family: .inet, type: .datagram)
 
@@ -112,13 +107,13 @@ class SocketTests: TestCase {
             }
         }
 
-        async.loop.run()
+        loop.run()
     }
 
     func testSocketInet6Stream() {
         let message = [UInt8]("ping".utf8)
 
-        async.task {
+        async {
             scope {
                 let socket = try Socket(family: .inet6, type: .stream)
                     .bind(to: "::1", port: 3003)
@@ -131,7 +126,7 @@ class SocketTests: TestCase {
             }
         }
 
-        async.task {
+        async {
             scope {
                 let socket = try Socket(family: .inet6, type: .stream)
                     .connect(to: "::1", port: 3003)
@@ -146,7 +141,7 @@ class SocketTests: TestCase {
             }
         }
 
-        async.loop.run()
+        loop.run()
     }
 
     func testSocketInet6Datagram() {
@@ -154,7 +149,7 @@ class SocketTests: TestCase {
 
         let server = try! Socket.Address("::1", port: 3004)
 
-        async.task {
+        async {
             scope {
                 let socket = try Socket(family: .inet6, type: .datagram)
                     .bind(to: server)
@@ -166,7 +161,7 @@ class SocketTests: TestCase {
             }
         }
 
-        async.task {
+        async {
             scope {
                 let socket = try Socket(family: .inet6, type: .datagram)
 
@@ -182,14 +177,14 @@ class SocketTests: TestCase {
             }
         }
 
-        async.loop.run()
+        loop.run()
     }
 
     func testSocketUnixStream() {
         let message = [UInt8]("ping".utf8)
 
         unlink("/tmp/teststream.sock")
-        async.task {
+        async {
             scope {
                 let socket = try Socket(family: .local, type: .stream)
                     .bind(to: "/tmp/teststream.sock")
@@ -202,7 +197,7 @@ class SocketTests: TestCase {
             }
         }
 
-        async.task {
+        async {
             scope {
                 let socket = try Socket(family: .local, type: .stream)
                     .connect(to: "/tmp/teststream.sock")
@@ -217,7 +212,7 @@ class SocketTests: TestCase {
             }
         }
 
-        async.loop.run()
+        loop.run()
     }
 
     func testSocketUnixDatagram() {
@@ -228,7 +223,7 @@ class SocketTests: TestCase {
         let server = try! Socket.Address("/tmp/testdatagramserver.sock")
         let client = try! Socket.Address("/tmp/testdatagramclient.sock")
 
-        async.task {
+        async {
             scope {
                 let socket = try Socket(family: .local, type: .datagram)
                     .bind(to: server)
@@ -240,7 +235,7 @@ class SocketTests: TestCase {
             }
         }
 
-        async.task {
+        async {
             scope {
                 let socket = try Socket(family: .local, type: .datagram)
                     .bind(to: client)
@@ -257,7 +252,7 @@ class SocketTests: TestCase {
             }
         }
 
-        async.loop.run()
+        loop.run()
     }
 
     func testSocketUnixSequenced() {
@@ -265,7 +260,7 @@ class SocketTests: TestCase {
         let message = [UInt8]("ping".utf8)
 
         unlink("/tmp/testsequenced.sock")
-        async.task {
+        async {
             scope {
                 let socket = try Socket(family: .local, type: .sequenced)
                     .bind(to: "/tmp/testsequenced.sock")
@@ -278,7 +273,7 @@ class SocketTests: TestCase {
             }
         }
 
-        async.task {
+        async {
             scope {
                 let socket = try Socket(family: .local, type: .sequenced)
                     .connect(to: "/tmp/testsequenced.sock")
@@ -293,7 +288,7 @@ class SocketTests: TestCase {
             }
         }
 
-        async.loop.run()
+        loop.run()
         #endif
     }
 }
