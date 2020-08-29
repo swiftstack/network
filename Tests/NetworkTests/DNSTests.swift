@@ -51,15 +51,4 @@ class DNSTests: TestCase {
         }
         loop.run()
     }
-
-    func testPerformance() {
-        let query = Message(domain: "duckduckgo.com", type: .a)
-
-        async {
-            self.measure {
-                _ = try? DNS.makeRequest(query: query)
-            }
-        }
-        loop.run()
-    }
 }
