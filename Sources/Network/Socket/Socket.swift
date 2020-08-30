@@ -1,6 +1,8 @@
 import Time
 import Platform
 
+import enum Event.IOEvent
+
 @_exported import Async
 
 public final class Socket {
@@ -89,12 +91,15 @@ public final class Socket {
     }
 
     public func accept(deadline: Time = .distantFuture) throws -> Socket {
-        let client = try repeatWhileInterrupted {
-            try await(for: descriptor, event: .read, deadline: deadline)
+        let client = try awaitIfNeeded(
+            for: descriptor,
+            event: .read,
+            deadline: deadline)
+        {
             return Int(Platform.accept(descriptor.rawValue, nil, nil))
         }
         guard let descriptor = Descriptor(rawValue: Int32(client)) else {
-            throw Socket.Error()
+            throw Socket.Error.badDescriptor
         }
         return try Socket(descriptor: descriptor, family: family, type: type)
     }
@@ -106,7 +111,11 @@ public final class Socket {
     ) throws -> Self {
         var copy = address
         do {
-            _ = try repeatWhileInterrupted {
+            _ = try awaitIfNeeded(
+                for: descriptor,
+                event: .write,
+                deadline: deadline)
+            {
                 return Int(Platform.connect(
                     descriptor.rawValue, rebounded(&copy), address.size))
             }
@@ -117,8 +126,8 @@ public final class Socket {
     }
 
     public func close() throws {
-        _ = try repeatWhileInterrupted {
-            return Int(Platform.close(descriptor.rawValue))
+        guard Platform.close(descriptor.rawValue) != -1 else {
+            throw Socket.Error()
         }
     }
 
@@ -127,8 +136,11 @@ public final class Socket {
         count: Int,
         deadline: Time = .distantFuture
     ) throws -> Int {
-        return try repeatWhileInterrupted {
-            try await(for: descriptor, event: .write, deadline: deadline)
+        return try awaitIfNeeded(
+            for: descriptor,
+            event: .write,
+            deadline: deadline)
+        {
             return Platform.send(descriptor.rawValue, bytes, count, noSignal)
         }
     }
@@ -138,8 +150,11 @@ public final class Socket {
         count: Int,
         deadline: Time = .distantFuture
     ) throws -> Int {
-        return try repeatWhileInterrupted {
-            try await(for: descriptor, event: .read, deadline: deadline)
+        return try awaitIfNeeded(
+            for: descriptor,
+            event: .read,
+            deadline: deadline)
+        {
             return Platform.recv(descriptor.rawValue, buffer, count, 0)
         }
     }
@@ -151,8 +166,11 @@ public final class Socket {
         deadline: Time = .distantFuture
     ) throws -> Int {
         var copy = address
-        return try repeatWhileInterrupted {
-            try await(for: descriptor, event: .write, deadline: deadline)
+        return try awaitIfNeeded(
+            for: descriptor,
+            event: .write,
+            deadline: deadline)
+        {
             return Platform.sendto(
                 descriptor.rawValue,
                 bytes,
@@ -171,8 +189,11 @@ public final class Socket {
     ) throws -> Int {
         var storage = sockaddr_storage()
         var size = sockaddr_storage.size
-        let received = try repeatWhileInterrupted {
-            try await(for: descriptor, event: .read, deadline: deadline)
+        let received = try awaitIfNeeded(
+            for: descriptor,
+            event: .read,
+            deadline: deadline)
+        {
             return Platform.recvfrom(
                 descriptor.rawValue,
                 buffer,
@@ -185,15 +206,22 @@ public final class Socket {
         return received
     }
 
-    @inline(__always)
-    func repeatWhileInterrupted(_ task: () throws -> Int) throws -> Int {
+    fileprivate func awaitIfNeeded(
+        for descriptor: Descriptor,
+        event: Event.IOEvent,
+        deadline: Time,
+        _ task: () throws -> Int) throws -> Int
+    {
         var result = 0
         while true {
             result = try task()
             guard result != -1 else {
                 switch Socket.Error() {
-                case .again, .wouldBlock, .interrupted: continue
-                default: throw Socket.Error()
+                case .again, .wouldBlock, .interrupted:
+                    try await(for: descriptor, event: event, deadline: deadline)
+                    continue
+                default:
+                    throw Socket.Error()
                 }
             }
             break
