@@ -44,7 +44,7 @@ public final class Socket {
     ) throws {
         let fd = socket(family.rawValue, type.rawValue, 0)
         guard let descriptor = Descriptor(rawValue: fd) else {
-            throw SocketError()
+            throw Socket.Error.badDescriptor
         }
         try self.init(descriptor: descriptor, family: family, type: type)
     }
@@ -73,8 +73,9 @@ public final class Socket {
     public func bind(to address: Address) throws -> Self {
         var copy = address
         guard Platform.bind(
-            descriptor.rawValue, rebounded(&copy), address.size) != -1 else {
-                throw SocketError()
+            descriptor.rawValue, rebounded(&copy), address.size) != -1 else
+        {
+            throw Socket.Error()
         }
         return self
     }
@@ -82,7 +83,7 @@ public final class Socket {
     @discardableResult
     public func listen() throws -> Self {
         guard Platform.listen(descriptor.rawValue, backlog) != -1 else {
-            throw SocketError()
+            throw Socket.Error()
         }
         return self
     }
@@ -93,7 +94,7 @@ public final class Socket {
             return Int(Platform.accept(descriptor.rawValue, nil, nil))
         }
         guard let descriptor = Descriptor(rawValue: Int32(client)) else {
-            throw SocketError()
+            throw Socket.Error()
         }
         return try Socket(descriptor: descriptor, family: family, type: type)
     }
@@ -109,7 +110,7 @@ public final class Socket {
                 return Int(Platform.connect(
                     descriptor.rawValue, rebounded(&copy), address.size))
             }
-        } catch let error as SocketError where error.number == EINPROGRESS {
+        } catch let error as Socket.Error where error == .inProgress {
             try await(for: descriptor, event: .write, deadline: deadline)
         }
         return self
@@ -189,14 +190,13 @@ public final class Socket {
         var result = 0
         while true {
             result = try task()
-            if result == -1 &&
-                (errno == EAGAIN || errno == EWOULDBLOCK || errno == EINTR) {
-                continue
+            guard result != -1 else {
+                switch Socket.Error() {
+                case .again, .wouldBlock, .interrupted: continue
+                default: throw Socket.Error()
+                }
             }
             break
-        }
-        guard result != -1 else {
-            throw SocketError()
         }
         return result
     }

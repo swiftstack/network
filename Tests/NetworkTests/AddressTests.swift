@@ -46,8 +46,7 @@ class AddressTests: TestCase {
         var sockaddr = sockaddr_un()
         let size = MemoryLayout.size(ofValue: sockaddr.sun_path)
         guard bytes.count < size else {
-            errno = EINVAL
-            throw SocketError()
+            throw Socket.Error.invalidArgument
         }
     #if os(macOS)
         sockaddr.sun_len = sa_family_t(sockaddr_un.size)
@@ -59,7 +58,7 @@ class AddressTests: TestCase {
         expect(address.size == socklen_t(MemoryLayout<sockaddr_un>.size))
         expect(address.description == "/tmp/testunix")
 
-        expect(throws: SocketError.invalidArgument) {
+        expect(throws: Socket.Error.invalidArgument) {
             _ = try Socket.Address(unix: "testunix.com")
         }
     }

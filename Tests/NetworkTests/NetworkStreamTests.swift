@@ -57,10 +57,10 @@ class NetworkStreamTests: TestCase {
 
                 var buffer = [UInt8](repeating: 0, count: 100)
                 // FIXME: hangs on linux
-                expect(throws: SocketError.badDescriptor) {
+                expect(throws: Socket.Error.badDescriptor) {
                     _ = try clientStream.read(to: &buffer)
                 }
-                expect(throws: SocketError.badDescriptor) {
+                expect(throws: Socket.Error.badDescriptor) {
                     _ = try clientStream.write(from: buffer)
                 }
             }

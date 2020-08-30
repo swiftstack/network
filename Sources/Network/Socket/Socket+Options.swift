@@ -49,8 +49,9 @@ extension Socket {
                 SOL_SOCKET,
                 option,
                 pointer,
-                socklen_t(size)) != -1 else {
-                    throw SocketError()
+                socklen_t(size)) != -1 else
+            {
+                throw Socket.Error()
             }
         }
 
@@ -65,8 +66,9 @@ extension Socket {
                 SOL_SOCKET,
                 option,
                 pointer,
-                &actualSize) != -1 else {
-                    throw SocketError()
+                &actualSize) != -1 else
+            {
+                throw Socket.Error()
             }
             size = Int(actualSize)
         }

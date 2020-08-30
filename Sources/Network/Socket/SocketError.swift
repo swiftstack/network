@@ -1,27 +1,47 @@
 import Platform
 
-public struct SocketError: Error, Equatable {
-    public let number: Int32
+extension Socket {
+    public enum Error: Swift.Error, Equatable, CustomStringConvertible {
+        case again           // EAGAIN
+        case wouldBlock      // EWOULDBLOCK
+        case inProgress      // EINPROGRESS
+        case interrupted     // EINTR
+        case badDescriptor   // EBADF
+        case invalidArgument // EINVAL
+        case connectionReset // ECONNRESET
+        case system(Int32)
 
-    public init(number: Int32 = errno) {
-        self.number = number
-    }
-}
+        var shouldTryAgain: Bool {
+            switch self {
+            case .again, .wouldBlock, .interrupted: return true
+            default: return false
+            }
+        }
 
-extension SocketError: CustomStringConvertible {
-    public var description: String { .init(cString: strerror(errno)) }
-}
+        init() {
+            switch errno {
+            case EAGAIN: self = .again
+            case EWOULDBLOCK: self = .wouldBlock
+            case EINPROGRESS: self = .inProgress
+            case EINTR: self = .interrupted
+            case EBADF: self = .badDescriptor
+            case EINVAL: self = .invalidArgument
+            case ECONNRESET: self = .connectionReset
+            default: self = .system(errno)
+            }
+        }
 
-extension SocketError {
-    public var interrupted: Bool {
-        return number == EAGAIN || number == EWOULDBLOCK || number == EINTR
-    }
-
-    public static var badDescriptor: SocketError {
-        return SocketError(number: EBADF)
-    }
-
-    public static var invalidArgument: SocketError {
-        return SocketError(number: EINVAL)
+        public var description: String {
+            switch self {
+            case .again: return .init(cString: strerror(EAGAIN))
+            case .wouldBlock: return .init(cString: strerror(EWOULDBLOCK))
+            case .inProgress: return .init(cString: strerror(EINPROGRESS))
+            case .interrupted: return .init(cString: strerror(EINTR))
+            case .badDescriptor: return .init(cString: strerror(EBADF))
+            case .invalidArgument: return .init(cString: strerror(EINVAL))
+            case .connectionReset: return .init(cString: strerror(ECONNRESET))
+            case .system(let code): return .init(cString: strerror(code))
+            }
+        }
     }
 }

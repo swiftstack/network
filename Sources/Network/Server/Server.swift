@@ -52,7 +52,7 @@ public class Server {
         switch error {
             /* connection reset by peer */
             /* do nothing, it's fine. */
-        case let error as SocketError where error.number == ECONNRESET: break
+        case let error as Socket.Error where error == .connectionReset: break
             /* log other errors */
         default: Log.error(String(describing: error))
         }

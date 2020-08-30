@@ -68,7 +68,7 @@ extension in_addr {
         switch inet_pton(AF_INET, address, &addr) {
         case 1: self = addr
         case 0: return nil
-        case -1: throw SocketError()
+        case -1: throw Socket.Error() // TODO: define possible errors
         default: preconditionFailure("inet_pton: unexpected return code")
         }
     }
@@ -80,7 +80,7 @@ extension in6_addr {
         switch inet_pton(AF_INET6, address, &addr6) {
         case 1: self = addr6
         case 0: return nil
-        case -1: throw SocketError()
+        case -1: throw Socket.Error() // TODO: define possible errors
         default: preconditionFailure("inet_pton: unexpected return code")
         }
     }
@@ -157,9 +157,9 @@ extension sockaddr_in {
 
     public init(_ address: String, _ port: Int) throws {
         guard let address = try in_addr(address),
-            let port = UInt16(exactly: port) else {
-                errno = EINVAL
-                throw SocketError()
+              let port = UInt16(exactly: port) else
+        {
+            throw Socket.Error.invalidArgument
         }
         try self.init(address, port)
     }
@@ -199,9 +199,9 @@ extension sockaddr_in6 {
 
     public init(_ address: String, _ port: Int) throws {
         guard let address = try in6_addr(address),
-            let port = UInt16(exactly: port) else {
-                errno = EINVAL
-                throw SocketError()
+              let port = UInt16(exactly: port) else
+        {
+            throw Socket.Error.invalidArgument
         }
         try self.init(address, port)
     }
@@ -229,15 +229,13 @@ extension sockaddr_un {
 
     public init(_ address: String) throws {
         guard address.starts(with: "/") else {
-            errno = EINVAL
-            throw SocketError()
+            throw Socket.Error.invalidArgument
         }
         var bytes = [UInt8](address.utf8)
         var sockaddr = sockaddr_un()
         let size = MemoryLayout.size(ofValue: sockaddr.sun_path)
         guard bytes.count < size else {
-            errno = EINVAL
-            throw SocketError()
+            throw Socket.Error.invalidArgument
         }
     #if os(macOS)
         sockaddr.sun_len = UInt8(sockaddr_un.size)

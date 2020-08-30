@@ -82,8 +82,7 @@ extension Socket.Address {
             return
         }
 
-        errno = EINVAL
-        throw SocketError()
+        throw Socket.Error.invalidArgument
     }
 
     public init(ip4 address: String, port: Int) throws {

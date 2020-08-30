@@ -1,4 +1,5 @@
 import Log
+import Platform
 
 public class SystemLogger: LogProtocol {
     #if os(macOS)
@@ -39,7 +40,7 @@ public class SystemLogger: LogProtocol {
         while total < data.count {
             let written = try socket.send(bytes: data, to: log)
             guard written > 0 else {
-                throw SocketError()
+                throw SystemError()
             }
             total += written
         }
