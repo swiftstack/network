@@ -2,7 +2,7 @@ extension Message {
     init(from bytes: [UInt8]) throws {
         let headerSize = 12
         guard bytes.count >= headerSize else {
-            throw DNSError.invalidMessage
+            throw DNS.Error.invalidMessage
         }
 
         // MARK: Header
@@ -22,10 +22,10 @@ extension Message {
         let type = MessageType(rawValue: rawType)!
 
         guard let kind = MessageKind(rawValue: rawKind) else {
-            throw DNSError.invalidKind
+            throw DNS.Error.invalidKind
         }
         guard let responseCode = ResponseCode(rawValue: rawResponseCode) else {
-            throw DNSError.invalidResponseCode
+            throw DNS.Error.invalidResponseCode
         }
 
         let questionCount = Int(bytes[4]) << 8 | Int(bytes[5])
@@ -44,7 +44,7 @@ extension Message {
             var nameParts = [String]()
             while true {
                 guard offset < bytes.count else {
-                    throw DNSError.invalidName
+                    throw DNS.Error.invalidName
                 }
 
                 let count = Int(bytes[offset])
@@ -58,7 +58,7 @@ extension Message {
                         | Int(bytes[offset])
                     offset += 1
                     guard nameOffset < offset else {
-                        throw DNSError.invalidOffset
+                        throw DNS.Error.invalidOffset
                     }
                     let name = try decodeName(from: bytes, offset: &nameOffset)
                     nameParts.append(name)
@@ -66,7 +66,7 @@ extension Message {
                 }
 
                 guard offset + count <= bytes.count else {
-                    throw DNSError.invalidName
+                    throw DNS.Error.invalidName
                 }
                 let part = [UInt8](bytes[offset..<offset + count]) + [0]
                 nameParts.append(String(cString: part))
@@ -81,7 +81,7 @@ extension Message {
         ) throws -> ResourceType {
             let rawType = UInt16(bytes[offset]) << 8 | UInt16(bytes[offset+1])
             guard let type = ResourceType(rawValue: rawType) else {
-                throw DNSError.invalidResourceType
+                throw DNS.Error.invalidResourceType
             }
             offset += 2
             return type
@@ -93,7 +93,7 @@ extension Message {
         ) throws -> ResourceClass {
             let rawClass = UInt16(bytes[offset]) << 8 | UInt16(bytes[offset+1])
             guard let klass = ResourceClass(rawValue: rawClass) else {
-                throw DNSError.invalidResourceClass
+                throw DNS.Error.invalidResourceClass
             }
             offset += 2
             return klass
@@ -131,7 +131,7 @@ extension Message {
             offset += 2
 
             guard bytes.count >= offset + length else {
-                throw DNSError.invalidResourceRecord
+                throw DNS.Error.invalidResourceRecord
             }
 
             let data: ResourceData
@@ -157,10 +157,10 @@ extension Message {
                 let name = try decodeName(from: bytes, offset: &copyOffset)
                 data = .ns(name)
                 guard copyOffset == offset + length else {
-                    throw DNSError.invalidResourceNSName
+                    throw DNS.Error.invalidResourceNSName
                 }
             default:
-                throw DNSError.invalidResourceRecord
+                throw DNS.Error.invalidResourceRecord
             }
             offset += length
 

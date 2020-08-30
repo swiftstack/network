@@ -45,18 +45,6 @@ enum MessageKind: UInt16 {
     case status = 2
 }
 
-enum DNSError: Error {
-    case invalidKind
-    case invalidResponseCode
-    case invalidName
-    case invalidResourceType
-    case invalidResourceClass
-    case invalidResourceRecord
-    case invalidResourceNSName
-    case invalidOffset
-    case invalidMessage
-}
-
 enum ResponseCode: UInt16 {
     case noError        = 0
     case formatError    = 1
