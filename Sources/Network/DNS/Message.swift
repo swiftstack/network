@@ -54,18 +54,18 @@ enum ResponseCode: UInt16 {
     case refused        = 5
 }
 
-struct Question {
+struct Question: Equatable {
     var name: String
     var type: ResourceType
 }
 
-struct ResourceRecord {
+struct ResourceRecord: Equatable {
     let name: String
     let ttl: Int
     let data: ResourceData
 }
 
-enum ResourceData {
+enum ResourceData: Equatable {
     case a(IPv4)
     case ns(String)
     case aaaa(IPv6)
@@ -82,34 +82,4 @@ enum ResourceType: UInt16 {
 
 enum ResourceClass: UInt16 {
     case `in` = 1
-}
-
-extension Question: Equatable {
-    static func ==(lhs: Question, rhs: Question) -> Bool {
-        return lhs.name == rhs.name
-            && lhs.type == rhs.type
-    }
-}
-
-extension ResourceRecord: Equatable {
-    static func ==(lhs: ResourceRecord, rhs: ResourceRecord) -> Bool {
-        return lhs.name == rhs.name
-            && lhs.ttl == rhs.ttl
-            && lhs.data == rhs.data
-    }
-}
-
-extension ResourceData: Equatable {
-    static func ==(lhs: ResourceData, rhs: ResourceData) -> Bool {
-        switch (lhs, rhs) {
-        case let (.a(lhsAddress), .a(rhsAddress)):
-            return lhsAddress == rhsAddress
-        case let (.ns(lhsAddress), .ns(rhsAddress)):
-            return lhsAddress == rhsAddress
-        case let (.aaaa(lhsAddress), .aaaa(rhsAddress)):
-            return lhsAddress == rhsAddress
-        default:
-            return false
-        }
-    }
 }
