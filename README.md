@@ -5,7 +5,7 @@ Asynchronous non-blocking io with syncronous API. **No callbacks.**
 ## Package.swift
 
  ```swift
-.package(url: "https://github.com/swift-stack/aio.git", .branch("dev"))
+.package(url: "https://github.com/swift-stack/aio.git", .branch("fiber"))
 ```
 
 # Network
