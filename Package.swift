@@ -23,13 +23,22 @@ let package = Package(
     targets: [
         .target(
             name: "Async",
-            dependencies: ["Platform", "Fiber", "Time"]),
+            dependencies: ["Platform", "Fiber", "Time"],
+            swiftSettings: [
+                .unsafeFlags(["-Xfrontend", "-enable-experimental-concurrency"])
+            ]),
         .target(
             name: "Network",
-            dependencies: ["Platform", "Time", "Async", "Stream", "Log"]),
+            dependencies: ["Platform", "Time", "Async", "Stream", "Log"],
+            swiftSettings: [
+                .unsafeFlags(["-Xfrontend", "-enable-experimental-concurrency"])
+            ]),
         .testTarget(
             name: "NetworkTests",
-            dependencies: ["Test", "Network", "FileSystem", "Fiber"])
+            dependencies: ["Test", "Network", "FileSystem", "Fiber"],
+            swiftSettings: [
+                .unsafeFlags(["-Xfrontend", "-enable-experimental-concurrency"])
+            ])
     ]
 )
 
