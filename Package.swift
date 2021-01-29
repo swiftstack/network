@@ -5,37 +5,28 @@ let package = Package(
     name: "Network",
     products: [
         .library(
-            name: "Async",
-            targets: ["Async"]),
-        .library(
             name: "Network",
             targets: ["Network"]),
     ],
     dependencies: [
         .package(name: "Platform"),
+        .package(name: "Event"),
         .package(name: "Time"),
         .package(name: "Log"),
         .package(name: "Stream"),
         .package(name: "Test"),
         .package(name: "FileSystem"),
-        .package(name: "Fiber"),
     ],
     targets: [
         .target(
-            name: "Async",
-            dependencies: ["Platform", "Fiber", "Time"],
-            swiftSettings: [
-                .unsafeFlags(["-Xfrontend", "-enable-experimental-concurrency"])
-            ]),
-        .target(
             name: "Network",
-            dependencies: ["Platform", "Time", "Async", "Stream", "Log"],
+            dependencies: ["Platform", "Event", "Time", "Stream", "Log"],
             swiftSettings: [
                 .unsafeFlags(["-Xfrontend", "-enable-experimental-concurrency"])
             ]),
         .testTarget(
             name: "NetworkTests",
-            dependencies: ["Test", "Network", "FileSystem", "Fiber"],
+            dependencies: ["Test", "Network", "FileSystem"],
             swiftSettings: [
                 .unsafeFlags(["-Xfrontend", "-enable-experimental-concurrency"])
             ])
