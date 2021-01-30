@@ -2,10 +2,12 @@ import Log
 import Platform
 
 public class Server {
+    var handle: Task.Handle<Void>?
+
     public let socket: Socket
 
-    public var onClient: (Socket) -> Void = { _ in }
-    public var onError: (Error) -> Void = { _ in }
+    public var onClient: (Socket) async -> Void = { _ in }
+    public var onError: (Error) async -> Void = { _ in }
 
     public var address: String {
         return socket.selfAddress!.description
@@ -29,32 +31,34 @@ public class Server {
         try? socket.close()
     }
 
-    public func start() throws {
+    public func start() async throws {
         try socket.listen()
+        await startAsync()
+    }
+
+    func startAsync() async {
         while true {
             do {
-                let client = try self.socket.accept()
-                async { [unowned self] in
-                    self.onClient(client)
-                }
+                let client = try await socket.accept()
+                await onClient(client)
             } catch {
-                onError(error)
+                await onError(error)
             }
         }
     }
 
-    func handleClient (_ socket: Socket) {
+    func handleClient (_ socket: Socket) async {
         try? socket.close()
-        Log.warning("unhandled client")
+        await Log.warning("unhandled client")
     }
 
-    func handleError (_ error: Error) {
+    func handleError (_ error: Error) async {
         switch error {
-            /* connection reset by peer */
-            /* do nothing, it's fine. */
+        /* connection reset by peer */
+        /* do nothing, it's fine. */
         case let error as Socket.Error where error == .connectionReset: break
-            /* log other errors */
-        default: Log.error(String(describing: error))
+        /* log other errors */
+        default: await Log.error(String(describing: error))
         }
     }
 }

@@ -9,9 +9,9 @@ public class NetworkStream: Stream {
     }
 
     public func read(
-        to buffer: UnsafeMutableRawPointer, byteCount: Int) throws -> Int
+        to buffer: UnsafeMutableRawPointer, byteCount: Int) async throws -> Int
     {
-        let read = try socket.receive(to: buffer, count: byteCount)
+        let read = try await socket.receive(to: buffer, count: byteCount)
         guard read != -1 else {
             throw SystemError()
         }
@@ -20,9 +20,9 @@ public class NetworkStream: Stream {
 
     public func write(
         from buffer: UnsafeRawPointer,
-        byteCount: Int) throws -> Int
+        byteCount: Int) async throws -> Int
     {
-        let written = try socket.send(bytes: buffer, count: byteCount)
+        let written = try await socket.send(bytes: buffer, count: byteCount)
         guard written != -1 else {
             throw SystemError()
         }

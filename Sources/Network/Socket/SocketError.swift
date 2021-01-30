@@ -9,6 +9,7 @@ extension Socket {
         case badDescriptor   // EBADF
         case invalidArgument // EINVAL
         case connectionReset // ECONNRESET
+        case alreadyInUse    // EADDRINUSE
         case system(Int32)
 
         var shouldTryAgain: Bool {
@@ -27,6 +28,7 @@ extension Socket {
             case EBADF: self = .badDescriptor
             case EINVAL: self = .invalidArgument
             case ECONNRESET: self = .connectionReset
+            case EADDRINUSE: self = .alreadyInUse
             default: self = .system(errno)
             }
         }
@@ -40,6 +42,7 @@ extension Socket {
             case .badDescriptor: return .init(cString: strerror(EBADF))
             case .invalidArgument: return .init(cString: strerror(EINVAL))
             case .connectionReset: return .init(cString: strerror(ECONNRESET))
+            case .alreadyInUse: return .init(cString: strerror(EADDRINUSE))
             case .system(let code): return .init(cString: strerror(code))
             }
         }

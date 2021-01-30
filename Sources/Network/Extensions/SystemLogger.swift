@@ -19,12 +19,12 @@ public class SystemLogger: LogProtocol {
         try? socket.close()
     }
 
-    public func handle(_ message: Log.Message) {
+    public func handle(_ message: Log.Message) async {
         let message = "[\(message.level)] \(message.payload)"
 
         for _ in 0..<reconnectAttempts {
             do {
-                try write(message)
+                try await write(message)
                 return
             } catch {
                 reconnect()
@@ -34,11 +34,12 @@ public class SystemLogger: LogProtocol {
         print("can't log message", message)
     }
 
-    func write(_ message: String) throws {
+    // FIXME: [Concurrency]
+    func write(_ message: String) async throws {
         let data = [UInt8](message.utf8)
         var total = 0
         while total < data.count {
-            let written = try socket.send(bytes: data, to: log)
+            let written = try await socket.send(bytes: data, to: log)
             guard written > 0 else {
                 throw SystemError()
             }

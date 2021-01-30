@@ -1,9 +1,6 @@
 import Time
+import Event
 import Platform
-
-import enum Event.IOEvent
-
-@_exported import Async
 
 public final class Socket {
     public enum Family {
@@ -90,8 +87,8 @@ public final class Socket {
         return self
     }
 
-    public func accept(deadline: Time = .distantFuture) throws -> Socket {
-        let client = try awaitIfNeeded(
+    public func accept(deadline: Time = .distantFuture) async throws -> Socket {
+        let client = try await awaitIfNeeded(
             for: descriptor,
             event: .read,
             deadline: deadline)
@@ -108,10 +105,10 @@ public final class Socket {
     public func connect(
         to address: Address,
         deadline: Time = .distantFuture
-    ) throws -> Self {
+    ) async throws -> Self {
         var copy = address
         do {
-            _ = try awaitIfNeeded(
+            _ = try await awaitIfNeeded(
                 for: descriptor,
                 event: .write,
                 deadline: deadline)
@@ -120,7 +117,7 @@ public final class Socket {
                     descriptor.rawValue, rebounded(&copy), address.size))
             }
         } catch let error as Socket.Error where error == .inProgress {
-            try await(for: descriptor, event: .write, deadline: deadline)
+            try await loop.wait(for: descriptor, event: .write, deadline: deadline)
         }
         return self
     }
@@ -135,8 +132,8 @@ public final class Socket {
         bytes: UnsafeRawPointer,
         count: Int,
         deadline: Time = .distantFuture
-    ) throws -> Int {
-        return try awaitIfNeeded(
+    ) async throws -> Int {
+        return try await awaitIfNeeded(
             for: descriptor,
             event: .write,
             deadline: deadline)
@@ -149,8 +146,8 @@ public final class Socket {
         to buffer: UnsafeMutableRawPointer,
         count: Int,
         deadline: Time = .distantFuture
-    ) throws -> Int {
-        return try awaitIfNeeded(
+    ) async throws -> Int {
+        return try await awaitIfNeeded(
             for: descriptor,
             event: .read,
             deadline: deadline)
@@ -164,9 +161,9 @@ public final class Socket {
         count: Int,
         to address: Address,
         deadline: Time = .distantFuture
-    ) throws -> Int {
+    ) async throws -> Int {
         var copy = address
-        return try awaitIfNeeded(
+        return try await awaitIfNeeded(
             for: descriptor,
             event: .write,
             deadline: deadline)
@@ -186,10 +183,10 @@ public final class Socket {
         count: Int,
         from address: inout Address?,
         deadline: Time = .distantFuture
-    ) throws -> Int {
+    ) async throws -> Int {
         var storage = sockaddr_storage()
         var size = sockaddr_storage.size
-        let received = try awaitIfNeeded(
+        let received = try await awaitIfNeeded(
             for: descriptor,
             event: .read,
             deadline: deadline)
@@ -208,17 +205,17 @@ public final class Socket {
 
     fileprivate func awaitIfNeeded(
         for descriptor: Descriptor,
-        event: Event.IOEvent,
+        event: IOEvent,
         deadline: Time,
-        _ task: () throws -> Int) throws -> Int
+        _ task: () -> Int) async throws -> Int
     {
         var result = 0
         while true {
-            result = try task()
+            result = task()
             guard result != -1 else {
                 switch Socket.Error() {
                 case .again, .wouldBlock, .interrupted:
-                    try await(for: descriptor, event: event, deadline: deadline)
+                    try await loop.wait(for: descriptor, event: event, deadline: deadline)
                     continue
                 default:
                     throw Socket.Error()

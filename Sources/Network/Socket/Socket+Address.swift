@@ -65,16 +65,6 @@ extension Socket.Address {
                 self = ip6
                 return
             }
-
-            let entries = try DNS.resolve(
-                domain: address,
-                type: .a,
-                deadline: .distantFuture)
-
-            if let address = entries.first, case .v4(let ip) = address {
-                self = .ip4(try sockaddr_in(ip.address, UInt16(port)))
-                return
-            }
         }
 
         if let unix = try? Socket.Address(unix: address) {

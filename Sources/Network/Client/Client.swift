@@ -21,13 +21,13 @@ public class Client {
         case alreadyConnected
     }
 
-    public func connect() throws -> BufferedStream<NetworkStream> {
+    public func connect() async throws -> BufferedStream<NetworkStream> {
         guard !isConnected else {
             throw Error.alreadyConnected
         }
 
         let socket = try Socket()
-        try socket.connect(to: host, port: port)
+        try await socket.connect(to: host, port: port)
         self.socket = socket
         return BufferedStream(baseStream: NetworkStream(socket: socket))
     }

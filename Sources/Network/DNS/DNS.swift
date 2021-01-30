@@ -17,13 +17,13 @@ struct DNS {
     static func makeRequest(
         query: Message,
         deadline: Time = .distantFuture
-    ) throws -> Message {
+    ) async throws -> Message {
         let server = try! Socket.Address(nameserver, port: 53)
         let socket = try Socket(type: .datagram)
 
-        _ = try socket.send(bytes: query.bytes, to: server)
+        _ = try await socket.send(bytes: query.bytes, to: server)
         var buffer = [UInt8](repeating: 0, count: 1024)
-        let count = try socket.receive(to: &buffer)
+        let count = try await socket.receive(to: &buffer)
         let response = [UInt8](buffer.prefix(upTo: count))
 
         return try Message(from: response)
@@ -33,13 +33,13 @@ struct DNS {
         domain: String,
         type: ResourceType = .a,
         deadline: Time = .distantFuture
-    ) throws -> [IPAddress] {
+    ) async throws -> [IPAddress] {
         // TODO: separate by resource type
         guard cache[domain] == nil else {
             return cache[domain]!
         }
 
-        let response = try makeRequest(
+        let response = try await makeRequest(
             query: Message(domain: domain, type: type),
             deadline: deadline)
 
