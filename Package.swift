@@ -15,7 +15,6 @@ let package = Package(
         .package(name: "Log"),
         .package(name: "Stream"),
         .package(name: "Test"),
-        .package(name: "FileSystem"),
     ],
     targets: [
         .target(
@@ -23,15 +22,40 @@ let package = Package(
             dependencies: ["Platform", "Event", "Time", "Stream", "Log"],
             swiftSettings: [
                 .unsafeFlags(["-Xfrontend", "-enable-experimental-concurrency"])
-            ]),
-        .testTarget(
-            name: "NetworkTests",
-            dependencies: ["Test", "Network", "FileSystem"],
-            swiftSettings: [
-                .unsafeFlags(["-Xfrontend", "-enable-experimental-concurrency"])
             ])
     ]
 )
+
+// MARK: - tests
+
+testTarget("Network") { test in
+    test("Abstraction")
+    test("Address")
+    test("Client")
+    test("DNS")
+    test("DNSMessage")
+    test("IP")
+    test("NetworkStream")
+    test("Options")
+    test("Server")
+    test("Socket")
+    test("SystemLogger")
+}
+
+func testTarget(_ target: String, task: ((String) -> Void) -> Void) {
+    task { test in addTest(target: target, name: test) }
+}
+
+func addTest(target: String, name: String) {
+    package.targets.append(
+        .target(
+            name: "Tests/\(target)/\(name)",
+            dependencies: ["Network", "Test"],
+            path: "Tests/\(target)/\(name)",
+            swiftSettings: [
+                .unsafeFlags(["-Xfrontend", "-enable-experimental-concurrency"])
+            ]))
+}
 
 // MARK: - custom package source
 
