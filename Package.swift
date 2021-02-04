@@ -1,4 +1,4 @@
-// swift-tools-version:5.2
+// swift-tools-version:5.4
 import PackageDescription
 
 let package = Package(
@@ -48,7 +48,7 @@ func testTarget(_ target: String, task: ((String) -> Void) -> Void) {
 
 func addTest(target: String, name: String) {
     package.targets.append(
-        .target(
+        .executableTarget(
             name: "Tests/\(target)/\(name)",
             dependencies: ["Network", "Test"],
             path: "Tests/\(target)/\(name)",
