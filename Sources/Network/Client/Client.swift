@@ -4,12 +4,10 @@ public class Client {
     public let host: String
     public let port: Int
 
-    public var bufferSize = 4096
-
-    public private(set) var socket: Socket?
+    public private(set) var stream: NetworkStream?
 
     public var isConnected: Bool {
-        return socket != nil
+        return stream != nil
     }
 
     public init(host: String, port: Int) {
@@ -21,21 +19,21 @@ public class Client {
         case alreadyConnected
     }
 
-    public func connect() async throws -> BufferedStream<NetworkStream> {
+    public func connect() async throws -> NetworkStream {
         guard !isConnected else {
             throw Error.alreadyConnected
         }
-
         let socket = try Socket()
         try await socket.connect(to: host, port: port)
-        self.socket = socket
-        return BufferedStream(baseStream: NetworkStream(socket: socket))
+        let stream = NetworkStream(socket: socket)
+        self.stream = stream
+        return stream
     }
 
     public func disconnect() throws {
-        if let socket = self.socket {
-            try socket.close()
-            self.socket = nil
+        if let stream = self.stream {
+            try stream.socket.close()
+            self.stream = nil
         }
     }
 }
