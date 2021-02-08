@@ -4,21 +4,13 @@ import Platform
 struct DNS {
     static var cache = [String : [IPAddress]]()
 
-    static var nameservers: [String] = [
-        "208.67.220.220",
-        "208.67.222.222"
-    ]
-
-    // TODO: round-robin? till failure?
-    static var nameserver: String {
-        return nameservers.first!
-    }
+    static var nameservers: [String] = ["1.1.1.1"]
 
     static func makeRequest(
         query: Message,
         deadline: Time = .distantFuture
     ) async throws -> Message {
-        let server = try! Socket.Address(nameserver, port: 53)
+        let server = try! Socket.Address(nameservers.first!, port: 53)
         let socket = try Socket(type: .datagram)
 
         _ = try await socket.send(bytes: query.bytes, to: server)
