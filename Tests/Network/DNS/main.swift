@@ -5,37 +5,35 @@ import Event
 
 test.case("MakeRequest") {
     asyncTask {
-        await scope {
-            let query = Message(domain: "swiftstack.io", type: .a)
-            let response = try await DNS.makeRequest(query: query)
+        let query = Message(domain: "swiftstack.io", type: .a)
+        let response = try await DNS.makeRequest(query: query)
 
-            expect(response.answer.count == 1)
+        expect(response.answer.count == 1)
 
-            for answer in response.answer {
-                expect(answer.name == "swiftstack.io")
-                expect(answer.ttl > 0)
-                expect(answer.data == .a(.init(116,203,222,133)))
-            }
-
-            expect(response.authority == [])
-            expect(response.additional == [])
-
-            await loop.terminate()
+        for answer in response.answer {
+            expect(answer.name == "swiftstack.io")
+            expect(answer.ttl > 0)
+            expect(answer.data == .a(.init(116,203,222,133)))
         }
+
+        expect(response.authority == [])
+        expect(response.additional == [])
+
+        await loop.terminate()
     }
+
     await loop.run()
 }
 
 test.case("Resolve") {
     asyncTask {
-        await scope {
-            let addresses = try await DNS.resolve(domain: "swiftstack.io")
-            expect(addresses.count == 1)
-            expect(addresses.first == .v4(.init(116,203,222,133)))
+        let addresses = try await DNS.resolve(domain: "swiftstack.io")
+        expect(addresses.count == 1)
+        expect(addresses.first == .v4(.init(116,203,222,133)))
 
-            await loop.terminate()
-        }
+        await loop.terminate()
     }
+
     await loop.run()
 }
 

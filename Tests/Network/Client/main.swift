@@ -8,27 +8,23 @@ import Platform
 
 test.case("Client") {
     asyncTask {
-        await scope {
-            let socket = try Socket()
-                .bind(to: "127.0.0.1", port: 6000)
-                .listen()
+        let socket = try Socket()
+            .bind(to: "127.0.0.1", port: 6000)
+            .listen()
 
-            let client = try await socket.accept()
-            var buffer = [UInt8](repeating: 0, count: 5)
-            _ = try await client.receive(to: &buffer)
-            _ = try await client.send(bytes: [0,1,2,3,4])
-        }
+        let client = try await socket.accept()
+        var buffer = [UInt8](repeating: 0, count: 5)
+        _ = try await client.receive(to: &buffer)
+        _ = try await client.send(bytes: [0,1,2,3,4])
     }
 
     asyncTask {
-        await scope {
-            let client = Client(host: "127.0.0.1", port: 6000)
-            let stream = try await client.connect()
-            expect(try await stream.write(from: [0,1,2,3,4]) == 5)
+        let client = Client(host: "127.0.0.1", port: 6000)
+        let stream = try await client.connect()
+        expect(try await stream.write(from: [0,1,2,3,4]) == 5)
 
-            var buffer = [UInt8](repeating: 0, count: 5)
-            expect(try await stream.read(to: &buffer) == 5)
-        }
+        var buffer = [UInt8](repeating: 0, count: 5)
+        expect(try await stream.read(to: &buffer) == 5)
 
         await loop.terminate()
     }

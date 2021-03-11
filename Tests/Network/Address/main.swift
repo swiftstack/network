@@ -86,33 +86,30 @@ import Event
 
 test.case("LocalAddress") {
     asyncTask {
-        await scope {
-            let socket = try Socket()
-                .bind(to: "127.0.0.1", port: 4004)
-                .listen()
+        let socket = try Socket()
+            .bind(to: "127.0.0.1", port: 4004)
+            .listen()
 
-            _ = try await socket.accept()
-        }
+        _ = try await socket.accept()
     }
 
     asyncTask {
-        await scope {
-            let socket = try Socket()
-            _ = try await socket
-                .bind(to: "127.0.0.1", port: 4005)
-                .connect(to: "127.0.0.1", port: 4004)
+        let socket = try Socket()
+        _ = try await socket
+            .bind(to: "127.0.0.1", port: 4005)
+            .connect(to: "127.0.0.1", port: 4004)
 
-            var sockaddr = sockaddr_in()
-            inet_pton(AF_INET, "127.0.0.1", &sockaddr.sin_addr)
-            sockaddr.sin_port = UInt16(4005).byteSwapped
-            sockaddr.sin_family = sa_family_t(AF_INET)
-            #if os(macOS)
-            sockaddr.sin_len = 16
-            #endif
+        var sockaddr = sockaddr_in()
+        inet_pton(AF_INET, "127.0.0.1", &sockaddr.sin_addr)
+        sockaddr.sin_port = UInt16(4005).byteSwapped
+        sockaddr.sin_family = sa_family_t(AF_INET)
+        #if os(macOS)
+        sockaddr.sin_len = 16
+        #endif
 
-            expect(socket.selfAddress == Socket.Address.ip4(sockaddr))
-            await loop.terminate()
-        }
+        expect(socket.selfAddress == Socket.Address.ip4(sockaddr))
+
+        await loop.terminate()
     }
 
     await loop.run()
@@ -120,32 +117,29 @@ test.case("LocalAddress") {
 
 test.case("RemoteAddress") {
     asyncTask {
-        await scope {
-            let socket = try Socket()
-                .bind(to: "127.0.0.1", port: 4006)
-                .listen()
+        let socket = try Socket()
+            .bind(to: "127.0.0.1", port: 4006)
+            .listen()
 
-            _ = try await socket.accept()
-        }
+        _ = try await socket.accept()
     }
 
     asyncTask {
-        await scope {
-            let socket = try Socket()
-            _ = try await socket
-                .bind(to: "127.0.0.1", port: 4007)
-                .connect(to: "127.0.0.1", port: 4006)
+        let socket = try Socket()
+        _ = try await socket
+            .bind(to: "127.0.0.1", port: 4007)
+            .connect(to: "127.0.0.1", port: 4006)
 
-            var sockaddr = sockaddr_in()
-            inet_pton(AF_INET, "127.0.0.1", &sockaddr.sin_addr)
-            sockaddr.sin_port = UInt16(4006).byteSwapped
-            sockaddr.sin_family = sa_family_t(AF_INET)
-            #if os(macOS)
-            sockaddr.sin_len = 16
-            #endif
+        var sockaddr = sockaddr_in()
+        inet_pton(AF_INET, "127.0.0.1", &sockaddr.sin_addr)
+        sockaddr.sin_port = UInt16(4006).byteSwapped
+        sockaddr.sin_family = sa_family_t(AF_INET)
+        #if os(macOS)
+        sockaddr.sin_len = 16
+        #endif
 
-            expect(socket.peerAddress == Socket.Address.ip4(sockaddr))
-        }
+        expect(socket.peerAddress == Socket.Address.ip4(sockaddr))
+
         await loop.terminate()
     }
 
@@ -154,32 +148,29 @@ test.case("RemoteAddress") {
 
 test.case("Local6Address") {
     asyncTask {
-        await scope {
-            let socket = try Socket(family: .inet6)
-                .bind(to: "::1", port: 4008)
-                .listen()
+        let socket = try Socket(family: .inet6)
+            .bind(to: "::1", port: 4008)
+            .listen()
 
-            _ = try await socket.accept()
-        }
+        _ = try await socket.accept()
     }
 
     asyncTask {
-        await scope {
-            let socket = try Socket(family: .inet6)
-            _ = try await socket
-                .bind(to: "::1", port: 4009)
-                .connect(to: "::1", port: 4008)
+        let socket = try Socket(family: .inet6)
+        _ = try await socket
+            .bind(to: "::1", port: 4009)
+            .connect(to: "::1", port: 4008)
 
-            var sockaddr = sockaddr_in6()
-            inet_pton(AF_INET6, "::1", &sockaddr.sin6_addr)
-            sockaddr.sin6_port = UInt16(4009).byteSwapped
-            sockaddr.sin6_family = sa_family_t(AF_INET6)
-            #if os(macOS)
-            sockaddr.sin6_len = 28
-            #endif
+        var sockaddr = sockaddr_in6()
+        inet_pton(AF_INET6, "::1", &sockaddr.sin6_addr)
+        sockaddr.sin6_port = UInt16(4009).byteSwapped
+        sockaddr.sin6_family = sa_family_t(AF_INET6)
+        #if os(macOS)
+        sockaddr.sin6_len = 28
+        #endif
 
-            expect(socket.selfAddress == Socket.Address.ip6(sockaddr))
-        }
+        expect(socket.selfAddress == Socket.Address.ip6(sockaddr))
+
         await loop.terminate()
     }
 
@@ -188,32 +179,29 @@ test.case("Local6Address") {
 
 test.case("Remote6Address") {
     asyncTask {
-        await scope {
-            let socket = try Socket(family: .inet6)
-                .bind(to: "::1", port: 4010)
-                .listen()
+        let socket = try Socket(family: .inet6)
+            .bind(to: "::1", port: 4010)
+            .listen()
 
-            _ = try await socket.accept()
-        }
+        _ = try await socket.accept()
     }
 
     asyncTask {
-        await scope {
-            let socket = try Socket(family: .inet6)
-            _ = try await socket
-                .bind(to: "::1", port: 4011)
-                .connect(to: "::1", port: 4010)
+        let socket = try Socket(family: .inet6)
+        _ = try await socket
+            .bind(to: "::1", port: 4011)
+            .connect(to: "::1", port: 4010)
 
-            var sockaddr = sockaddr_in6()
-            inet_pton(AF_INET6, "::1", &sockaddr.sin6_addr)
-            sockaddr.sin6_port = UInt16(4010).byteSwapped
-            sockaddr.sin6_family = sa_family_t(AF_INET6)
-            #if os(macOS)
-            sockaddr.sin6_len = 28
-            #endif
+        var sockaddr = sockaddr_in6()
+        inet_pton(AF_INET6, "::1", &sockaddr.sin6_addr)
+        sockaddr.sin6_port = UInt16(4010).byteSwapped
+        sockaddr.sin6_family = sa_family_t(AF_INET6)
+        #if os(macOS)
+        sockaddr.sin6_len = 28
+        #endif
 
-            expect(socket.peerAddress == Socket.Address.ip6(sockaddr))
-        }
+        expect(socket.peerAddress == Socket.Address.ip6(sockaddr))
+
         await loop.terminate()
     }
 

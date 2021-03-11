@@ -13,20 +13,17 @@ test.case("SystemLogger") {
     unlink(unixPath)
 
     asyncTask {
-        await scope {
-            let socket = try Socket(family: .local, type: .datagram)
-            try socket.bind(to: unixPath)
-            let result = try await socket.read(max: 100, as: String.self)
-            expect(result == "[info] \(message)")
-        }
+        let socket = try Socket(family: .local, type: .datagram)
+        try socket.bind(to: unixPath)
+        let result = try await socket.read(max: 100, as: String.self)
+        expect(result == "[info] \(message)")
+
         await loop.terminate()
     }
 
     asyncTask {
-        await scope {
-            Log.use(try SystemLogger(unixPath: unixPath))
-            await Log.info(message)
-        }
+        Log.use(try SystemLogger(unixPath: unixPath))
+        await Log.info(message)
     }
 
     await loop.run()
