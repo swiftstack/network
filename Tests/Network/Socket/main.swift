@@ -2,6 +2,7 @@ import Test
 import Event
 import Platform
 
+@testable import Stream
 @testable import Network
 
 test.case("Socket") {

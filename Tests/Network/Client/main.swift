@@ -3,6 +3,7 @@ import Time
 import Event
 import Platform
 
+@testable import Stream
 @testable import Network
 
 test.case("Client") {
