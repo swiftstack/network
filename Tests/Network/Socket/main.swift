@@ -73,9 +73,8 @@ test.case("SocketInetStream") {
 test.case("SocketInetDatagram") {
     let message = [UInt8]("ping".utf8)
 
-    let server = try! Socket.Address("127.0.0.1", port: 3002)
-
     asyncTask {
+        let server = try! Socket.Address("127.0.0.1", port: 3002)
         let socket = try Socket(family: .inet, type: .datagram)
             .bind(to: server)
 
@@ -86,6 +85,7 @@ test.case("SocketInetDatagram") {
     }
 
     asyncTask {
+        let server = try! Socket.Address("127.0.0.1", port: 3002)
         let socket = try Socket(family: .inet, type: .datagram)
 
         let written = try await socket.send(bytes: message, to: server)
@@ -139,9 +139,8 @@ test.case("SocketInet6Stream") {
 test.case("SocketInet6Datagram") {
     let message = [UInt8]("ping".utf8)
 
-    let server = try! Socket.Address("::1", port: 3004)
-
     asyncTask {
+        let server = try! Socket.Address("::1", port: 3004)
         let socket = try Socket(family: .inet6, type: .datagram)
             .bind(to: server)
 
@@ -152,6 +151,7 @@ test.case("SocketInet6Datagram") {
     }
 
     asyncTask {
+        let server = try! Socket.Address("::1", port: 3004)
         let socket = try Socket(family: .inet6, type: .datagram)
 
         let written = try await socket.send(bytes: message, to: server)
@@ -208,10 +208,9 @@ test.case("SocketUnixDatagram") {
 
     unlink("/tmp/testdatagramserver.sock")
     unlink("/tmp/testdatagramclient.sock")
-    let server = try! Socket.Address("/tmp/testdatagramserver.sock")
-    let client = try! Socket.Address("/tmp/testdatagramclient.sock")
 
     asyncTask {
+        let server = try! Socket.Address("/tmp/testdatagramserver.sock")
         let socket = try Socket(family: .local, type: .datagram)
             .bind(to: server)
 
@@ -222,6 +221,8 @@ test.case("SocketUnixDatagram") {
     }
 
     asyncTask {
+        let server = try! Socket.Address("/tmp/testdatagramserver.sock")
+        let client = try! Socket.Address("/tmp/testdatagramclient.sock")
         let socket = try Socket(family: .local, type: .datagram)
             .bind(to: client)
 
