@@ -1,76 +1,115 @@
 import Platform
 
 extension Socket {
-    @discardableResult
-    public func configure(
-        _ configurator: (inout Options) throws -> Void
-    ) rethrows -> Self {
-        try configurator(&options)
-        return self
+    public enum Family: ConcurrentValue {
+        case local, inet, inet6
     }
 
-    public struct Options {
-        let descriptor: Descriptor
+    public enum `Type`: ConcurrentValue {
+        case stream, datagram, sequenced, raw
+    }
+}
 
-        public init(for descriptor: Descriptor) {
-            self.descriptor = descriptor
+extension Socket {
+    public var isNonBlocking: Bool {
+        get {
+            return descriptor.status & O_NONBLOCK != 0
         }
-
-        public func get(_ option: Option) throws -> Bool {
-            return try getValue(for: option.rawValue)
-        }
-
-        public func set(_ option: Option, _ value: Bool) throws {
-            try setValue(value, for: option.rawValue)
-        }
-
-        fileprivate func setValue(
-            _ value: Bool,
-            for option: Int32
-        ) throws {
-            var value: Int32 = value ? 1 : 0
-            try setValue(&value, size: MemoryLayout<Int32>.size, for: option)
-        }
-
-        fileprivate func getValue(for option: Int32) throws -> Bool {
-            var value: Int32 = 0
-            var valueSize = MemoryLayout<Int32>.size
-            try getValue(&value, size: &valueSize, for: option)
-            return value == 0 ? false : true
-        }
-
-        fileprivate func setValue(
-            _ pointer: UnsafeRawPointer,
-            size: Int,
-            for option: Int32
-        ) throws {
-            guard setsockopt(
-                descriptor.rawValue,
-                SOL_SOCKET,
-                option,
-                pointer,
-                socklen_t(size)) != -1 else
-            {
-                throw Socket.Error()
+        set {
+            switch newValue {
+            case true: descriptor.status |= O_NONBLOCK
+            case false: descriptor.status &= ~O_NONBLOCK
             }
         }
+    }
 
-        fileprivate func getValue(
-            _ pointer: UnsafeMutableRawPointer,
-            size: inout Int,
-            for option: Int32
-        ) throws {
-            var actualSize = socklen_t(size)
-            guard getsockopt(
-                descriptor.rawValue,
-                SOL_SOCKET,
-                option,
-                pointer,
-                &actualSize) != -1 else
-            {
-                throw Socket.Error()
-            }
-            size = Int(actualSize)
+    public enum Option: ConcurrentValue {
+        case reuseAddr, reusePort, broadcast
+        #if os(macOS)
+        case noSignalPipe
+        #endif
+    }
+
+    var noSignalPipe: Bool {
+        get { try! getOption(.noSignalPipe) }
+        nonmutating
+        set { try! setOption(.noSignalPipe, to: newValue) }
+    }
+
+    var reuseAddr: Bool {
+        get { try! getOption(.reuseAddr) }
+        nonmutating
+        set { try! setOption(.reuseAddr, to: newValue) }
+    }
+
+    var reusePort: Bool {
+        get { try! getOption(.reusePort) }
+        nonmutating
+        set { try! setOption(.reusePort, to: newValue) }
+    }
+
+    var broadcast: Bool {
+        get { try! getOption(.broadcast) }
+        nonmutating
+        set { try! setOption(.broadcast, to: newValue) }
+    }
+
+    // MARK: Utils
+
+    private func getOption(_ option: Option) throws -> Bool {
+        return try getValue(for: option.rawValue)
+    }
+
+    private func setOption(_ option: Option, to value: Bool) throws {
+        try setValue(value, for: option.rawValue)
+    }
+
+    private func setValue(
+        _ value: Bool,
+        for option: Int32
+    ) throws {
+        var value: Int32 = value ? 1 : 0
+        try setValue(&value, size: MemoryLayout<Int32>.size, for: option)
+    }
+
+    private func getValue(for option: Int32) throws -> Bool {
+        var value: Int32 = 0
+        var valueSize = MemoryLayout<Int32>.size
+        try getValue(&value, size: &valueSize, for: option)
+        return value == 0 ? false : true
+    }
+
+    private func setValue(
+        _ pointer: UnsafeRawPointer,
+        size: Int,
+        for option: Int32
+    ) throws {
+        guard setsockopt(
+            descriptor.rawValue,
+            SOL_SOCKET,
+            option,
+            pointer,
+            socklen_t(size)) != -1 else
+        {
+            throw Socket.Error()
         }
+    }
+
+    private func getValue(
+        _ pointer: UnsafeMutableRawPointer,
+        size: inout Int,
+        for option: Int32
+    ) throws {
+        var actualSize = socklen_t(size)
+        guard getsockopt(
+            descriptor.rawValue,
+            SOL_SOCKET,
+            option,
+            pointer,
+            &actualSize) != -1 else
+        {
+            throw Socket.Error()
+        }
+        size = Int(actualSize)
     }
 }

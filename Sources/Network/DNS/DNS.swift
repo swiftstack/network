@@ -11,11 +11,11 @@ struct DNS {
         deadline: Time = .distantFuture
     ) async throws -> Message {
         let server = try! Socket.Address(nameservers.first!, port: 53)
-        let socket = try Socket(type: .datagram)
+        let socket = try UDP.Socket()
 
         _ = try await socket.send(bytes: query.bytes, to: server)
         var buffer = [UInt8](repeating: 0, count: 1024)
-        let count = try await socket.receive(to: &buffer)
+        let (count, _) = try await socket.receive(to: &buffer)
         let response = [UInt8](buffer.prefix(upTo: count))
 
         return try Message(from: response)

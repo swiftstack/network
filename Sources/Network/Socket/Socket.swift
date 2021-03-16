@@ -1,197 +1,107 @@
-import Time
-import Event
 import Platform
 
-public final class Socket {
-    public enum Family {
-        case local, inet, inet6
-    }
+public struct Socket: ConcurrentValue {
+    public let descriptor: Descriptor
 
-    public enum `Type` {
-        case stream, datagram, sequenced, raw
-    }
-
-    public enum Option {
-        case reuseAddr, reusePort, broadcast
-        #if os(macOS)
-        case noSignalPipe
-        #endif
-    }
-
-    private var backlog: Int32 = 256
-
-    public private(set) var descriptor: Descriptor
-    public internal(set) var options: Options
-    public private(set) var family: Family
-    public private(set) var type: Type
-
-    public var nonBlock: Bool {
-        get {
-            return descriptor.status & O_NONBLOCK != 0
-        }
-        set {
-            switch newValue {
-            case true: descriptor.status |= O_NONBLOCK
-            case false: descriptor.status &= ~O_NONBLOCK
-            }
-        }
-    }
-
-    public convenience init(
-        family: Family = .inet,
-        type: Type = .stream
-    ) throws {
+    public init(family: Family = .inet, type: Type = .stream) throws {
         let fd = socket(family.rawValue, type.rawValue, 0)
         guard let descriptor = Descriptor(rawValue: fd) else {
             throw Socket.Error.badDescriptor
         }
-        try self.init(descriptor: descriptor, family: family, type: type)
+        try self.init(descriptor: descriptor)
     }
 
-    private init(
-        descriptor: Descriptor,
-        family: Family = .inet,
-        type: Type = .stream
-    ) throws {
-        self.type = type
-        self.family = family
+    private init(descriptor: Descriptor) throws {
         self.descriptor = descriptor
-        self.options = Options(for: descriptor)
     #if os(macOS)
-        try options.set(.noSignalPipe, true)
+        self.noSignalPipe = true
     #endif
-        try options.set(.reuseAddr, true)
-        self.nonBlock = true
-    }
-
-    deinit {
-        try? close()
+        self.reuseAddr = true
+        self.isNonBlocking = true
     }
 
     @discardableResult
     public func bind(to address: Address) throws -> Self {
         var copy = address
-        guard Platform.bind(
-            descriptor.rawValue, rebounded(&copy), address.size) != -1 else
-        {
-            throw Socket.Error()
+        try positiveResult {
+            Platform.bind(descriptor.rawValue, rebounded(&copy), address.size)
         }
         return self
     }
 
     @discardableResult
-    public func listen() throws -> Self {
-        guard Platform.listen(descriptor.rawValue, backlog) != -1 else {
-            throw Socket.Error()
+    public func listen(backlog: Int = 256) throws -> Self {
+        try positiveResult {
+            Platform.listen(descriptor.rawValue, Int32(backlog))
         }
         return self
     }
 
-    public func accept(deadline: Time = .distantFuture) async throws -> Socket {
-        let client = try await awaitIfNeeded(
-            for: descriptor,
-            event: .read,
-            deadline: deadline)
-        {
-            return Int(Platform.accept(descriptor.rawValue, nil, nil))
+    public func accept() throws -> Socket {
+        let client = try positiveResult {
+            Platform.accept(descriptor.rawValue, nil, nil)
         }
-        guard let descriptor = Descriptor(rawValue: Int32(client)) else {
+        guard let descriptor = Descriptor(rawValue: client) else {
             throw Socket.Error.badDescriptor
         }
-        return try Socket(descriptor: descriptor, family: family, type: type)
+        return try Socket(descriptor: descriptor)
     }
 
     @discardableResult
-    public func connect(
-        to address: Address,
-        deadline: Time = .distantFuture
-    ) async throws -> Self {
+    public func connect(to address: Address) throws -> Self {
         var copy = address
-        do {
-            _ = try await awaitIfNeeded(
-                for: descriptor,
-                event: .write,
-                deadline: deadline)
-            {
-                return Int(Platform.connect(
-                    descriptor.rawValue, rebounded(&copy), address.size))
-            }
-        } catch let error as Socket.Error where error == .inProgress {
-            try await loop.wait(for: descriptor, event: .write, deadline: deadline)
+        try positiveResult {
+            Platform.connect(descriptor.rawValue, rebounded(&copy), copy.size)
         }
         return self
     }
 
     public func close() throws {
-        guard Platform.close(descriptor.rawValue) != -1 else {
-            throw Socket.Error()
+        try positiveResult {
+            Platform.close(descriptor.rawValue)
         }
     }
 
-    public func send(
-        bytes: UnsafeRawPointer,
-        count: Int,
-        deadline: Time = .distantFuture
-    ) async throws -> Int {
-        return try await awaitIfNeeded(
-            for: descriptor,
-            event: .write,
-            deadline: deadline)
-        {
-            return Platform.send(descriptor.rawValue, bytes, count, noSignal)
+    public func send(bytes: UnsafeRawPointer, count: Int) throws -> Int {
+        try positiveResult {
+            Platform.send(descriptor.rawValue, bytes, count, noSignal)
         }
     }
 
     public func receive(
         to buffer: UnsafeMutableRawPointer,
-        count: Int,
-        deadline: Time = .distantFuture
-    ) async throws -> Int {
-        return try await awaitIfNeeded(
-            for: descriptor,
-            event: .read,
-            deadline: deadline)
-        {
-            return Platform.recv(descriptor.rawValue, buffer, count, 0)
+        count: Int
+    ) throws -> Int {
+        try positiveResult {
+            Platform.recv(descriptor.rawValue, buffer, count, 0)
         }
     }
 
     public func send(
         bytes: UnsafeRawPointer,
         count: Int,
-        to address: Address,
-        deadline: Time = .distantFuture
-    ) async throws -> Int {
+        to address: Address
+    ) throws -> Int {
         var copy = address
-        return try await awaitIfNeeded(
-            for: descriptor,
-            event: .write,
-            deadline: deadline)
-        {
-            return Platform.sendto(
+        return try positiveResult {
+            Platform.sendto(
                 descriptor.rawValue,
                 bytes,
                 count,
                 noSignal,
                 rebounded(&copy),
-                address.size)
+                copy.size)
         }
     }
 
     public func receive(
         to buffer: UnsafeMutableRawPointer,
-        count: Int,
-        from address: inout Address?,
-        deadline: Time = .distantFuture
-    ) async throws -> Int {
+        count: Int
+    ) throws -> (count: Int, from: Network.Socket.Address?) {
         var storage = sockaddr_storage()
         var size = sockaddr_storage.size
-        let received = try await awaitIfNeeded(
-            for: descriptor,
-            event: .read,
-            deadline: deadline)
-        {
-            return Platform.recvfrom(
+        let received = try positiveResult {
+            Platform.recvfrom(
                 descriptor.rawValue,
                 buffer,
                 count,
@@ -199,29 +109,17 @@ public final class Socket {
                 rebounded(&storage),
                 &size)
         }
-        address = Address(storage)
-        return received
+        return (received, Address(storage))
     }
 
-    fileprivate func awaitIfNeeded(
-        for descriptor: Descriptor,
-        event: IOEvent,
-        deadline: Time,
-        _ task: () -> Int) async throws -> Int
-    {
-        var result = 0
-        while true {
-            result = task()
-            guard result != -1 else {
-                switch Socket.Error() {
-                case .again, .wouldBlock, .interrupted:
-                    try await loop.wait(for: descriptor, event: event, deadline: deadline)
-                    continue
-                default:
-                    throw Socket.Error()
-                }
-            }
-            break
+    @inline(__always)
+    @discardableResult
+    private func positiveResult<Result: SignedInteger>(
+        _ task: () -> Result
+    ) throws -> Result {
+        let result = task()
+        guard result != -1 else {
+            throw Socket.Error()
         }
         return result
     }

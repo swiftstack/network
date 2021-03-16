@@ -8,7 +8,7 @@ import Platform
 
 test.case("Client") {
     asyncTask {
-        let socket = try Socket()
+        let socket = try TCP.Socket()
             .bind(to: "127.0.0.1", port: 6000)
             .listen()
 
@@ -19,13 +19,13 @@ test.case("Client") {
     }
 
     asyncTask {
-        let client = Client(host: "127.0.0.1", port: 6000)
+        let client = TCP.Client(host: "127.0.0.1", port: 6000)
         let stream = try await client.connect()
         expect(try await stream.write(from: [0,1,2,3,4]) == 5)
 
         var buffer = [UInt8](repeating: 0, count: 5)
         expect(try await stream.read(to: &buffer) == 5)
-
+    } deinit: {
         await loop.terminate()
     }
 

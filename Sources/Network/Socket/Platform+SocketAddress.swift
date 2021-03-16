@@ -1,57 +1,5 @@
 import Platform
 
-// MARK: raw values
-
-#if os(Linux)
-    let SOCK_STREAM = Int32(Glibc.SOCK_STREAM.rawValue)
-    let SOCK_DGRAM = Int32(Glibc.SOCK_DGRAM.rawValue)
-    let SOCK_SEQPACKET = Int32(Glibc.SOCK_SEQPACKET.rawValue)
-    let SOCK_RAW = Int32(Glibc.SOCK_RAW.rawValue)
-    let noSignal = Int32(MSG_NOSIGNAL)
-#else
-    let noSignal = Int32(0)
-#endif
-
-extension Socket.Family {
-    var rawValue: Int32 {
-        switch self {
-        case .local: return PF_LOCAL
-        case .inet: return PF_INET
-        case .inet6: return PF_INET6
-        }
-    }
-}
-
-extension Socket.`Type` {
-    var rawValue: Int32 {
-        switch self {
-        case .stream: return SOCK_STREAM
-        case .datagram: return SOCK_DGRAM
-        case .sequenced: return SOCK_SEQPACKET
-        case .raw: return SOCK_RAW
-        }
-    }
-}
-
-extension Socket.Option {
-    var rawValue: Int32 {
-        #if os(macOS)
-            switch self {
-            case .reuseAddr: return SO_REUSEADDR
-            case .reusePort: return SO_REUSEPORT
-            case .noSignalPipe: return SO_NOSIGPIPE
-            case .broadcast: return SO_BROADCAST
-            }
-        #else
-            switch self {
-            case .reuseAddr: return SO_REUSEADDR
-            case .reusePort: return SO_REUSEPORT
-            case .broadcast: return SO_BROADCAST
-            }
-        #endif
-    }
-}
-
 // MARK: convert
 
 func rebounded<T>(_ pointer: UnsafePointer<T>) -> UnsafePointer<sockaddr> {
@@ -68,7 +16,7 @@ extension in_addr {
         switch inet_pton(AF_INET, address, &addr) {
         case 1: self = addr
         case 0: return nil
-        case -1: throw Socket.Error() // TODO: define possible errors
+        case -1: throw Network.Socket.Error() // TODO: define possible errors
         default: preconditionFailure("inet_pton: unexpected return code")
         }
     }
@@ -80,7 +28,7 @@ extension in6_addr {
         switch inet_pton(AF_INET6, address, &addr6) {
         case 1: self = addr6
         case 0: return nil
-        case -1: throw Socket.Error() // TODO: define possible errors
+        case -1: throw Network.Socket.Error() // TODO: define possible errors
         default: preconditionFailure("inet_pton: unexpected return code")
         }
     }
@@ -167,9 +115,7 @@ extension sockaddr_in {
 
 extension sockaddr_in6 {
     var address: String {
-        get {
-            return self.sin6_addr.description
-        }
+        sin6_addr.description
     }
 
     var port: UInt16 {
@@ -209,13 +155,11 @@ extension sockaddr_in6 {
 
 extension sockaddr_un {
     var address: String {
-        get {
-            var path = self.sun_path
-            let size = MemoryLayout.size(ofValue: path)
-            var bytes = [Int8](repeating: 0, count: size)
-            memcpy(&bytes, &path, size-1)
-            return String(cString: bytes)
-        }
+        var path = self.sun_path
+        let size = MemoryLayout.size(ofValue: path)
+        var bytes = [Int8](repeating: 0, count: size)
+        memcpy(&bytes, &path, size-1)
+        return String(cString: bytes)
     }
 
     var family: Int32 {
@@ -224,7 +168,7 @@ extension sockaddr_un {
     }
 
     static var size: socklen_t {
-        return socklen_t(MemoryLayout<sockaddr_un>.size)
+        socklen_t(MemoryLayout<sockaddr_un>.size)
     }
 
     public init(_ address: String) throws {
@@ -250,43 +194,35 @@ extension sockaddr_un {
 
 extension sockaddr_in: CustomStringConvertible {
     public var description: String {
-        get {
-            return "\(address):\(port)"
-        }
+        "\(address):\(port)"
     }
 }
 
 extension sockaddr_in6: CustomStringConvertible {
     public var description: String {
-        get {
-            return "\(address):\(port)"
-        }
+        "\(address):\(port)"
     }
 }
 
 extension in_addr: CustomStringConvertible {
     public var description: String {
-        get {
-            var bytes = [Int8](repeating: 0, count: Int(INET_ADDRSTRLEN) + 1)
-            var addr = self
-            guard inet_ntop(AF_INET, &addr, &bytes, socklen_t(INET_ADDRSTRLEN)) != nil else {
-                return ""
-            }
-            return String(cString: bytes)
+        var bytes = [Int8](repeating: 0, count: Int(INET_ADDRSTRLEN) + 1)
+        var addr = self
+        guard inet_ntop(AF_INET, &addr, &bytes, socklen_t(INET_ADDRSTRLEN)) != nil else {
+            return ""
         }
+        return String(cString: bytes)
     }
 }
 
 extension in6_addr: CustomStringConvertible {
     public var description: String {
-        get {
-            var bytes = [Int8](repeating: 0, count: Int(INET6_ADDRSTRLEN) + 1)
-            var addr = self
-            guard inet_ntop(AF_INET6, &addr, &bytes, socklen_t(INET6_ADDRSTRLEN)) != nil else {
-                return ""
-            }
-            return String(cString: bytes)
+        var bytes = [Int8](repeating: 0, count: Int(INET6_ADDRSTRLEN) + 1)
+        var addr = self
+        guard inet_ntop(AF_INET6, &addr, &bytes, socklen_t(INET6_ADDRSTRLEN)) != nil else {
+            return ""
         }
+        return String(cString: bytes)
     }
 }
 

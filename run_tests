@@ -6,14 +6,15 @@ swift build
 
 export DYLD_LIBRARY_PATH=/Library/Developer/Toolchains/swift-latest.xctoolchain/usr/lib/swift/macosx
 
-.build/debug/Tests/Network/Abstraction
+.build/debug/Tests/Network/Abstractions
 .build/debug/Tests/Network/Address
-.build/debug/Tests/Network/Client
 .build/debug/Tests/Network/DNS
 .build/debug/Tests/Network/DNSMessage
 .build/debug/Tests/Network/IP
-.build/debug/Tests/Network/NetworkStream
-.build/debug/Tests/Network/Options
-.build/debug/Tests/Network/Server
 .build/debug/Tests/Network/Socket
 .build/debug/Tests/Network/SystemLogger
+.build/debug/Tests/Network/TCPClient
+.build/debug/Tests/Network/TCPServer
+.build/debug/Tests/Network/TCPSocket
+.build/debug/Tests/Network/TCPStream
+.build/debug/Tests/Network/UDPSocket

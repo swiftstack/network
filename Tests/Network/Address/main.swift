@@ -86,7 +86,7 @@ import Event
 
 test.case("LocalAddress") {
     asyncTask {
-        let socket = try Socket()
+        let socket = try TCP.Socket()
             .bind(to: "127.0.0.1", port: 4004)
             .listen()
 
@@ -94,7 +94,7 @@ test.case("LocalAddress") {
     }
 
     asyncTask {
-        let socket = try Socket()
+        let socket = try TCP.Socket()
         _ = try await socket
             .bind(to: "127.0.0.1", port: 4005)
             .connect(to: "127.0.0.1", port: 4004)
@@ -108,7 +108,7 @@ test.case("LocalAddress") {
         #endif
 
         expect(socket.selfAddress == Socket.Address.ip4(sockaddr))
-
+    } deinit: {
         await loop.terminate()
     }
 
@@ -117,7 +117,7 @@ test.case("LocalAddress") {
 
 test.case("RemoteAddress") {
     asyncTask {
-        let socket = try Socket()
+        let socket = try TCP.Socket()
             .bind(to: "127.0.0.1", port: 4006)
             .listen()
 
@@ -125,7 +125,7 @@ test.case("RemoteAddress") {
     }
 
     asyncTask {
-        let socket = try Socket()
+        let socket = try TCP.Socket()
         _ = try await socket
             .bind(to: "127.0.0.1", port: 4007)
             .connect(to: "127.0.0.1", port: 4006)
@@ -139,7 +139,7 @@ test.case("RemoteAddress") {
         #endif
 
         expect(socket.peerAddress == Socket.Address.ip4(sockaddr))
-
+    } deinit: {
         await loop.terminate()
     }
 
@@ -148,7 +148,7 @@ test.case("RemoteAddress") {
 
 test.case("Local6Address") {
     asyncTask {
-        let socket = try Socket(family: .inet6)
+        let socket = try TCP.Socket(family: .inet6)
             .bind(to: "::1", port: 4008)
             .listen()
 
@@ -156,7 +156,7 @@ test.case("Local6Address") {
     }
 
     asyncTask {
-        let socket = try Socket(family: .inet6)
+        let socket = try TCP.Socket(family: .inet6)
         _ = try await socket
             .bind(to: "::1", port: 4009)
             .connect(to: "::1", port: 4008)
@@ -170,7 +170,7 @@ test.case("Local6Address") {
         #endif
 
         expect(socket.selfAddress == Socket.Address.ip6(sockaddr))
-
+    } deinit: {
         await loop.terminate()
     }
 
@@ -179,7 +179,7 @@ test.case("Local6Address") {
 
 test.case("Remote6Address") {
     asyncTask {
-        let socket = try Socket(family: .inet6)
+        let socket = try TCP.Socket(family: .inet6)
             .bind(to: "::1", port: 4010)
             .listen()
 
@@ -187,7 +187,7 @@ test.case("Remote6Address") {
     }
 
     asyncTask {
-        let socket = try Socket(family: .inet6)
+        let socket = try TCP.Socket(family: .inet6)
         _ = try await socket
             .bind(to: "::1", port: 4011)
             .connect(to: "::1", port: 4010)
@@ -201,7 +201,7 @@ test.case("Remote6Address") {
         #endif
 
         expect(socket.peerAddress == Socket.Address.ip6(sockaddr))
-
+    } deinit: {
         await loop.terminate()
     }
 

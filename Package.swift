@@ -29,17 +29,18 @@ let package = Package(
 // MARK: - tests
 
 testTarget("Network") { test in
-    test("Abstraction")
+    test("Abstractions")
     test("Address")
-    test("Client")
     test("DNS")
     test("DNSMessage")
     test("IP")
-    test("NetworkStream")
-    test("Options")
-    test("Server")
     test("Socket")
     test("SystemLogger")
+    test("TCPClient")
+    test("TCPServer")
+    test("TCPSocket")
+    test("TCPStream")
+    test("UDPSocket")
 }
 
 func testTarget(_ target: String, task: ((String) -> Void) -> Void) {

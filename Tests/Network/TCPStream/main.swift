@@ -8,12 +8,12 @@ import Platform
 
 test.case("NetworkStream") {
     asyncTask {
-        let listener = try Socket()
+        let listener = try TCP.Socket()
             .bind(to: "127.0.0.1", port: 7000)
             .listen()
 
         let server = try await listener.accept()
-        let stream = NetworkStream(socket: server)
+        let stream = TCP.Stream(socket: server)
 
         var buffer = [UInt8](repeating: 0, count: 5)
         expect(try await stream.read(to: &buffer) == 5)
@@ -23,13 +23,13 @@ test.case("NetworkStream") {
     }
 
     asyncTask {
-        let client = try await Socket().connect(to: "127.0.0.1", port: 7000)
-        let stream = NetworkStream(socket: client)
+        let client = try await TCP.Socket().connect(to: "127.0.0.1", port: 7000)
+        let stream = TCP.Stream(socket: client)
         expect(try await stream.write(from: [0,1,2,3,4]) == 5)
 
         var buffer = [UInt8](repeating: 0, count: 5)
         expect(try await stream.read(to: &buffer) == 5)
-
+    } deinit: {
         await loop.terminate()
     }
 
@@ -39,7 +39,7 @@ test.case("NetworkStream") {
 #if os(macOS)
 test.case("NetworkStreamError") {
     asyncTask {
-        let listener = try Socket()
+        let listener = try TCP.Socket()
             .bind(to: "127.0.0.1", port: 7001)
             .listen()
 
@@ -47,8 +47,8 @@ test.case("NetworkStreamError") {
     }
 
     asyncTask {
-        let client = try await Socket().connect(to: "127.0.0.1", port: 7001)
-        let stream = NetworkStream(socket: client)
+        let client = try await TCP.Socket().connect(to: "127.0.0.1", port: 7001)
+        let stream = TCP.Stream(socket: client)
         try client.close()
 
         var buffer = [UInt8](repeating: 0, count: 100)
@@ -59,7 +59,7 @@ test.case("NetworkStreamError") {
         expect(throws: Socket.Error.badDescriptor) {
             _ = try await stream.write(from: buffer)
         }
-
+    } deinit: {
         await loop.terminate()
     }
 

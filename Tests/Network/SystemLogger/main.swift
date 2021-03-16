@@ -13,11 +13,11 @@ test.case("SystemLogger") {
     unlink(unixPath)
 
     asyncTask {
-        let socket = try Socket(family: .local, type: .datagram)
+        let socket = try UDP.Socket(family: .local)
         try socket.bind(to: unixPath)
         let result = try await socket.read(max: 100, as: String.self)
         expect(result == "[info] \(message)")
-
+    } deinit: {
         await loop.terminate()
     }
 
@@ -29,12 +29,11 @@ test.case("SystemLogger") {
     await loop.run()
 }
 
-extension Socket {
+extension UDP.Socket {
     func read(max: Int, as: String.Type) async throws -> String {
-        var client: Socket.Address? = nil
         var buffer = [UInt8](repeating: 0, count: max)
-        _ = try await receive(to: &buffer, from: &client)
-        return String(cString: buffer + [0])
+        let (count,_) = try await receive(to: &buffer)
+        return String(decoding: buffer[..<count], as: UTF8.self)
     }
 }
 

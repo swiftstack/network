@@ -18,7 +18,7 @@ test.case("MakeRequest") {
 
         expect(response.authority == [])
         expect(response.additional == [])
-
+    } deinit: {
         await loop.terminate()
     }
 
@@ -30,7 +30,7 @@ test.case("Resolve") {
         let addresses = try await DNS.resolve(domain: "swiftstack.io")
         expect(addresses.count == 1)
         expect(addresses.first == .v4(.init(116,203,222,133)))
-
+    } deinit: {
         await loop.terminate()
     }
 

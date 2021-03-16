@@ -9,10 +9,10 @@ public class SystemLogger: LogProtocol {
     #endif
 
     var reconnectAttempts = 2
-    public var socket: Socket
+    public var socket: UDP.Socket
 
     public init() throws {
-        self.socket = try Socket(family: .local, type: .datagram)
+        self.socket = try UDP.Socket(family: .local)
     }
 
     deinit {
@@ -34,14 +34,15 @@ public class SystemLogger: LogProtocol {
         print("can't log message", message)
     }
 
-    // FIXME: [Concurrency]
+    // TODO: optimize
     func write(_ message: String) async throws {
         let data = [UInt8](message.utf8)
         var total = 0
         while total < data.count {
-            let written = try await socket.send(bytes: data, to: log)
+            let rest = [UInt8](data[total...])
+            let written = try await socket.send(bytes: rest, to: log)
             guard written > 0 else {
-                throw SystemError()
+                throw Network.Socket.Error.connectionReset
             }
             total += written
         }
@@ -50,7 +51,7 @@ public class SystemLogger: LogProtocol {
     func reconnect() {
         try? socket.close()
         do {
-            self.socket = try Socket(family: .local, type: .datagram)
+            self.socket = try UDP.Socket(family: .local)
         } catch {
             print("can't create syslog socket: \(error)")
         }
