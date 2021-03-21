@@ -50,9 +50,7 @@ extension UDP {
                     var buffer = [UInt8](repeating: 0, count: 16348)
                     let (count, from) = try await socket.receive(to: &buffer)
                     let bytes = [UInt8](buffer.prefix(count))
-                    _ = Task.runDetached {
-                        await self.onData(bytes, from!)
-                    }
+                    await self.onData(bytes, from!)
                 } catch {
                     await onError(error)
                 }

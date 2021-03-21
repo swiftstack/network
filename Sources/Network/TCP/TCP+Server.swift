@@ -44,9 +44,7 @@ extension TCP {
             while true {
                 do {
                     let client = try await socket.accept()
-                    _ = Task.runDetached {
-                        await self.onClient(client)
-                    }
+                    await self.onClient(client)
                 } catch {
                     await onError(error)
                 }
