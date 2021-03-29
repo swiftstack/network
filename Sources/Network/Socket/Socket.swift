@@ -97,7 +97,7 @@ public struct Socket: ConcurrentValue {
     public func receive(
         to buffer: UnsafeMutableRawPointer,
         count: Int
-    ) throws -> (count: Int, from: Network.Socket.Address?) {
+    ) throws -> (count: Int, from: Network.Socket.Address) {
         var storage = sockaddr_storage()
         var size = sockaddr_storage.size
         let received = try positiveResult {
@@ -109,7 +109,10 @@ public struct Socket: ConcurrentValue {
                 rebounded(&storage),
                 &size)
         }
-        return (received, Address(storage))
+        guard let address = Address(storage) else {
+            throw Error.invalidArgument
+        }
+        return (received, address)
     }
 
     @inline(__always)

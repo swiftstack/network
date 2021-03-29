@@ -46,7 +46,7 @@ extension Socket {
 
     public func receive(
         to buffer: inout [UInt8]
-    ) throws -> (count: Int, from: Network.Socket.Address?) {
+    ) throws -> (count: Int, from: Network.Socket.Address) {
         try receive(to: &buffer, count: buffer.count)
     }
 
@@ -58,7 +58,7 @@ extension Socket {
 
     public func receive(
         to buffer: UnsafeMutableRawBufferPointer
-    ) throws -> (count: Int, from: Network.Socket.Address?) {
+    ) throws -> (count: Int, from: Network.Socket.Address) {
         try receive(to: buffer.baseAddress!, count: buffer.count)
     }
 }
