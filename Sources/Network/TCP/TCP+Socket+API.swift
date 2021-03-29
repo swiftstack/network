@@ -54,14 +54,17 @@ extension TCP.Socket {
             deadline: deadline)
     }
 
+    // FIXME: [Concurrency]
     public func receive(
-        to buffer: inout [UInt8],
+        maxLength: Int,
         deadline: Time = .distantFuture
-    ) async throws -> Int {
-        try await receive(
-            to: &buffer,
-            count: buffer.count,
-            deadline: deadline)
+    ) async throws -> [UInt8] {
+        let buffer = UnsafeMutableRawBufferPointer.allocate(
+            byteCount: maxLength,
+            alignment: MemoryLayout<UInt>.alignment)
+        defer { buffer.deallocate() }
+        let count = try await receive(to: buffer, deadline: deadline)
+        return [UInt8](buffer[..<count])
     }
 
     public func receive(

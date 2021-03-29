@@ -47,10 +47,8 @@ extension UDP {
         func startAsync() async {
             while true {
                 do {
-                    var buffer = [UInt8](repeating: 0, count: 16348)
-                    let (count, from) = try await socket.receive(to: &buffer)
-                    let bytes = [UInt8](buffer.prefix(count))
-                    await self.onData(bytes, from!)
+                    let result = try await socket.receive(maxLength: 16348)
+                    await self.onData(result.data, result.from)
                 } catch {
                     await onError(error)
                 }

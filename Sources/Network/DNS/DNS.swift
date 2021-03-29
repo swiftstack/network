@@ -14,11 +14,9 @@ struct DNS {
         let socket = try UDP.Socket()
 
         _ = try await socket.send(bytes: query.bytes, to: server)
-        var buffer = [UInt8](repeating: 0, count: 1024)
-        let (count, _) = try await socket.receive(to: &buffer)
-        let response = [UInt8](buffer.prefix(upTo: count))
+        let result = try await socket.receive(maxLength: 1024)
 
-        return try Message(from: response)
+        return try Message(from: result.data)
     }
 
     public static func resolve(

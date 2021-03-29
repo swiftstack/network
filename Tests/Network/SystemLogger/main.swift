@@ -31,9 +31,8 @@ test.case("SystemLogger") {
 
 extension UDP.Socket {
     func read(max: Int, as: String.Type) async throws -> String {
-        var buffer = [UInt8](repeating: 0, count: max)
-        let (count,_) = try await receive(to: &buffer)
-        return String(decoding: buffer[..<count], as: UTF8.self)
+        let result = try await receive(maxLength: max)
+        return String(decoding: result.data, as: UTF8.self)
     }
 }
 

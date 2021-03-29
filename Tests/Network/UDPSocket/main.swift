@@ -12,9 +12,8 @@ test.case("UDP IPv4 Socket") {
         let socket = try UDP.Socket(family: .inet)
             .bind(to: server)
 
-        var buffer = [UInt8](repeating: 0, count: message.count)
-        let (_, client) = try await socket.receive(to: &buffer)
-        _ = try await socket.send(bytes: message, to: client!)
+        let result = try await socket.receive(maxLength: message.count)
+        _ = try await socket.send(bytes: result.data, to: result.from)
     }
 
     asyncTask {
@@ -24,11 +23,10 @@ test.case("UDP IPv4 Socket") {
         let written = try await socket.send(bytes: message, to: server)
         expect(written == message.count)
 
-        var buffer = [UInt8](repeating: 0, count: message.count)
-        let (read, sender) = try await socket.receive(to: &buffer)
-        expect(sender == server)
-        expect(read == message.count)
-        expect(buffer == message)
+        let result = try await socket.receive(maxLength: message.count)
+        expect(result.from == server)
+        expect(result.data.count == message.count)
+        expect(result.data == message)
     } deinit: {
         await loop.terminate()
     }
@@ -44,9 +42,8 @@ test.case("UDP IPv6 Socket") {
         let socket = try UDP.Socket(family: .inet6)
             .bind(to: server)
 
-        var buffer = [UInt8](repeating: 0, count: message.count)
-        let (_, client) = try await socket.receive(to: &buffer)
-        _ = try await socket.send(bytes: message, to: client!)
+        let result = try await socket.receive(maxLength: message.count)
+        _ = try await socket.send(bytes: result.data, to: result.from)
     }
 
     asyncTask {
@@ -56,11 +53,10 @@ test.case("UDP IPv6 Socket") {
         let written = try await socket.send(bytes: message, to: server)
         expect(written == message.count)
 
-        var buffer = [UInt8](repeating: 0, count: message.count)
-        let (read, sender) = try await socket.receive(to: &buffer)
-        expect(sender == server)
-        expect(read == message.count)
-        expect(buffer == message)
+        let result = try await socket.receive(maxLength: message.count)
+        expect(result.from == server)
+        expect(result.data.count == message.count)
+        expect(result.data == message)
     } deinit: {
         await loop.terminate()
     }
@@ -87,9 +83,8 @@ test.case("UDP Unix Socket") {
         let socket = try UDP.Socket(family: .local)
             .bind(to: server)
 
-        var buffer = [UInt8](repeating: 0, count: message.count)
-        let (_, client) = try await socket.receive(to: &buffer)
-        _ = try await socket.send(bytes: message, to: client!)
+        let result = try await socket.receive(maxLength: message.count)
+        _ = try await socket.send(bytes: result.data, to: result.from)
     }
 
     asyncTask {
@@ -101,11 +96,10 @@ test.case("UDP Unix Socket") {
         let written = try await socket.send(bytes: message, to: server)
         expect(written == message.count)
 
-        var buffer = [UInt8](repeating: 0, count: message.count)
-        let (read, sender) = try await socket.receive(to: &buffer)
-        expect(sender == server)
-        expect(read == message.count)
-        expect(buffer == message)
+        let result = try await socket.receive(maxLength: message.count)
+        expect(result.from == server)
+        expect(result.data.count == message.count)
+        expect(result.data == message)
     } deinit: {
         await loop.terminate()
     }

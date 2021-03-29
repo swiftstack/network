@@ -13,9 +13,8 @@ test.case("Client") {
             .listen()
 
         let client = try await socket.accept()
-        var buffer = [UInt8](repeating: 0, count: 5)
-        _ = try await client.receive(to: &buffer)
-        _ = try await client.send(bytes: [0,1,2,3,4])
+        let bytes = try await client.receive(maxLength: 5)
+        _ = try await client.send(bytes: bytes)
     }
 
     asyncTask {

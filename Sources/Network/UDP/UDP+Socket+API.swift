@@ -37,20 +37,26 @@ extension UDP.Socket {
             deadline: deadline)
     }
 
+    // FIXME: [Concurrency]
+    // compiler crash with -> (bytes: [UInt8], from: Address) tuple
     public func receive(
-        to buffer: inout [UInt8],
+        maxLength: Int,
         deadline: Time = .distantFuture
-    ) async throws -> (count: Int, from: Network.Socket.Address?) {
-        try await receive(
-            to: &buffer,
-            count: buffer.count,
-            deadline: deadline)
+    ) async throws -> Result<[UInt8]> {
+        let buffer = UnsafeMutableRawBufferPointer.allocate(
+            byteCount: maxLength,
+            alignment: MemoryLayout<UInt>.alignment)
+        defer { buffer.deallocate() }
+        let result = try await receive(to: buffer, deadline: deadline)
+        return .init(data: [UInt8](buffer[..<result.data]), from: result.from)
     }
 
+    // FIXME: [Concurrency]
+    // compiler crash with -> (count: Int, from: Address) tuple
     public func receive(
         to buffer: UnsafeMutableRawBufferPointer,
         deadline: Time = .distantFuture
-    ) async throws -> (count: Int, from: Network.Socket.Address?) {
+    ) async throws -> Result<Int> {
         try await receive(
             to: buffer.baseAddress!,
             count: buffer.count,

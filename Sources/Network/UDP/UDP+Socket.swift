@@ -43,13 +43,22 @@ public enum UDP {
             }
         }
 
+        // FIXME: [Concurrency]
+        // compiler crash with -> (count: Int, from: Address) tuple
+
+        public struct Result<T> {
+            let data: T
+            let from: Network.Socket.Address
+        }
+
         public func receive(
             to buffer: UnsafeMutableRawPointer,
             count: Int,
             deadline: Time = .distantFuture
-        ) async throws -> (count: Int, from: Network.Socket.Address?) {
+        ) async throws -> Result<Int> {
             try await awaitIfNeeded(event: .read, deadline: deadline) {
-                try socket.receive(to: buffer, count: count)
+                let (count, from) = try socket.receive(to: buffer, count: count)
+                return .init(data: count, from: from)
             }
         }
 

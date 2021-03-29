@@ -14,9 +14,8 @@ test.case("Socket default") {
             .listen()
 
         let client = try await socket.accept()
-        var buffer = [UInt8](repeating: 0, count: message.count)
-        _ = try await client.receive(to: &buffer)
-        _ = try await client.send(bytes: buffer)
+        let response = try await client.receive(maxLength: message.count)
+        _ = try await client.send(bytes: response)
     }
 
     asyncTask {
@@ -26,9 +25,8 @@ test.case("Socket default") {
         let written = try await socket.send(bytes: message)
         expect(written == message.count)
 
-        var response = [UInt8](repeating: 0, count: message.count)
-        let read = try await socket.receive(to: &response)
-        expect(read == message.count)
+        let response = try await socket.receive(maxLength: message.count)
+        expect(response.count == message.count)
         expect(response == message)
     } deinit: {
         await loop.terminate()
@@ -46,9 +44,8 @@ test.case("Socket IPv4") {
             .listen()
 
         let client = try await socket.accept()
-        var buffer = [UInt8](repeating: 0, count: message.count)
-        _ = try await client.receive(to: &buffer)
-        _ = try await client.send(bytes: buffer)
+        let response = try await client.receive(maxLength: message.count)
+        _ = try await client.send(bytes: response)
     }
 
 
@@ -59,9 +56,8 @@ test.case("Socket IPv4") {
         let written = try await socket.send(bytes: message)
         expect(written == message.count)
 
-        var response = [UInt8](repeating: 0, count: message.count)
-        let read = try await socket.receive(to: &response)
-        expect(read == message.count)
+        let response = try await socket.receive(maxLength: message.count)
+        expect(response.count == message.count)
         expect(response == message)
     } deinit: {
         await loop.terminate()
@@ -79,9 +75,8 @@ test.case("Socket IPv6") {
             .listen()
 
         let client = try await socket.accept()
-        var buffer = [UInt8](repeating: 0, count: message.count)
-        _ = try await client.receive(to: &buffer)
-        _ = try await client.send(bytes: buffer)
+        let response = try await client.receive(maxLength: message.count)
+        _ = try await client.send(bytes: response)
     }
 
     asyncTask {
@@ -91,9 +86,8 @@ test.case("Socket IPv6") {
         let written = try await socket.send(bytes: message)
         expect(written == message.count)
 
-        var response = [UInt8](repeating: 0, count: message.count)
-        let read = try await socket.receive(to: &response)
-        expect(read == message.count)
+        let response = try await socket.receive(maxLength: message.count)
+        expect(response.count == message.count)
         expect(response == message)
     } deinit: {
         await loop.terminate()
@@ -119,9 +113,8 @@ test.case("Socket Unix") {
             .listen()
 
         let client = try await socket.accept()
-        var buffer = [UInt8](repeating: 0, count: message.count)
-        _ = try await client.receive(to: &buffer)
-        _ = try await client.send(bytes: buffer)
+        let response = try await client.receive(maxLength: message.count)
+        _ = try await client.send(bytes: response)
     }
 
     asyncTask {
@@ -133,9 +126,8 @@ test.case("Socket Unix") {
         let written = try await socket.send(bytes: message)
         expect(written == message.count)
 
-        var response = [UInt8](repeating: 0, count: message.count)
-        let read = try await socket.receive(to: &response)
-        expect(read == message.count)
+        let response = try await socket.receive(maxLength: message.count)
+        expect(response.count == message.count)
         expect(response == message)
     } deinit: {
         await loop.terminate()
@@ -156,9 +148,8 @@ test.case("Socket Unix Sequenced") {
             .listen()
 
         let client = try await socket.accept()
-        var buffer = [UInt8](repeating: 0, count: message.count)
-        _ = try await client.receive(to: &buffer)
-        _ = try await client.send(bytes: buffer)
+        let response = try await client.receive(maxLength: message.count)
+        _ = try await client.send(bytes: response)
     }
 
     asyncTask {
@@ -168,9 +159,8 @@ test.case("Socket Unix Sequenced") {
         let written = try await socket.send(bytes: message)
         expect(written == message.count)
 
-        var response = [UInt8](repeating: 0, count: message.count)
-        let read = try await socket.receive(to: &response)
-        expect(read == message.count)
+        let response = try await socket.receive(maxLength: message.count)
+        expect(response.count == message.count)
         expect(response == message)
     } deinit: {
         await loop.terminate()
