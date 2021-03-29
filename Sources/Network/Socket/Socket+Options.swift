@@ -1,11 +1,11 @@
 import Platform
 
 extension Socket {
-    public enum Family: ConcurrentValue {
+    public enum Family: Sendable {
         case local, inet, inet6
     }
 
-    public enum `Type`: ConcurrentValue {
+    public enum `Type`: Sendable {
         case stream, datagram, sequenced, raw
     }
 }
@@ -23,7 +23,7 @@ extension Socket {
         }
     }
 
-    public enum Option: ConcurrentValue {
+    public enum Option: Sendable {
         case reuseAddr, reusePort, broadcast
         #if os(macOS)
         case noSignalPipe

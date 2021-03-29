@@ -3,7 +3,7 @@ import Event
 import Platform
 
 public enum UDP {
-    public final class Socket: ConcurrentValue {
+    public final class Socket: Sendable {
         public let socket: Network.Socket
 
         public var selfAddress: Network.Socket.Address? { socket.selfAddress }

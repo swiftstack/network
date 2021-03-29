@@ -1,7 +1,7 @@
 import Platform
 
 extension Socket {
-    public enum Address: ConcurrentValue {
+    public enum Address: Sendable {
         case ip4(sockaddr_in)
         case ip6(sockaddr_in6)
         case unix(sockaddr_un)

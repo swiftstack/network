@@ -1,6 +1,6 @@
 import Platform
 
-public struct Socket: ConcurrentValue {
+public struct Socket: Sendable {
     public let descriptor: Descriptor
 
     public init(family: Family = .inet, type: Type = .stream) throws {
