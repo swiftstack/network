@@ -30,11 +30,13 @@ extension Socket {
         #endif
     }
 
+    #if os(macOS) || os(iOS)
     var noSignalPipe: Bool {
         get { try! getOption(.noSignalPipe) }
         nonmutating
         set { try! setOption(.noSignalPipe, to: newValue) }
     }
+    #endif
 
     var reuseAddr: Bool {
         get { try! getOption(.reuseAddr) }
