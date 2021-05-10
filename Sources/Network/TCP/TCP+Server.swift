@@ -5,7 +5,7 @@ extension TCP {
     public actor Server {
         var handle: Task.Handle<Void, Never>?
 
-        public let socket: TCP.Socket
+        public nonisolated let socket: TCP.Socket
 
         @actorIndependent(unsafe)
         public var onClient: (TCP.Socket) async -> Void = { _ in }

@@ -5,7 +5,7 @@ extension UDP {
     public actor Server {
         var handle: Task.Handle<Void, Never>?
 
-        public let socket: UDP.Socket
+        public nonisolated let socket: UDP.Socket
 
         @actorIndependent(unsafe)
         public var onData: (
