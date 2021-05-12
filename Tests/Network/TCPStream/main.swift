@@ -53,10 +53,10 @@ test.case("NetworkStreamError") {
 
         var buffer = [UInt8](repeating: 0, count: 100)
         // FIXME: hangs on linux
-        expect(throws: Socket.Error.badDescriptor) {
+        await expect(throws: Socket.Error.badDescriptor) {
             _ = try await stream.read(to: &buffer)
         }
-        expect(throws: Socket.Error.badDescriptor) {
+        await expect(throws: Socket.Error.badDescriptor) {
             _ = try await stream.write(from: buffer)
         }
     } deinit: {
