@@ -3,9 +3,7 @@ import Platform
 
 extension UDP {
     public actor Server {
-        var handle: Task.Handle<Void, Never>?
-
-        public nonisolated let socket: UDP.Socket
+        public let socket: UDP.Socket
 
         @actorIndependent(unsafe)
         public var onData: (
