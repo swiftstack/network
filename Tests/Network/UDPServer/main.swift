@@ -1,0 +1,42 @@
+import Test
+import Event
+import Platform
+
+@testable import Network
+
+test.case("Server") {
+    asyncTask {
+        let server = try UDP.Server(host: "127.0.0.1", port: 8000)
+        await server.onData { (bytes, from) in
+            do {
+                expect(bytes == [0,1,2,3,4])
+                let sent = try await server.socket.send(bytes: bytes, to: from)
+                expect(sent == 5)
+            } catch {
+                fail(String(describing: error))
+            }
+        }
+        try await server.start()
+    }
+
+    asyncTask {
+        let server = try! Socket.Address("127.0.0.1", port: 8000)
+        let socket = try UDP.Socket()
+
+        // FIXME: Use IPC package
+        await Task.sleep(1_000_000)
+
+        let sent = try await socket.send(bytes: [0,1,2,3,4], to: server)
+        expect(sent == 5)
+
+        let (data, address) = try await socket.receive(maxLength: 5)
+        expect(data == [0,1,2,3,4])
+        expect(address == (try .init("127.0.0.1", port: 8000)))
+    } deinit: {
+        await loop.terminate()
+    }
+
+    await loop.run()
+}
+
+test.run()

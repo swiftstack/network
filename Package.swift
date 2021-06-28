@@ -41,6 +41,7 @@ testTarget("Network") { test in
     test("TCPServer")
     test("TCPSocket")
     test("TCPStream")
+    test("UDPServer")
     test("UDPSocket")
 }
 

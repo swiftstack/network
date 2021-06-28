@@ -40,7 +40,6 @@ extension UDP {
         }
 
         public func start() async throws {
-            try socket.listen()
             await startAsync()
         }
 
