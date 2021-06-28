@@ -16,7 +16,7 @@ struct DNS {
         _ = try await socket.send(bytes: query.bytes, to: server)
         let result = try await socket.receive(maxLength: 1024)
 
-        return try Message(from: result.data)
+        return try Message(from: result.bytes)
     }
 
     public static func resolve(

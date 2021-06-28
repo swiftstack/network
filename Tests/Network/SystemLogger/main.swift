@@ -32,7 +32,7 @@ test.case("SystemLogger") {
 extension UDP.Socket {
     func read(max: Int, as: String.Type) async throws -> String {
         let result = try await receive(maxLength: max)
-        return String(decoding: result.data, as: UTF8.self)
+        return String(decoding: result.bytes, as: UTF8.self)
     }
 }
 

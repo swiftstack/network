@@ -13,7 +13,7 @@ test.case("UDP IPv4 Socket") {
             .bind(to: server)
 
         let result = try await socket.receive(maxLength: message.count)
-        _ = try await socket.send(bytes: result.data, to: result.from)
+        _ = try await socket.send(bytes: result.bytes, to: result.from)
     }
 
     asyncTask {
@@ -25,8 +25,8 @@ test.case("UDP IPv4 Socket") {
 
         let result = try await socket.receive(maxLength: message.count)
         expect(result.from == server)
-        expect(result.data.count == message.count)
-        expect(result.data == message)
+        expect(result.bytes.count == message.count)
+        expect(result.bytes == message)
     } deinit: {
         await loop.terminate()
     }
@@ -43,7 +43,7 @@ test.case("UDP IPv6 Socket") {
             .bind(to: server)
 
         let result = try await socket.receive(maxLength: message.count)
-        _ = try await socket.send(bytes: result.data, to: result.from)
+        _ = try await socket.send(bytes: result.bytes, to: result.from)
     }
 
     asyncTask {
@@ -55,8 +55,8 @@ test.case("UDP IPv6 Socket") {
 
         let result = try await socket.receive(maxLength: message.count)
         expect(result.from == server)
-        expect(result.data.count == message.count)
-        expect(result.data == message)
+        expect(result.bytes.count == message.count)
+        expect(result.bytes == message)
     } deinit: {
         await loop.terminate()
     }
@@ -84,7 +84,7 @@ test.case("UDP Unix Socket") {
             .bind(to: server)
 
         let result = try await socket.receive(maxLength: message.count)
-        _ = try await socket.send(bytes: result.data, to: result.from)
+        _ = try await socket.send(bytes: result.bytes, to: result.from)
     }
 
     asyncTask {
@@ -98,8 +98,8 @@ test.case("UDP Unix Socket") {
 
         let result = try await socket.receive(maxLength: message.count)
         expect(result.from == server)
-        expect(result.data.count == message.count)
-        expect(result.data == message)
+        expect(result.bytes.count == message.count)
+        expect(result.bytes == message)
     } deinit: {
         await loop.terminate()
     }
