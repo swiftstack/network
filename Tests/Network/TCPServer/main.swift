@@ -1,5 +1,4 @@
 import Test
-import Time
 import Event
 import Platform
 
@@ -29,6 +28,15 @@ test.case("Server") {
     }
 
     await loop.run()
+}
+
+test.case("chained api calls") {
+    let address = try await TCP.Server(host: "127.0.0.1", port: 5001)
+        .onClient { _ in }
+        .onError { _ in }
+        .address
+
+    expect(address == "127.0.0.1:5001")
 }
 
 test.run()

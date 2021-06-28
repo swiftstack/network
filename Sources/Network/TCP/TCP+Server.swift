@@ -31,12 +31,16 @@ extension TCP {
             try? socket.close()
         }
 
-        public func onClient(_ handler: @escaping OnClientHandler) async {
+        @discardableResult
+        public func onClient(_ handler: @escaping OnClientHandler) async -> Self {
             self.onClientHandler = handler
+            return self
         }
 
-        public func onError(_ handler: @escaping OnErrorHandler) async {
+        @discardableResult
+        public func onError(_ handler: @escaping OnErrorHandler) async -> Self {
             self.onErrorHandler = handler
+            return self
         }
 
         public func start() async throws {

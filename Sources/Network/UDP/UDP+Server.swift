@@ -31,12 +31,16 @@ extension UDP {
             try? socket.close()
         }
 
-        public func onData(_ handler: @escaping OnDataHandler) async {
+        @discardableResult
+        public func onData(_ handler: @escaping OnDataHandler) async -> Self {
             self.onDataHandler = handler
+            return self
         }
 
-        public func onError(_ handler: @escaping OnErrorHandler) async {
+        @discardableResult
+        public func onError(_ handler: @escaping OnErrorHandler) async -> Self {
             self.onErrorHandler = handler
+            return self
         }
 
         public func start() async throws {

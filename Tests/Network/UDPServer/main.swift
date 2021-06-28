@@ -39,4 +39,13 @@ test.case("Server") {
     await loop.run()
 }
 
+test.case("chained api calls") {
+    let address = try await UDP.Server(host: "127.0.0.1", port: 8001)
+        .onData { _, _ in }
+        .onError { _ in }
+        .address
+
+    expect(address == "127.0.0.1:8001")
+}
+
 test.run()
