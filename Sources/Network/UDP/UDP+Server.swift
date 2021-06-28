@@ -5,26 +5,20 @@ extension UDP {
     public actor Server {
         public let socket: UDP.Socket
 
-        @actorIndependent(unsafe)
-        public var onData: (
-            _ bytes: [UInt8],
-            _ from: Network.Socket.Address
-        ) async -> Void = { _, _  in }
-
-        @actorIndependent(unsafe)
-        public var onError: (Swift.Error) async -> Void = { _ in }
-
-        @actorIndependent
-        public var address: String {
+        public nonisolated var address: String {
             return socket.selfAddress!.description
         }
 
+        public typealias Address = Network.Socket.Address
+        public typealias OnDataHandler = ([UInt8], Address) async -> Void
+        public typealias OnErrorHandler = (Swift.Error) async -> Void
+
+        lazy var onDataHandler: OnDataHandler = handleData
+        lazy var onErrorHandler: OnErrorHandler = handleError
+
         public init(host: String, port: Int) throws {
-            let socket = try UDP.Socket()
-            try socket.bind(to: host, port: port)
-            self.socket = socket
-            self.onData = handleData
-            self.onError = handleError
+            self.socket = try UDP.Socket()
+            try self.socket.bind(to: host, port: port)
         }
 
         convenience
@@ -37,6 +31,14 @@ extension UDP {
             try? socket.close()
         }
 
+        public func onData(_ handler: @escaping OnDataHandler) async {
+            self.onDataHandler = handler
+        }
+
+        public func onError(_ handler: @escaping OnErrorHandler) async {
+            self.onErrorHandler = handler
+        }
+
         public func start() async throws {
             try socket.listen()
             await startAsync()
@@ -45,10 +47,10 @@ extension UDP {
         func startAsync() async {
             while true {
                 do {
-                    let result = try await socket.receive(maxLength: 16348)
-                    await self.onData(result.bytes, result.from)
+                    let (bytes, from) = try await socket.receive(maxLength: 16348)
+                    await self.onDataHandler(bytes, from)
                 } catch {
-                    await onError(error)
+                    await onErrorHandler(error)
                 }
             }
         }

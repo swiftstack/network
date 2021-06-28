@@ -5,22 +5,20 @@ extension TCP {
     public actor Server {
         public let socket: TCP.Socket
 
-        @actorIndependent(unsafe)
-        public var onClient: (TCP.Socket) async -> Void = { _ in }
-        @actorIndependent(unsafe)
-        public var onError: (Swift.Error) async -> Void = { _ in }
-
-        @actorIndependent
-        public var address: String {
+        public nonisolated var address: String {
             return socket.selfAddress!.description
         }
+
+        public typealias OnClientHandler = (TCP.Socket) async -> Void
+        public typealias OnErrorHandler = (Swift.Error) async -> Void
+
+        lazy var onClientHandler: OnClientHandler = handleClient
+        lazy var onErrorHandler: OnErrorHandler = handleError
 
         public init(host: String, port: Int) throws {
             let socket = try TCP.Socket()
             try socket.bind(to: host, port: port)
             self.socket = socket
-            self.onClient = handleClient
-            self.onError = handleError
         }
 
         convenience
@@ -33,6 +31,14 @@ extension TCP {
             try? socket.close()
         }
 
+        public func onClient(_ handler: @escaping OnClientHandler) async {
+            self.onClientHandler = handler
+        }
+
+        public func onError(_ handler: @escaping OnErrorHandler) async {
+            self.onErrorHandler = handler
+        }
+
         public func start() async throws {
             try socket.listen()
             await startAsync()
@@ -42,9 +48,9 @@ extension TCP {
             while true {
                 do {
                     let client = try await socket.accept()
-                    await self.onClient(client)
+                    await self.onClientHandler(client)
                 } catch {
-                    await onError(error)
+                    await onErrorHandler(error)
                 }
             }
         }

@@ -8,7 +8,7 @@ import Platform
 test.case("Server") {
     asyncTask {
         let server = try TCP.Server(host: "127.0.0.1", port: 5000)
-        server.onClient = { socket in
+        await server.onClient { socket in
             do {
                 expect(try await socket.receive(maxLength: 5) == [0,1,2,3,4])
                 expect(try await socket.send(bytes: [0,1,2,3,4]) == 5)
