@@ -10,7 +10,8 @@ test.case("Server") {
         await server.onData { (bytes, from) in
             do {
                 expect(bytes == [0,1,2,3,4])
-                let sent = try await server.socket.send(bytes: bytes, to: from)
+                let socket = try UDP.Socket()
+                let sent = try await socket.send(bytes: bytes, to: from)
                 expect(sent == 5)
             } catch {
                 fail(String(describing: error))
@@ -29,9 +30,8 @@ test.case("Server") {
         let sent = try await socket.send(bytes: [0,1,2,3,4], to: server)
         expect(sent == 5)
 
-        let (data, address) = try await socket.receive(maxLength: 5)
+        let (data, _) = try await socket.receive(maxLength: 5)
         expect(data == [0,1,2,3,4])
-        expect(address == (try .init("127.0.0.1", port: 8000)))
     } deinit: {
         await loop.terminate()
     }
