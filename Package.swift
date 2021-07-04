@@ -15,6 +15,7 @@ let package = Package(
         .package(name: "Log"),
         .package(name: "Stream"),
         .package(name: "Test"),
+        .package(name: "IPC"),
     ],
     targets: [
         .target(
@@ -53,7 +54,7 @@ func addTest(target: String, name: String) {
     package.targets.append(
         .executableTarget(
             name: "Tests/\(target)/\(name)",
-            dependencies: ["Network", "Test"],
+            dependencies: ["Network", "Test", "IPC"],
             path: "Tests/\(target)/\(name)",
             swiftSettings: [
                 .unsafeFlags(["-Xfrontend", "-disable-availability-checking"]),

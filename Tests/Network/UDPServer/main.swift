@@ -1,3 +1,4 @@
+import IPC
 import Test
 import Event
 import Platform
@@ -5,6 +6,8 @@ import Platform
 @testable import Network
 
 test.case("Server") {
+    let serverIsReady = Condition()
+    
     asyncTask {
         let server = try UDP.Server(host: "127.0.0.1", port: 8000)
         await server.onData { (bytes, from) in
@@ -17,6 +20,7 @@ test.case("Server") {
                 fail(String(describing: error))
             }
         }
+        await serverIsReady.notify()
         try await server.start()
     }
 
@@ -24,8 +28,7 @@ test.case("Server") {
         let server = try! Socket.Address("127.0.0.1", port: 8000)
         let socket = try UDP.Socket()
 
-        // FIXME: Use IPC package
-        await Task.sleep(1_000_000)
+        await serverIsReady.wait()
 
         let sent = try await socket.send(bytes: [0,1,2,3,4], to: server)
         expect(sent == 5)

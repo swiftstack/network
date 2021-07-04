@@ -1,3 +1,4 @@
+import IPC
 import Test
 import Event
 import Platform
@@ -47,7 +48,6 @@ test.case("Socket IPv4") {
         let response = try await client.receive(maxLength: message.count)
         _ = try await client.send(bytes: response)
     }
-
 
     asyncTask {
         let socket = try await TCP.Socket(family: .inet)
@@ -107,10 +107,14 @@ test.case("Socket Unix") {
 
     unlink(address)
 
+    let serverIsReady = Condition()
+
     asyncTask {
         let socket = try TCP.Socket(family: .local)
             .bind(to: address)
             .listen()
+
+        await serverIsReady.notify()
 
         let client = try await socket.accept()
         let response = try await client.receive(maxLength: message.count)
@@ -118,8 +122,8 @@ test.case("Socket Unix") {
     }
 
     asyncTask {
-        // FIXME:
-        usleep(10000)
+        await serverIsReady.wait()
+
         let socket = try await TCP.Socket(family: .local)
             .connect(to: address)
 
@@ -142,10 +146,14 @@ test.case("Socket Unix Sequenced") {
 
     unlink("/tmp/testsequenced.sock")
 
+    let serverIsReady = Condition()
+
     asyncTask {
         let socket = try TCP.Socket(.init(family: .local, type: .sequenced))
             .bind(to: "/tmp/testsequenced.sock")
             .listen()
+
+        await serverIsReady.notify()
 
         let client = try await socket.accept()
         let response = try await client.receive(maxLength: message.count)
@@ -153,6 +161,8 @@ test.case("Socket Unix Sequenced") {
     }
 
     asyncTask {
+        await serverIsReady.wait()
+
         let socket = try await TCP.Socket(.init(family: .local, type: .sequenced))
             .connect(to: "/tmp/testsequenced.sock")
 
