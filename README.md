@@ -5,7 +5,7 @@ Asynchronous non-blocking io with syncronous API. **No callbacks.**
 ## Package.swift
 
  ```swift
-.package(url: "https://github.com/swift-stack/aio.git", .branch("fiber"))
+.package(url: "https://github.com/swiftstack/aio.git", .branch("fiber"))
 ```
 
 # Network
@@ -14,7 +14,7 @@ Zero-cost socket abstraction designed for cooperative multitasking.
 
 ## Usage
 
-You can find this code and more in [examples](https://github.com/swift-stack/examples).
+You can find this code and more in [examples](https://github.com/swiftstack/examples).
 
 ### Sync
 ```swift

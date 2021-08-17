@@ -45,13 +45,13 @@ extension Package.Dependency {
     enum Source: String {
         case local, remote, github
 
-        static var `default`: Self { .local }
+        static var `default`: Self { .github }
 
         var baseUrl: String {
             switch self {
             case .local: return "../"
             case .remote: return "https://swiftstack.io/"
-            case .github: return "https://github.com/swift-stack/"
+            case .github: return "https://github.com/swiftstack/"
             }
         }
 
