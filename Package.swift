@@ -20,11 +20,7 @@ let package = Package(
     targets: [
         .target(
             name: "Network",
-            dependencies: ["Platform", "Event", "Time", "Stream", "Log"],
-            swiftSettings: [
-                .unsafeFlags(["-Xfrontend", "-disable-availability-checking"]),
-                .unsafeFlags(["-Xfrontend", "-enable-experimental-concurrency"])
-            ])
+            dependencies: ["Platform", "Event", "Time", "Stream", "Log"]),
     ]
 )
 
@@ -55,11 +51,7 @@ func addTest(target: String, name: String) {
         .executableTarget(
             name: "Tests/\(target)/\(name)",
             dependencies: ["Network", "Test", "IPC"],
-            path: "Tests/\(target)/\(name)",
-            swiftSettings: [
-                .unsafeFlags(["-Xfrontend", "-disable-availability-checking"]),
-                .unsafeFlags(["-Xfrontend", "-enable-experimental-concurrency"])
-            ]))
+            path: "Tests/\(target)/\(name)"))
 }
 
 // MARK: - custom package source
