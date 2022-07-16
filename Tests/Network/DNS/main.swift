@@ -5,15 +5,15 @@ import Event
 
 test.case("MakeRequest") {
     asyncTask {
-        let query = Message(domain: "swiftstack.io", type: .a)
+        let query = Message(domain: "example.com", type: .a)
         let response = try await DNS.makeRequest(query: query)
 
         expect(response.answer.count == 1)
 
         for answer in response.answer {
-            expect(answer.name == "swiftstack.io")
+            expect(answer.name == "example.com")
             expect(answer.ttl > 0)
-            expect(answer.data == .a(.init(116,203,222,133)))
+            expect(answer.data == .a(.init(93,184,216,34)))
         }
 
         expect(response.authority == [])
@@ -27,26 +27,14 @@ test.case("MakeRequest") {
 
 test.case("Resolve") {
     asyncTask {
-        let addresses = try await DNS.resolve(domain: "swiftstack.io")
+        let addresses = try await DNS.resolve(domain: "example.com")
         expect(addresses.count == 1)
-        expect(addresses.first == .v4(.init(116,203,222,133)))
+        expect(addresses.first == .v4(.init(93,184,216,34)))
     } deinit: {
         await loop.terminate()
     }
 
     await loop.run()
 }
-
-//test.case("Socket.Address") {
-//    let address = try Socket.Address("swiftstack.io", port: 80)
-//
-//    guard case .ip4(let sockaddr) = address else {
-//        fail("invalid address")
-//        return
-//    }
-//
-//    let ip = sockaddr.address.description
-//    expect(ip.split(separator: ".").count == 4)
-//}
 
 test.run()
