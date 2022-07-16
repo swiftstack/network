@@ -35,7 +35,7 @@ extension Socket.`Type` {
 
 extension Socket.Option {
     var rawValue: Int32 {
-        #if os(macOS)
+        #if os(macOS) || os(iOS)
             switch self {
             case .reuseAddr: return SO_REUSEADDR
             case .reusePort: return SO_REUSEPORT

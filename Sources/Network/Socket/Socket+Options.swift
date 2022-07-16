@@ -25,7 +25,7 @@ extension Socket {
 
     public enum Option: Sendable {
         case reuseAddr, reusePort, broadcast
-        #if os(macOS)
+        #if os(macOS) || os(iOS)
         case noSignalPipe
         #endif
     }
