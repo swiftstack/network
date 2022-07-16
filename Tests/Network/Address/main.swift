@@ -1,6 +1,6 @@
 import Test
+import Event
 import Platform
-import Dispatch
 
 @testable import Network
 
@@ -79,10 +79,6 @@ test.case("UnixDetect") {
     let detected = try Socket.Address("/tmp/testunixdetect")
     expect(address == detected)
 }
-
-// FIXME: Concurrency
-
-import Event
 
 test.case("LocalAddress") {
     asyncTask {
