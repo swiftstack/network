@@ -18,4 +18,4 @@ test.case("SocketType") {
     expect(rawValue(of: .raw) == SOCK_RAW)
 }
 
-test.run()
+await test.run()

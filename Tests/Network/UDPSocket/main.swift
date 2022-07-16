@@ -107,4 +107,4 @@ test.case("UDP Unix Socket") {
     await loop.run()
 }
 
-test.run()
+await test.run()

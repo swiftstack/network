@@ -67,4 +67,4 @@ test.case("NetworkStreamError") {
 }
 #endif
 
-test.run()
+await test.run()

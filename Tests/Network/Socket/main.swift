@@ -43,4 +43,4 @@ test.case("socket.broadcast") {
     expect(socket.broadcast == true)
 }
 
-test.run()
+await test.run()

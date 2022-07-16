@@ -37,4 +37,4 @@ test.case("Resolve") {
     await loop.run()
 }
 
-test.run()
+await test.run()

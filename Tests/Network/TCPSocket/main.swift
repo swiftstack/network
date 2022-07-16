@@ -180,4 +180,4 @@ test.case("Socket Unix Sequenced") {
 }
 #endif
 
-test.run()
+await test.run()

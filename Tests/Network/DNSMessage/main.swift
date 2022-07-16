@@ -132,4 +132,4 @@ test.case("Response") {
     expect(message.additional == [ResourceRecord]())
 }
 
-test.run()
+await test.run()

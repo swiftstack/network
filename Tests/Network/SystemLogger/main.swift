@@ -36,4 +36,4 @@ extension UDP.Socket {
     }
 }
 
-test.run()
+await test.run()

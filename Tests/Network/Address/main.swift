@@ -204,4 +204,4 @@ test.case("Remote6Address") {
     await loop.run()
 }
 
-test.run()
+await test.run()

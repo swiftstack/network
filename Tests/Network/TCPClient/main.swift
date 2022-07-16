@@ -31,4 +31,4 @@ test.case("Client") {
     await loop.run()
 }
 
-test.run()
+await test.run()

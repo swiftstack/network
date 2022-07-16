@@ -16,4 +16,4 @@ test.case("IPAddress") {
     let _: IPAddress = .v6(IPv6(0,0,0,0,0,0,0,1))
 }
 
-test.run()
+await test.run()

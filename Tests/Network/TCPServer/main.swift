@@ -39,4 +39,4 @@ test.case("chained api calls") {
     expect(address == "127.0.0.1:5001")
 }
 
-test.run()
+await test.run()
