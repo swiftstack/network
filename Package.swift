@@ -15,7 +15,6 @@ let package = Package(
     dependencies: [
         .package(name: "Platform"),
         .package(name: "Event"),
-        .package(name: "Time"),
         .package(name: "Log"),
         .package(name: "Stream"),
         .package(name: "Test"),
@@ -24,7 +23,7 @@ let package = Package(
     targets: [
         .target(
             name: "Network",
-            dependencies: ["Platform", "Event", "Time", "Stream", "Log"]),
+            dependencies: ["Platform", "Event", "Stream", "Log"]),
     ]
 )
 

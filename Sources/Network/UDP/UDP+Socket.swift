@@ -1,4 +1,3 @@
-import Time
 import Event
 import Platform
 
@@ -36,7 +35,7 @@ public enum UDP {
             bytes: UnsafeRawPointer,
             count: Int,
             to address: Network.Socket.Address,
-            deadline: Time = .distantFuture
+            deadline: Instant? = nil
         ) async throws -> Int {
             try await awaitIfNeeded(event: .write, deadline: deadline) {
                 try socket.send(bytes: bytes, count: count, to: address)
@@ -46,7 +45,7 @@ public enum UDP {
         public func receive(
             to buffer: UnsafeMutableRawPointer,
             count: Int,
-            deadline: Time = .distantFuture
+            deadline: Instant? = nil
         ) async throws -> (count: Int, from: Network.Socket.Address) {
             try await awaitIfNeeded(event: .read, deadline: deadline) {
                 try socket.receive(to: buffer, count: count)
@@ -55,7 +54,7 @@ public enum UDP {
 
         fileprivate func awaitIfNeeded<T>(
             event: IOEvent,
-            deadline: Time,
+            deadline: Instant?,
             _ task: () throws -> T) async throws -> T
         {
             while true {

@@ -1,4 +1,3 @@
-import Time
 import Event
 import Platform
 
@@ -29,9 +28,7 @@ public enum TCP {
             return self
         }
 
-        public func accept(
-            deadline: Time = .distantFuture
-        ) async throws -> Socket {
+        public func accept(deadline: Instant? = nil) async throws -> Socket {
             let client = try await awaitIfNeeded(
                 event: .read,
                 deadline: deadline)
@@ -44,7 +41,7 @@ public enum TCP {
         @discardableResult
         public func connect(
             to address: Network.Socket.Address,
-            deadline: Time = .distantFuture
+            deadline: Instant? = nil
         ) async throws -> Self {
             do {
                 _ = try await awaitIfNeeded(event: .write, deadline: deadline) {
@@ -66,7 +63,7 @@ public enum TCP {
         public func send(
             bytes: UnsafeRawPointer,
             count: Int,
-            deadline: Time = .distantFuture
+            deadline: Instant? = nil
         ) async throws -> Int {
             try await awaitIfNeeded(event: .write, deadline: deadline) {
                 try socket.send(bytes: bytes, count: count)
@@ -76,7 +73,7 @@ public enum TCP {
         public func receive(
             to buffer: UnsafeMutableRawPointer,
             count: Int,
-            deadline: Time = .distantFuture
+            deadline: Instant? = nil
         ) async throws -> Int {
             try await awaitIfNeeded(event: .read, deadline: deadline) {
                 try socket.receive(to: buffer, count: count)
@@ -85,7 +82,7 @@ public enum TCP {
 
         fileprivate func awaitIfNeeded<T>(
             event: IOEvent,
-            deadline: Time,
+            deadline: Instant? = nil,
             _ task: () throws -> T) async throws -> T
         {
             while true {

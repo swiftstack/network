@@ -1,5 +1,3 @@
-import Time
-
 extension UDP.Socket {
     @discardableResult
     public func bind(to address: String, port: Int) throws -> Self {
@@ -16,7 +14,7 @@ extension UDP.Socket {
     public func send(
         bytes: UnsafeRawBufferPointer,
         to address: Network.Socket.Address,
-        deadline: Time = .distantFuture
+        deadline: Instant? = nil
     ) async throws -> Int {
         try await send(
             bytes: bytes.baseAddress!,
@@ -28,7 +26,7 @@ extension UDP.Socket {
     public func send(
         bytes: [UInt8],
         to address: Network.Socket.Address,
-        deadline: Time = .distantFuture
+        deadline: Instant? = nil
     ) async throws -> Int {
         try await send(
             bytes: bytes,
@@ -39,7 +37,7 @@ extension UDP.Socket {
 
     public func receive(
         maxLength: Int,
-        deadline: Time = .distantFuture
+        deadline: Instant? = nil
     ) async throws -> (bytes: [UInt8], from: Network.Socket.Address) {
         let buffer = UnsafeMutableRawBufferPointer.allocate(
             byteCount: maxLength,
@@ -51,7 +49,7 @@ extension UDP.Socket {
 
     public func receive(
         to buffer: UnsafeMutableRawBufferPointer,
-        deadline: Time = .distantFuture
+        deadline: Instant? = nil
     ) async throws -> (count: Int, from: Network.Socket.Address) {
         try await receive(
             to: buffer.baseAddress!,

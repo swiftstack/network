@@ -1,5 +1,3 @@
-import Time
-
 extension TCP.Socket {
     @discardableResult
     public func bind(to address: String, port: Int) throws -> Self {
@@ -15,7 +13,7 @@ extension TCP.Socket {
     public func connect(
         to address: String,
         port: Int,
-        deadline: Time = .distantFuture
+        deadline: Instant? = nil
     ) async throws -> Self {
         try await connect(
             to: try Network.Socket.Address(address, port: port),
@@ -25,7 +23,7 @@ extension TCP.Socket {
     @discardableResult
     public func connect(
         to address: String,
-        deadline: Time = .distantFuture
+        deadline: Instant? = nil
     ) async throws -> Self {
         try await connect(
             to: try Network.Socket.Address(address),
@@ -36,7 +34,7 @@ extension TCP.Socket {
 extension TCP.Socket {
     public func send(
         bytes: UnsafeRawBufferPointer,
-        deadline: Time = .distantFuture
+        deadline: Instant? = nil
     ) async throws -> Int {
         try await send(
             bytes: bytes.baseAddress!,
@@ -46,7 +44,7 @@ extension TCP.Socket {
 
     public func send(
         bytes: [UInt8],
-        deadline: Time = .distantFuture
+        deadline: Instant? = nil
     ) async throws -> Int {
         try await send(
             bytes: bytes,
@@ -57,7 +55,7 @@ extension TCP.Socket {
     // FIXME: [Concurrency]
     public func receive(
         maxLength: Int,
-        deadline: Time = .distantFuture
+        deadline: Instant? = nil
     ) async throws -> [UInt8] {
         let buffer = UnsafeMutableRawBufferPointer.allocate(
             byteCount: maxLength,
@@ -69,7 +67,7 @@ extension TCP.Socket {
 
     public func receive(
         to buffer: UnsafeMutableRawBufferPointer,
-        deadline: Time = .distantFuture
+        deadline: Instant? = nil
     ) async throws -> Int {
         try await receive(
             to: buffer.baseAddress!,
