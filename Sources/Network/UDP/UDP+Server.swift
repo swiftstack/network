@@ -21,7 +21,6 @@ extension UDP {
             try self.socket.bind(to: host, port: port)
         }
 
-        convenience
         public init(host: String, reusePort: Int) throws {
             try self.init(host: host, port: reusePort)
             socket.socket.reusePort = true

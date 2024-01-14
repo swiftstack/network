@@ -21,7 +21,6 @@ extension TCP {
             self.socket = socket
         }
 
-        convenience
         public init(host: String, reusePort: Int) throws {
             try self.init(host: host, port: reusePort)
             socket.socket.reusePort = true
