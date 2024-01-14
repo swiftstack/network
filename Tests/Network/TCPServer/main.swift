@@ -1,3 +1,4 @@
+import IPC
 import Test
 import Event
 import Platform
@@ -5,6 +6,8 @@ import Platform
 @testable import Network
 
 test("Server") {
+    let ready = Condition()
+
     Task {
         let server = try TCP.Server(host: "127.0.0.1", port: 5000)
         await server.onClient { socket in
@@ -15,14 +18,21 @@ test("Server") {
                 fail(String(describing: error))
             }
         }
+        await ready.notify()
         try await server.start()
     }
 
     Task {
-        let client = try await TCP.Socket().connect(to: "127.0.0.1", port: 5000)
-        expect(try await client.send(bytes: [0,1,2,3,4]) == 5)
+        do {
+            await ready.wait()
+            let client = try await TCP.Socket()
+                .connect(to: "127.0.0.1", port: 5000)
+            expect(try await client.send(bytes: [0,1,2,3,4]) == 5)
+            expect(try await client.receive(maxLength: 5) == [0,1,2,3,4])
+        } catch {
+            fail(String(describing: error))
+        }
 
-        expect(try await client.receive(maxLength: 5) == [0,1,2,3,4])
         await loop.terminate()
     }
 
