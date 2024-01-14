@@ -5,10 +5,10 @@ import Platform
 
 @testable import Network
 
-test.case("Server") {
-    let serverIsReady = Condition()
+test("Server") {
+    let ready = Condition()
     
-    asyncTask {
+    Task {
         let server = try UDP.Server(host: "127.0.0.1", port: 8000)
         await server.onData { (bytes, from) in
             do {
@@ -20,29 +20,29 @@ test.case("Server") {
                 fail(String(describing: error))
             }
         }
-        await serverIsReady.notify()
+        await ready.notify()
         try await server.start()
     }
 
-    asyncTask {
+    Task {
         let server = try! Socket.Address("127.0.0.1", port: 8000)
         let socket = try UDP.Socket()
 
-        await serverIsReady.wait()
+        await ready.wait()
 
         let sent = try await socket.send(bytes: [0,1,2,3,4], to: server)
         expect(sent == 5)
 
         let (data, _) = try await socket.receive(maxLength: 5)
         expect(data == [0,1,2,3,4])
-    } deinit: {
+    
         await loop.terminate()
     }
 
     await loop.run()
 }
 
-test.case("chained api calls") {
+test("chained api calls") {
     let address = try await UDP.Server(host: "127.0.0.1", port: 8001)
         .onData { _, _ in }
         .onError { _ in }
@@ -51,4 +51,4 @@ test.case("chained api calls") {
     expect(address == "127.0.0.1:8001")
 }
 
-await test.run()
+await run()

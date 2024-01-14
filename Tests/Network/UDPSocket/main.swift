@@ -4,10 +4,10 @@ import Platform
 
 @testable import Network
 
-test.case("UDP IPv4 Socket") {
+test("UDP IPv4 Socket") {
     let message = [UInt8]("ping".utf8)
 
-    asyncTask {
+    Task {
         let server = try! Socket.Address("127.0.0.1", port: 3002)
         let socket = try UDP.Socket(family: .inet)
             .bind(to: server)
@@ -16,7 +16,7 @@ test.case("UDP IPv4 Socket") {
         _ = try await socket.send(bytes: result.bytes, to: result.from)
     }
 
-    asyncTask {
+    Task {
         let server = try! Socket.Address("127.0.0.1", port: 3002)
         let socket = try UDP.Socket(family: .inet)
 
@@ -27,17 +27,17 @@ test.case("UDP IPv4 Socket") {
         expect(result.from == server)
         expect(result.bytes.count == message.count)
         expect(result.bytes == message)
-    } deinit: {
+    
         await loop.terminate()
     }
 
     await loop.run()
 }
 
-test.case("UDP IPv6 Socket") {
+test("UDP IPv6 Socket") {
     let message = [UInt8]("ping".utf8)
 
-    asyncTask {
+    Task {
         let server = try! Socket.Address("::1", port: 3004)
         let socket = try UDP.Socket(family: .inet6)
             .bind(to: server)
@@ -46,7 +46,7 @@ test.case("UDP IPv6 Socket") {
         _ = try await socket.send(bytes: result.bytes, to: result.from)
     }
 
-    asyncTask {
+    Task {
         let server = try! Socket.Address("::1", port: 3004)
         let socket = try UDP.Socket(family: .inet6)
 
@@ -57,14 +57,14 @@ test.case("UDP IPv6 Socket") {
         expect(result.from == server)
         expect(result.bytes.count == message.count)
         expect(result.bytes == message)
-    } deinit: {
+    
         await loop.terminate()
     }
 
     await loop.run()
 }
 
-test.case("UDP Unix Socket") {
+test("UDP Unix Socket") {
     let message = [UInt8]("ping".utf8)
 
     #if os(macOS)
@@ -78,7 +78,7 @@ test.case("UDP Unix Socket") {
     unlink(serverSocket)
     unlink(clientSocket)
 
-    asyncTask {
+    Task {
         let server = try! Socket.Address(serverSocket)
         let socket = try UDP.Socket(family: .local)
             .bind(to: server)
@@ -87,7 +87,7 @@ test.case("UDP Unix Socket") {
         _ = try await socket.send(bytes: result.bytes, to: result.from)
     }
 
-    asyncTask {
+    Task {
         let server = try! Socket.Address(serverSocket)
         let client = try! Socket.Address(clientSocket)
         let socket = try UDP.Socket(family: .local)
@@ -100,11 +100,11 @@ test.case("UDP Unix Socket") {
         expect(result.from == server)
         expect(result.bytes.count == message.count)
         expect(result.bytes == message)
-    } deinit: {
+    
         await loop.terminate()
     }
 
     await loop.run()
 }
 
-await test.run()
+await run()

@@ -6,22 +6,22 @@ import Platform
 @testable import Log
 @testable import Network
 
-test.case("SystemLogger") {
+test("SystemLogger") {
     let unixPath = "/tmp/SystemLoggerTest"
     let message = "message"
 
     unlink(unixPath)
 
-    asyncTask {
+    Task {
         let socket = try UDP.Socket(family: .local)
         try socket.bind(to: unixPath)
         let result = try await socket.read(max: 100, as: String.self)
         expect(result == "[info] \(message)")
-    } deinit: {
+    
         await loop.terminate()
     }
 
-    asyncTask {
+    Task {
         Log.use(try SystemLogger(unixPath: unixPath))
         await Log.info(message)
     }
@@ -36,4 +36,4 @@ extension UDP.Socket {
     }
 }
 
-await test.run()
+await run()

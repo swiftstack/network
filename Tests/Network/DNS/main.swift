@@ -3,8 +3,8 @@ import Event
 
 @testable import Network
 
-test.case("MakeRequest") {
-    asyncTask {
+test("MakeRequest") {
+    Task {
         let query = Message(domain: "example.com", type: .a)
         let response = try await DNS.makeRequest(query: query)
 
@@ -18,23 +18,23 @@ test.case("MakeRequest") {
 
         expect(response.authority == [])
         expect(response.additional == [])
-    } deinit: {
+    
         await loop.terminate()
     }
 
     await loop.run()
 }
 
-test.case("Resolve") {
-    asyncTask {
+test("Resolve") {
+    Task {
         let addresses = try await DNS.resolve(domain: "example.com")
         expect(addresses.count == 1)
         expect(addresses.first == .v4(.init(93,184,216,34)))
-    } deinit: {
+    
         await loop.terminate()
     }
 
     await loop.run()
 }
 
-await test.run()
+await run()

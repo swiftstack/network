@@ -4,8 +4,8 @@ import Platform
 
 @testable import Network
 
-test.case("Server") {
-    asyncTask {
+test("Server") {
+    Task {
         let server = try TCP.Server(host: "127.0.0.1", port: 5000)
         await server.onClient { socket in
             do {
@@ -18,19 +18,18 @@ test.case("Server") {
         try await server.start()
     }
 
-    asyncTask {
+    Task {
         let client = try await TCP.Socket().connect(to: "127.0.0.1", port: 5000)
         expect(try await client.send(bytes: [0,1,2,3,4]) == 5)
 
         expect(try await client.receive(maxLength: 5) == [0,1,2,3,4])
-    } deinit: {
         await loop.terminate()
     }
 
     await loop.run()
 }
 
-test.case("chained api calls") {
+test("chained api calls") {
     let address = try await TCP.Server(host: "127.0.0.1", port: 5001)
         .onClient { _ in }
         .onError { _ in }
@@ -39,4 +38,4 @@ test.case("chained api calls") {
     expect(address == "127.0.0.1:5001")
 }
 
-await test.run()
+await run()

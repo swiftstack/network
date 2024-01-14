@@ -6,10 +6,10 @@ import Platform
 @testable import Stream
 @testable import Network
 
-test.case("Socket default") {
+test("Socket default") {
     let message = [UInt8]("ping".utf8)
 
-    asyncTask {
+    Task {
         let socket = try TCP.Socket()
             .bind(to: "127.0.0.1", port: 3000)
             .listen()
@@ -19,7 +19,7 @@ test.case("Socket default") {
         _ = try await client.send(bytes: response)
     }
 
-    asyncTask {
+    Task {
         let socket = try await TCP.Socket()
             .connect(to: "127.0.0.1", port: 3000)
 
@@ -29,17 +29,17 @@ test.case("Socket default") {
         let response = try await socket.receive(maxLength: message.count)
         expect(response.count == message.count)
         expect(response == message)
-    } deinit: {
+    
         await loop.terminate()
     }
 
     await loop.run()
 }
 
-test.case("Socket IPv4") {
+test("Socket IPv4") {
     let message = [UInt8]("ping".utf8)
 
-    asyncTask {
+    Task {
         let socket = try TCP.Socket(family: .inet)
             .bind(to: "127.0.0.1", port: 3001)
             .listen()
@@ -49,7 +49,7 @@ test.case("Socket IPv4") {
         _ = try await client.send(bytes: response)
     }
 
-    asyncTask {
+    Task {
         let socket = try await TCP.Socket(family: .inet)
             .connect(to: "127.0.0.1", port: 3001)
 
@@ -59,17 +59,17 @@ test.case("Socket IPv4") {
         let response = try await socket.receive(maxLength: message.count)
         expect(response.count == message.count)
         expect(response == message)
-    } deinit: {
+    
         await loop.terminate()
     }
 
     await loop.run()
 }
 
-test.case("Socket IPv6") {
+test("Socket IPv6") {
     let message = [UInt8]("ping".utf8)
 
-    asyncTask {
+    Task {
         let socket = try TCP.Socket(family: .inet6)
             .bind(to: "::1", port: 3003)
             .listen()
@@ -79,7 +79,7 @@ test.case("Socket IPv6") {
         _ = try await client.send(bytes: response)
     }
 
-    asyncTask {
+    Task {
         let socket = try await TCP.Socket(family: .inet6)
             .connect(to: "::1", port: 3003)
 
@@ -89,14 +89,14 @@ test.case("Socket IPv6") {
         let response = try await socket.receive(maxLength: message.count)
         expect(response.count == message.count)
         expect(response == message)
-    } deinit: {
+
         await loop.terminate()
     }
 
     await loop.run()
 }
 
-test.case("Socket Unix") {
+test("Socket Unix") {
     let message = [UInt8]("ping".utf8)
 
     #if os(macOS)
@@ -107,22 +107,22 @@ test.case("Socket Unix") {
 
     unlink(address)
 
-    let serverIsReady = Condition()
+    let ready = Condition()
 
-    asyncTask {
+    Task {
         let socket = try TCP.Socket(family: .local)
             .bind(to: address)
             .listen()
 
-        await serverIsReady.notify()
+        await ready.notify()
 
         let client = try await socket.accept()
         let response = try await client.receive(maxLength: message.count)
         _ = try await client.send(bytes: response)
     }
 
-    asyncTask {
-        await serverIsReady.wait()
+    Task {
+        await ready.wait()
 
         let socket = try await TCP.Socket(family: .local)
             .connect(to: address)
@@ -133,7 +133,7 @@ test.case("Socket Unix") {
         let response = try await socket.receive(maxLength: message.count)
         expect(response.count == message.count)
         expect(response == message)
-    } deinit: {
+    
         await loop.terminate()
     }
 
@@ -141,27 +141,27 @@ test.case("Socket Unix") {
 }
 
 #if os(Linux)
-test.case("Socket Unix Sequenced") {
+test("Socket Unix Sequenced") {
     let message = [UInt8]("ping".utf8)
 
     unlink("/tmp/testsequenced.sock")
 
-    let serverIsReady = Condition()
+    let ready = Condition()
 
-    asyncTask {
+    Task {
         let socket = try TCP.Socket(.init(family: .local, type: .sequenced))
             .bind(to: "/tmp/testsequenced.sock")
             .listen()
 
-        await serverIsReady.notify()
+        await ready.notify()
 
         let client = try await socket.accept()
         let response = try await client.receive(maxLength: message.count)
         _ = try await client.send(bytes: response)
     }
 
-    asyncTask {
-        await serverIsReady.wait()
+    Task {
+        await ready.wait()
 
         let socket = try await TCP.Socket(.init(family: .local, type: .sequenced))
             .connect(to: "/tmp/testsequenced.sock")
@@ -172,7 +172,7 @@ test.case("Socket Unix Sequenced") {
         let response = try await socket.receive(maxLength: message.count)
         expect(response.count == message.count)
         expect(response == message)
-    } deinit: {
+    
         await loop.terminate()
     }
 
@@ -180,4 +180,4 @@ test.case("Socket Unix Sequenced") {
 }
 #endif
 
-await test.run()
+await run()

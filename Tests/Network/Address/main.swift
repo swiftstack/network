@@ -4,7 +4,7 @@ import Platform
 
 @testable import Network
 
-test.case("IPv4") {
+test("IPv4") {
     let address = try Socket.Address(ip4: "127.0.0.1", port: 4000)
 
     var sockaddr = sockaddr_in()
@@ -20,7 +20,7 @@ test.case("IPv4") {
     expect(address.description == "127.0.0.1:4000")
 }
 
-test.case("IPv6") {
+test("IPv6") {
     let address = try Socket.Address(ip6: "::1", port: 4001)
 
     var sockaddr = sockaddr_in6()
@@ -36,7 +36,7 @@ test.case("IPv6") {
     expect(address.description == "::1:4001")
 }
 
-test.case("Unix") {
+test("Unix") {
     unlink("/tmp/testunix")
     let address = try Socket.Address(unix: "/tmp/testunix")
 
@@ -61,27 +61,27 @@ test.case("Unix") {
     }
 }
 
-test.case("IPv4Detect") {
+test("IPv4Detect") {
     let address = try Socket.Address(ip4: "127.0.0.1", port: 4002)
     let detected = try Socket.Address("127.0.0.1", port: 4002)
     expect(address == detected)
 }
 
-test.case("IPv6Detect") {
+test("IPv6Detect") {
     let address = try Socket.Address(ip6: "::1", port: 4003)
     let detected = try Socket.Address("::1", port: 4003)
     expect(address == detected)
 }
 
-test.case("UnixDetect") {
+test("UnixDetect") {
     unlink("/tmp/testunixdetect")
     let address = try Socket.Address(unix: "/tmp/testunixdetect")
     let detected = try Socket.Address("/tmp/testunixdetect")
     expect(address == detected)
 }
 
-test.case("LocalAddress") {
-    asyncTask {
+test("LocalAddress") {
+    Task {
         let socket = try TCP.Socket()
             .bind(to: "127.0.0.1", port: 4004)
             .listen()
@@ -89,7 +89,7 @@ test.case("LocalAddress") {
         _ = try await socket.accept()
     }
 
-    asyncTask {
+    Task {
         let socket = try TCP.Socket()
         _ = try await socket
             .bind(to: "127.0.0.1", port: 4005)
@@ -104,15 +104,15 @@ test.case("LocalAddress") {
         #endif
 
         expect(socket.selfAddress == Socket.Address.ip4(sockaddr))
-    } deinit: {
+    
         await loop.terminate()
     }
 
     await loop.run()
 }
 
-test.case("RemoteAddress") {
-    asyncTask {
+test("RemoteAddress") {
+    Task {
         let socket = try TCP.Socket()
             .bind(to: "127.0.0.1", port: 4006)
             .listen()
@@ -120,7 +120,7 @@ test.case("RemoteAddress") {
         _ = try await socket.accept()
     }
 
-    asyncTask {
+    Task {
         let socket = try TCP.Socket()
         _ = try await socket
             .bind(to: "127.0.0.1", port: 4007)
@@ -135,15 +135,15 @@ test.case("RemoteAddress") {
         #endif
 
         expect(socket.peerAddress == Socket.Address.ip4(sockaddr))
-    } deinit: {
+    
         await loop.terminate()
     }
 
     await loop.run()
 }
 
-test.case("Local6Address") {
-    asyncTask {
+test("Local6Address") {
+    Task {
         let socket = try TCP.Socket(family: .inet6)
             .bind(to: "::1", port: 4008)
             .listen()
@@ -151,7 +151,7 @@ test.case("Local6Address") {
         _ = try await socket.accept()
     }
 
-    asyncTask {
+    Task {
         let socket = try TCP.Socket(family: .inet6)
         _ = try await socket
             .bind(to: "::1", port: 4009)
@@ -166,15 +166,15 @@ test.case("Local6Address") {
         #endif
 
         expect(socket.selfAddress == Socket.Address.ip6(sockaddr))
-    } deinit: {
+    
         await loop.terminate()
     }
 
     await loop.run()
 }
 
-test.case("Remote6Address") {
-    asyncTask {
+test("Remote6Address") {
+    Task {
         let socket = try TCP.Socket(family: .inet6)
             .bind(to: "::1", port: 4010)
             .listen()
@@ -182,7 +182,7 @@ test.case("Remote6Address") {
         _ = try await socket.accept()
     }
 
-    asyncTask {
+    Task {
         let socket = try TCP.Socket(family: .inet6)
         _ = try await socket
             .bind(to: "::1", port: 4011)
@@ -197,11 +197,11 @@ test.case("Remote6Address") {
         #endif
 
         expect(socket.peerAddress == Socket.Address.ip6(sockaddr))
-    } deinit: {
+    
         await loop.terminate()
     }
 
     await loop.run()
 }
 
-await test.run()
+await run()
