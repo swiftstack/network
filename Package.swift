@@ -23,7 +23,12 @@ let package = Package(
     targets: [
         .target(
             name: "Network",
-            dependencies: ["Platform", "Event", "Stream", "Log"]),
+            dependencies: [
+                .product(name: "Platform", package: "platform"),
+                .product(name: "Event", package: "event"),
+                .product(name: "Stream", package: "stream"),
+                .product(name: "Log", package: "log"),
+            ]),
     ]
 )
 
@@ -53,7 +58,11 @@ func addTest(target: String, name: String) {
     package.targets.append(
         .executableTarget(
             name: "Tests/\(target)/\(name)",
-            dependencies: ["Network", "Test", "IPC"],
+            dependencies: [
+                .target(name: "Network"),
+                .product(name: "IPC", package: "ipc"),
+                .product(name: "Test", package: "test"),
+            ],
             path: "Tests/\(target)/\(name)"))
 }
 
@@ -99,6 +108,6 @@ extension Package.Dependency {
     static func package(name: String, source: Source) -> Package.Dependency {
         return source == .local
             ? .package(name: name, path: source.url(for: name))
-            : .package(name: name, url: source.url(for: name), .branch("dev"))
+            : .package(url: source.url(for: name), branch: "dev")
     }
 }
