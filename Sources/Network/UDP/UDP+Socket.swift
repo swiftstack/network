@@ -55,8 +55,8 @@ public enum UDP {
         fileprivate func awaitIfNeeded<T>(
             event: IOEvent,
             deadline: Instant?,
-            _ task: () throws -> T) async throws -> T
-        {
+            _ task: () throws -> T
+        ) async throws -> T {
             while true {
                 do {
                     return try task()

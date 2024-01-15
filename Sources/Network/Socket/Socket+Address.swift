@@ -128,7 +128,7 @@ extension Socket.Address.Family {
 }
 
 extension Socket.Address: Equatable {
-    public static func ==(lhs: Socket.Address, rhs: Socket.Address) -> Bool {
+    public static func == (lhs: Socket.Address, rhs: Socket.Address) -> Bool {
         switch (lhs, rhs) {
         case let (.ip4(lhs), .ip4(rhs)): return lhs == rhs
         case let (.ip6(lhs), .ip6(rhs)): return lhs == rhs

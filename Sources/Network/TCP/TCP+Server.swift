@@ -9,11 +9,11 @@ extension TCP {
             return socket.selfAddress!.description
         }
 
-        public typealias OnClientHandler = (TCP.Socket) async -> Void
-        public typealias OnErrorHandler = (Swift.Error) async -> Void
+        public typealias OnClient = (TCP.Socket) async -> Void
+        public typealias OnError = (Swift.Error) async -> Void
 
-        lazy var onClientHandler: OnClientHandler = handleClient
-        lazy var onErrorHandler: OnErrorHandler = handleError
+        lazy var onClient: OnClient = handleClient
+        lazy var onError: OnError = handleError
 
         public init(host: String, port: Int) throws {
             let socket = try TCP.Socket()
@@ -31,14 +31,14 @@ extension TCP {
         }
 
         @discardableResult
-        public func onClient(_ handler: @escaping OnClientHandler) async -> Self {
-            self.onClientHandler = handler
+        public func onClient(_ handler: @escaping OnClient) async -> Self {
+            self.onClient = handler
             return self
         }
 
         @discardableResult
-        public func onError(_ handler: @escaping OnErrorHandler) async -> Self {
-            self.onErrorHandler = handler
+        public func onError(_ handler: @escaping OnError) async -> Self {
+            self.onError = handler
             return self
         }
 
@@ -51,9 +51,9 @@ extension TCP {
             while true {
                 do {
                     let client = try await socket.accept()
-                    await self.onClientHandler(client)
+                    await self.onClient(client)
                 } catch {
-                    await onErrorHandler(error)
+                    await onError(error)
                 }
             }
         }
@@ -67,7 +67,8 @@ extension TCP {
             switch error {
             /* connection reset by peer */
             /* do nothing, it's fine. */
-            case let error as Network.Socket.Error where error == .connectionReset: break
+            case let error as Network.Socket.Error
+            where error == .connectionReset: break
             /* log other errors */
             default: await Log.error(String(describing: error))
             }

@@ -6,6 +6,8 @@ import Platform
 @testable import Network
 
 test("NetworkStream") {
+    let fiveBytes: [UInt8] = [0, 1, 2, 3, 4]
+
     Task {
         let listener = try TCP.Socket()
             .bind(to: "127.0.0.1", port: 7000)
@@ -16,19 +18,19 @@ test("NetworkStream") {
 
         var buffer = [UInt8](repeating: 0, count: 5)
         expect(try await stream.read(to: &buffer) == 5)
-        expect(buffer == [0,1,2,3,4])
+        expect(buffer == fiveBytes)
 
-        expect(try await stream.write(from: [0,1,2,3,4]) == 5)
+        expect(try await stream.write(from: fiveBytes) == 5)
     }
 
     Task {
         let client = try await TCP.Socket().connect(to: "127.0.0.1", port: 7000)
         let stream = TCP.Stream(socket: client)
-        expect(try await stream.write(from: [0,1,2,3,4]) == 5)
+        expect(try await stream.write(from: fiveBytes) == 5)
 
         var buffer = [UInt8](repeating: 0, count: 5)
         expect(try await stream.read(to: &buffer) == 5)
-    
+
         await loop.terminate()
     }
 
@@ -58,7 +60,7 @@ test("NetworkStreamError") {
         await expect(throws: Socket.Error.badDescriptor) {
             _ = try await stream.write(from: buffer)
         }
-    
+
         await loop.terminate()
     }
 

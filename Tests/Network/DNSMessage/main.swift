@@ -74,32 +74,32 @@ test("Response") {
         ResourceRecord(
             name: "duckduckgo.com",
             ttl: 180,
-            data: .a(IPv4(46,51,197,89))
+            data: .a(IPv4(46, 51, 197, 89))
         ),
         ResourceRecord(
             name: "duckduckgo.com",
             ttl: 180,
-            data: .a(IPv4(176,34,131,233))
+            data: .a(IPv4(176, 34, 131, 233))
         ),
         ResourceRecord(
             name: "duckduckgo.com",
             ttl: 180,
-            data: .a(IPv4(54,229,105,92))
+            data: .a(IPv4(54, 229, 105, 92))
         ),
         ResourceRecord(
             name: "duckduckgo.com",
             ttl: 180,
-            data: .a(IPv4(176,34,155,20))
+            data: .a(IPv4(176, 34, 155, 20))
         ),
         ResourceRecord(
             name: "duckduckgo.com",
             ttl: 180,
-            data: .a(IPv4(54,229,105,203))
+            data: .a(IPv4(54, 229, 105, 203))
         ),
         ResourceRecord(
             name: "duckduckgo.com",
             ttl: 180,
-            data: .a(IPv4(176,34,135,167))
+            data: .a(IPv4(176, 34, 135, 167))
         )
     ])
     expect(message.authority == [

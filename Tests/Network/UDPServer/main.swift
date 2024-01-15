@@ -7,12 +7,14 @@ import Platform
 
 test("Server") {
     let ready = Condition()
-    
+
+    let fiveBytes: [UInt8] = [0, 1, 2, 3, 4]
+
     Task {
         let server = try UDP.Server(host: "127.0.0.1", port: 8000)
         await server.onData { (bytes, from) in
             do {
-                expect(bytes == [0,1,2,3,4])
+                expect(bytes == fiveBytes)
                 let socket = try UDP.Socket()
                 let sent = try await socket.send(bytes: bytes, to: from)
                 expect(sent == 5)
@@ -31,11 +33,11 @@ test("Server") {
 
             await ready.wait()
 
-            let sent = try await socket.send(bytes: [0,1,2,3,4], to: server)
+            let sent = try await socket.send(bytes: fiveBytes, to: server)
             expect(sent == 5)
 
             let (data, _) = try await socket.receive(maxLength: 5)
-            expect(data == [0,1,2,3,4])
+            expect(data == fiveBytes)
         } catch {
             fail(String(describing: error))
         }

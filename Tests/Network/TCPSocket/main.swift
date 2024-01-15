@@ -29,7 +29,7 @@ test("Socket default") {
         let response = try await socket.receive(maxLength: message.count)
         expect(response.count == message.count)
         expect(response == message)
-    
+
         await loop.terminate()
     }
 
@@ -59,7 +59,7 @@ test("Socket IPv4") {
         let response = try await socket.receive(maxLength: message.count)
         expect(response.count == message.count)
         expect(response == message)
-    
+
         await loop.terminate()
     }
 
@@ -133,7 +133,7 @@ test("Socket Unix") {
         let response = try await socket.receive(maxLength: message.count)
         expect(response.count == message.count)
         expect(response == message)
-    
+
         await loop.terminate()
     }
 
@@ -163,8 +163,9 @@ test("Socket Unix Sequenced") {
     Task {
         await ready.wait()
 
-        let socket = try await TCP.Socket(.init(family: .local, type: .sequenced))
-            .connect(to: "/tmp/testsequenced.sock")
+        let socket =
+            try await TCP.Socket(.init(family: .local, type: .sequenced))
+                .connect(to: "/tmp/testsequenced.sock")
 
         let written = try await socket.send(bytes: message)
         expect(written == message.count)
@@ -172,7 +173,7 @@ test("Socket Unix Sequenced") {
         let response = try await socket.receive(maxLength: message.count)
         expect(response.count == message.count)
         expect(response == message)
-    
+
         await loop.terminate()
     }
 

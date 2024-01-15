@@ -104,7 +104,7 @@ test("LocalAddress") {
         #endif
 
         expect(socket.selfAddress == Socket.Address.ip4(sockaddr))
-    
+
         await loop.terminate()
     }
 
@@ -135,7 +135,7 @@ test("RemoteAddress") {
         #endif
 
         expect(socket.peerAddress == Socket.Address.ip4(sockaddr))
-    
+
         await loop.terminate()
     }
 
@@ -166,7 +166,7 @@ test("Local6Address") {
         #endif
 
         expect(socket.selfAddress == Socket.Address.ip6(sockaddr))
-    
+
         await loop.terminate()
     }
 
@@ -197,7 +197,7 @@ test("Remote6Address") {
         #endif
 
         expect(socket.peerAddress == Socket.Address.ip6(sockaddr))
-    
+
         await loop.terminate()
     }
 

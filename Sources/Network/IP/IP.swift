@@ -68,19 +68,19 @@ extension IPv6: CustomStringConvertible {
 }
 
 extension IPv4: Equatable {
-    static func ==(lhs: IPv4, rhs: IPv4) -> Bool {
+    static func == (lhs: IPv4, rhs: IPv4) -> Bool {
         return lhs.address == rhs.address
     }
 }
 
 extension IPv6: Equatable {
-    static func ==(lhs: IPv6, rhs: IPv6) -> Bool {
+    static func == (lhs: IPv6, rhs: IPv6) -> Bool {
         return lhs.address == rhs.address
     }
 }
 
 extension IPAddress: Equatable {
-    static func ==(lhs: IPAddress, rhs: IPAddress) -> Bool {
+    static func == (lhs: IPAddress, rhs: IPAddress) -> Bool {
         switch (lhs, rhs) {
         case let (.v4(lhs), v4(rhs)): return lhs == rhs
         case let (.v6(lhs), v6(rhs)): return lhs == rhs

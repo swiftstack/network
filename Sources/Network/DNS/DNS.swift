@@ -1,7 +1,7 @@
 import Platform
 
 struct DNS {
-    static var cache = [String : [IPAddress]]()
+    static var cache = [String: [IPAddress]]()
 
     static var nameservers: [String] = ["1.1.1.1"]
 

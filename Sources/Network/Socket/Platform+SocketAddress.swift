@@ -2,12 +2,16 @@ import Platform
 
 // MARK: convert
 
-func rebounded<T>(_ pointer: UnsafePointer<T>) -> UnsafePointer<sockaddr> {
-    return UnsafeRawPointer(pointer).assumingMemoryBound(to: sockaddr.self)
+func rebounded<T>(
+    _ pointer: UnsafePointer<T>
+) -> UnsafePointer<sockaddr> {
+    UnsafeRawPointer(pointer).assumingMemoryBound(to: sockaddr.self)
 }
 
-func rebounded<T>(_ pointer: UnsafeMutablePointer<T>) -> UnsafeMutablePointer<sockaddr> {
-    return UnsafeMutableRawPointer(pointer).assumingMemoryBound(to: sockaddr.self)
+func rebounded<T>(
+    _ pointer: UnsafeMutablePointer<T>
+) -> UnsafeMutablePointer<sockaddr> {
+    UnsafeMutableRawPointer(pointer).assumingMemoryBound(to: sockaddr.self)
 }
 
 extension in_addr {
@@ -67,15 +71,13 @@ extension sockaddr_un {
 
 extension sockaddr_storage {
     static var size: socklen_t {
-        return socklen_t(MemoryLayout<sockaddr_storage>.size)
+        socklen_t(MemoryLayout<sockaddr_storage>.size)
     }
 }
 
 extension sockaddr_in {
     var address: String {
-        get {
-            return self.sin_addr.description
-        }
+        self.sin_addr.description
     }
 
     var port: UInt16 {
@@ -89,7 +91,7 @@ extension sockaddr_in {
     }
 
     static var size: socklen_t {
-        return socklen_t(MemoryLayout<sockaddr_in>.size)
+        socklen_t(MemoryLayout<sockaddr_in>.size)
     }
 
     public init(_ address: in_addr, _ port: UInt16) throws {
@@ -104,9 +106,10 @@ extension sockaddr_in {
     }
 
     public init(_ address: String, _ port: Int) throws {
-        guard let address = try in_addr(address),
-              let port = UInt16(exactly: port) else
-        {
+        guard
+            let address = try in_addr(address),
+            let port = UInt16(exactly: port)
+        else {
             throw Socket.Error.invalidArgument
         }
         try self.init(address, port)
@@ -119,17 +122,17 @@ extension sockaddr_in6 {
     }
 
     var port: UInt16 {
-        get { return self.sin6_port.bigEndian }
+        get { self.sin6_port.bigEndian }
         set { self.sin6_port = in_port_t(newValue).bigEndian }
     }
 
     var family: Int32 {
-        get { return Int32(self.sin6_family) }
+        get { Int32(self.sin6_family) }
         set { self.sin6_family = sa_family_t(newValue) }
     }
 
     static var size: socklen_t {
-        return socklen_t(MemoryLayout<sockaddr_in6>.size)
+        socklen_t(MemoryLayout<sockaddr_in6>.size)
     }
 
     public init(_ address: in6_addr, _ port: UInt16) throws {
@@ -144,9 +147,10 @@ extension sockaddr_in6 {
     }
 
     public init(_ address: String, _ port: Int) throws {
-        guard let address = try in6_addr(address),
-              let port = UInt16(exactly: port) else
-        {
+        guard
+            let address = try in6_addr(address),
+            let port = UInt16(exactly: port)
+        else {
             throw Socket.Error.invalidArgument
         }
         try self.init(address, port)
@@ -163,7 +167,7 @@ extension sockaddr_un {
     }
 
     var family: Int32 {
-        get { return Int32(self.sun_family) }
+        get { Int32(self.sun_family) }
         set { self.sun_family = sa_family_t(newValue) }
     }
 
@@ -208,7 +212,9 @@ extension in_addr: CustomStringConvertible {
     public var description: String {
         var bytes = [Int8](repeating: 0, count: Int(INET_ADDRSTRLEN) + 1)
         var addr = self
-        guard inet_ntop(AF_INET, &addr, &bytes, socklen_t(INET_ADDRSTRLEN)) != nil else {
+        guard
+            inet_ntop(AF_INET, &addr, &bytes, socklen_t(INET_ADDRSTRLEN)) != nil
+        else {
             return ""
         }
         return String(cString: bytes)
@@ -219,7 +225,10 @@ extension in6_addr: CustomStringConvertible {
     public var description: String {
         var bytes = [Int8](repeating: 0, count: Int(INET6_ADDRSTRLEN) + 1)
         var addr = self
-        guard inet_ntop(AF_INET6, &addr, &bytes, socklen_t(INET6_ADDRSTRLEN)) != nil else {
+        guard
+            inet_ntop(AF_INET6, &addr, &bytes, socklen_t(INET6_ADDRSTRLEN))
+                != nil
+        else {
             return ""
         }
         return String(cString: bytes)
@@ -227,9 +236,10 @@ extension in6_addr: CustomStringConvertible {
 }
 
 extension in6_addr {
-    init(_ addr16:
-        (UInt16, UInt16, UInt16, UInt16, UInt16, UInt16, UInt16, UInt16))
-    {
+    init(
+        _ addr16:
+            (UInt16, UInt16, UInt16, UInt16, UInt16, UInt16, UInt16, UInt16)
+    ) {
         #if os(Linux)
             self = in6_addr(
                 __in6_u: in6_addr.__Unnamed_union___in6_u(
@@ -254,7 +264,7 @@ extension in_addr: NativeStructEquatable {}
 extension in6_addr: NativeStructEquatable {}
 
 extension NativeStructEquatable {
-    public static func ==(lhs: Self, rhs: Self) -> Bool {
+    public static func == (lhs: Self, rhs: Self) -> Bool {
         var lhs = lhs
         var rhs = rhs
         return withUnsafeBytes(of: &lhs) { lhs in

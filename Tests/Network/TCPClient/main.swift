@@ -6,6 +6,8 @@ import Platform
 @testable import Network
 
 test("Client") {
+    let fiveBytes: [UInt8] = [0, 1, 2, 3, 4]
+
     Task {
         let socket = try TCP.Socket()
             .bind(to: "127.0.0.1", port: 6000)
@@ -19,11 +21,12 @@ test("Client") {
     Task {
         let client = TCP.Client(host: "127.0.0.1", port: 6000)
         let stream = try await client.connect()
-        expect(try await stream.write(from: [0,1,2,3,4]) == 5)
+        expect(try await stream.write(from: fiveBytes) == 5)
 
         var buffer = [UInt8](repeating: 0, count: 5)
         expect(try await stream.read(to: &buffer) == 5)
-    
+        expect(buffer == fiveBytes)
+
         await loop.terminate()
     }
 

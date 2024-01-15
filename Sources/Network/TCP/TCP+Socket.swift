@@ -31,8 +31,8 @@ public enum TCP {
         public func accept(deadline: Instant? = nil) async throws -> Socket {
             let client = try await awaitIfNeeded(
                 event: .read,
-                deadline: deadline)
-            {
+                deadline: deadline
+            ) {
                 try socket.accept()
             }
             return try .init(client)
@@ -47,8 +47,8 @@ public enum TCP {
                 _ = try await awaitIfNeeded(event: .write, deadline: deadline) {
                     try socket.connect(to: address)
                 }
-            }
-            catch let error as Network.Socket.Error where error == .inProgress {
+            } catch let error as Network.Socket.Error
+                where error == .inProgress {
                 try await loop.wait(for: socket.descriptor,
                     event: .write,
                     deadline: deadline)
@@ -83,8 +83,8 @@ public enum TCP {
         fileprivate func awaitIfNeeded<T>(
             event: IOEvent,
             deadline: Instant? = nil,
-            _ task: () throws -> T) async throws -> T
-        {
+            _ task: () throws -> T
+        ) async throws -> T {
             while true {
                 do {
                     return try task()

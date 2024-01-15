@@ -27,7 +27,7 @@ test("UDP IPv4 Socket") {
         expect(result.from == server)
         expect(result.bytes.count == message.count)
         expect(result.bytes == message)
-    
+
         await loop.terminate()
     }
 
@@ -57,7 +57,7 @@ test("UDP IPv6 Socket") {
         expect(result.from == server)
         expect(result.bytes.count == message.count)
         expect(result.bytes == message)
-    
+
         await loop.terminate()
     }
 
@@ -100,7 +100,7 @@ test("UDP Unix Socket") {
         expect(result.from == server)
         expect(result.bytes.count == message.count)
         expect(result.bytes == message)
-    
+
         await loop.terminate()
     }
 

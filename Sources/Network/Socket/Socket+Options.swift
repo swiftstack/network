@@ -86,13 +86,15 @@ extension Socket {
         size: Int,
         for option: Int32
     ) throws {
-        guard setsockopt(
-            descriptor.rawValue,
-            SOL_SOCKET,
-            option,
-            pointer,
-            socklen_t(size)) != -1 else
-        {
+        guard
+            setsockopt(
+                descriptor.rawValue,
+                SOL_SOCKET,
+                option,
+                pointer,
+                socklen_t(size)
+            ) != -1
+        else {
             throw Socket.Error()
         }
     }
@@ -103,13 +105,15 @@ extension Socket {
         for option: Int32
     ) throws {
         var actualSize = socklen_t(size)
-        guard getsockopt(
-            descriptor.rawValue,
-            SOL_SOCKET,
-            option,
-            pointer,
-            &actualSize) != -1 else
-        {
+        guard
+            getsockopt(
+                descriptor.rawValue,
+                SOL_SOCKET,
+                option,
+                pointer,
+                &actualSize
+            ) != -1
+        else {
             throw Socket.Error()
         }
         size = Int(actualSize)

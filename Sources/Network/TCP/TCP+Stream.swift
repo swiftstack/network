@@ -22,8 +22,8 @@ extension TCP {
 
         public func write(
             from buffer: UnsafeRawPointer,
-            byteCount: Int) async throws -> Int
-        {
+            byteCount: Int
+        ) async throws -> Int {
             let written = try await socket.send(bytes: buffer, count: byteCount)
             guard written != -1 else {
                 throw SystemError()

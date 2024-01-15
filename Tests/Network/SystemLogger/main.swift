@@ -17,7 +17,7 @@ test("SystemLogger") {
         try socket.bind(to: unixPath)
         let result = try await socket.read(max: 100, as: String.self)
         expect(result == "[info] \(message)")
-    
+
         await loop.terminate()
     }
 

@@ -10,11 +10,11 @@ extension UDP {
         }
 
         public typealias Address = Network.Socket.Address
-        public typealias OnDataHandler = ([UInt8], Address) async -> Void
-        public typealias OnErrorHandler = (Swift.Error) async -> Void
+        public typealias OnData = ([UInt8], Address) async -> Void
+        public typealias OnError = (Swift.Error) async -> Void
 
-        lazy var onDataHandler: OnDataHandler = handleData
-        lazy var onErrorHandler: OnErrorHandler = handleError
+        lazy var onData: OnData = handleData
+        lazy var onError: OnError = handleError
 
         public init(host: String, port: Int) throws {
             self.socket = try UDP.Socket()
@@ -31,14 +31,14 @@ extension UDP {
         }
 
         @discardableResult
-        public func onData(_ handler: @escaping OnDataHandler) async -> Self {
-            self.onDataHandler = handler
+        public func onData(_ handler: @escaping OnData) async -> Self {
+            self.onData = handler
             return self
         }
 
         @discardableResult
-        public func onError(_ handler: @escaping OnErrorHandler) async -> Self {
-            self.onErrorHandler = handler
+        public func onError(_ handler: @escaping OnError) async -> Self {
+            self.onError = handler
             return self
         }
 
@@ -49,10 +49,11 @@ extension UDP {
         func startAsync() async {
             while true {
                 do {
-                    let (bytes, from) = try await socket.receive(maxLength: 16348)
-                    await self.onDataHandler(bytes, from)
+                    let (bytes, from) = try await socket
+                        .receive(maxLength: 16348)
+                    await self.onData(bytes, from)
                 } catch {
-                    await onErrorHandler(error)
+                    await onError(error)
                 }
             }
         }
