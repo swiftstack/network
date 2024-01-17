@@ -196,19 +196,31 @@ extension sockaddr_un {
 
 // MARK: CustomStringConvertible
 
-extension sockaddr_in: CustomStringConvertible {
+#if swift(>=5.10)
+extension sockaddr_in: @retroactive CustomStringConvertible {}
+extension sockaddr_in6: @retroactive CustomStringConvertible {}
+extension in_addr: @retroactive CustomStringConvertible {}
+extension in6_addr: @retroactive CustomStringConvertible {}
+#else
+extension sockaddr_in: CustomStringConvertible {}
+extension sockaddr_in6: CustomStringConvertible {}
+extension in_addr: CustomStringConvertible {}
+extension in6_addr: CustomStringConvertible {}
+#endif
+
+extension sockaddr_in {
     public var description: String {
         "\(address):\(port)"
     }
 }
 
-extension sockaddr_in6: CustomStringConvertible {
+extension sockaddr_in6 {
     public var description: String {
         "\(address):\(port)"
     }
 }
 
-extension in_addr: CustomStringConvertible {
+extension in_addr {
     public var description: String {
         var bytes = [Int8](repeating: 0, count: Int(INET_ADDRSTRLEN) + 1)
         var addr = self
@@ -221,7 +233,7 @@ extension in_addr: CustomStringConvertible {
     }
 }
 
-extension in6_addr: CustomStringConvertible {
+extension in6_addr {
     public var description: String {
         var bytes = [Int8](repeating: 0, count: Int(INET6_ADDRSTRLEN) + 1)
         var addr = self
@@ -256,7 +268,23 @@ extension in6_addr {
     }
 }
 
-protocol NativeStructEquatable: Equatable {}
+// Equatable
+
+#if swift(>=5.10)
+extension sockaddr_in: @retroactive Equatable {}
+extension sockaddr_in6: @retroactive Equatable {}
+extension sockaddr_un: @retroactive Equatable {}
+extension in_addr: @retroactive Equatable {}
+extension in6_addr: @retroactive Equatable {}
+#else
+extension sockaddr_in: Equatable {}
+extension sockaddr_in6: Equatable {}
+extension sockaddr_un: Equatable {}
+extension in_addr: Equatable {}
+extension in6_addr: Equatable {}
+#endif
+
+protocol NativeStructEquatable {}
 extension sockaddr_in: NativeStructEquatable {}
 extension sockaddr_in6: NativeStructEquatable {}
 extension sockaddr_un: NativeStructEquatable {}
@@ -265,11 +293,9 @@ extension in6_addr: NativeStructEquatable {}
 
 extension NativeStructEquatable {
     public static func == (lhs: Self, rhs: Self) -> Bool {
-        var lhs = lhs
-        var rhs = rhs
-        return withUnsafeBytes(of: &lhs) { lhs in
-            return withUnsafeBytes(of: &rhs) { rhs in
-                return lhs.elementsEqual(rhs)
+        withUnsafeBytes(of: lhs) { lhs in
+            withUnsafeBytes(of: rhs) { rhs in
+                lhs.elementsEqual(rhs)
             }
         }
     }
