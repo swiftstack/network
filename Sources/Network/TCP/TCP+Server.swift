@@ -51,7 +51,7 @@ extension TCP {
             while true {
                 do {
                     let client = try await socket.accept()
-                    await self.onClient(client)
+                    Task { await onClient(client) }
                 } catch {
                     await onError(error)
                 }

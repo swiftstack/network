@@ -51,7 +51,7 @@ extension UDP {
                 do {
                     let (bytes, from) = try await socket
                         .receive(maxLength: 16348)
-                    await self.onData(bytes, from)
+                    Task { await onData(bytes, from) }
                 } catch {
                     await onError(error)
                 }
